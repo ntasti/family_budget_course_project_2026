@@ -1,8 +1,7 @@
 module org.familybudget.familybudget {
     requires javafx.controls;
-
     requires javafx.fxml;
-    // requires javafx.web;  // можно убрать, если не используешь WebView
+    requires javafx.web;
     requires org.controlsfx.controls;
     requires net.synedra.validatorfx;
     requires org.kordamp.ikonli.javafx;
