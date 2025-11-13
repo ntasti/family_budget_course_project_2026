@@ -6,10 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-/**
- * Простое подключение к серверу по сокету.
- * Пока: открыли — отправили команду — прочитали ответ — закрыли.
- */
 public class ClientConnection implements AutoCloseable {
 
     private final String host;
@@ -24,34 +20,25 @@ public class ClientConnection implements AutoCloseable {
         this.port = port;
     }
 
-    /**
-     * Открыть соединение.
-     */
     public void connect() throws IOException {
         socket = new Socket(host, port);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
+        out = new PrintWriter(socket.getOutputStream(), true); // autoFlush=true
     }
 
-    /**
-     * Прочитать одну строку от сервера.
-     */
     public String readLine() throws IOException {
         return in.readLine();
     }
 
-    /**
-     * Отправить строку серверу.
-     */
     public void sendLine(String line) {
+        System.out.println("CLIENT SEND: " + line);
         out.println(line);
     }
 
     @Override
     public void close() throws IOException {
-        if (socket != null) {
+        if (socket != null && !socket.isClosed()) {
             socket.close();
         }
     }
 }
-

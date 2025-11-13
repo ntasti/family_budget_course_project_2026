@@ -6,27 +6,31 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" spacing="10.0"
-      xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
+<VBox alignment="CENTER" spacing="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.familybudget.familybudget.HelloController">
 
-  <padding>
-    <Insets top="20" right="20" bottom="20" left="20"/>
-  </padding>
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20"/>
+    </padding>
 
-  <Label text="Авторизация" styleClass="h3"/>
+    <Label text="Авторизация">
+        <font>
+            <Font name="Segoe UI Bold" size="18.0"/>
+        </font>
+    </Label>
 
-  <TextField fx:id="loginField" promptText="Логин" maxWidth="200"/>
+    <TextField fx:id="loginField" maxWidth="200" promptText="Логин"/>
 
-  <PasswordField fx:id="passwordField" promptText="Пароль" maxWidth="200"/>
+    <PasswordField fx:id="passwordField" maxWidth="200" promptText="Пароль"/>
 
-  <Button fx:id="loginButton"
-          text="Войти"
-          styleClass="btn", "btn-success"
-  onAction="#onLoginClick"/>
+    <Button fx:id="loginButton" defaultButton="true" maxWidth="200" onAction="#onLoginClick" text="Войти">
+        <font>
+            <Font name="Sitka Text Italic" size="12.0"/>
+        </font>
+    </Button>
 
-  <Label fx:id="statusLabel" text="" styleClass="text-muted"/>
+    <Label fx:id="statusLabel" text=""/>
 
 </VBox>
