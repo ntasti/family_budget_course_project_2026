@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
+<VBox alignment="CENTER" spacing="10.0"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.familybudget.familybudget.HelloController">
 
-
   <padding>
-    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    <Insets top="20" right="20" bottom="20" left="20"/>
   </padding>
 
-  <Label fx:id="welcomeText"/>
-  <Button fx:id="helloText"  text="Hello!" onAction="#onHelloButtonClick"/>
+  <Label text="Авторизация" styleClass="h3"/>
+
+  <TextField fx:id="loginField" promptText="Логин" maxWidth="200"/>
+
+  <PasswordField fx:id="passwordField" promptText="Пароль" maxWidth="200"/>
+
+  <Button fx:id="loginButton"
+          text="Войти"
+          styleClass="btn", "btn-success"
+  onAction="#onLoginClick"/>
+
+  <Label fx:id="statusLabel" text="" styleClass="text-muted"/>
+
 </VBox>
