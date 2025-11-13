@@ -8,29 +8,78 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" spacing="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.familybudget.familybudget.HelloController">
+<VBox alignment="CENTER"
+      spacing="10"
+      prefWidth="400"
+      prefHeight="300"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.familybudget.familybudget.LoginController"
+      style="-fx-background-color: #121212;">
 
     <padding>
-        <Insets bottom="20" left="20" right="20" top="20"/>
+        <Insets top="40" right="40" bottom="40" left="40"/>
     </padding>
 
-    <Label text="Авторизация">
-        <font>
-            <Font name="Segoe UI Bold" size="18.0"/>
-        </font>
-    </Label>
+    <children>
 
-    <TextField fx:id="loginField" maxWidth="200" promptText="Логин"/>
+        <!-- Карточка логина -->
+        <VBox alignment="CENTER"
+              spacing="15"
+              style="-fx-background-color: #1E1E1E;
+                     -fx-background-radius: 14;
+                     -fx-padding: 25;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 18, 0, 0, 4);
+                     -fx-font-family: 'Segoe UI';">
 
-    <PasswordField fx:id="passwordField" maxWidth="200" promptText="Пароль"/>
+            <Label text="Авторизация"
+                   style="-fx-text-fill: #FFFFFF;">
+                <font>
+                    <Font name="Segoe UI Semibold" size="22"/>
+                </font>
+            </Label>
 
-    <Button fx:id="loginButton" defaultButton="true" maxWidth="200" onAction="#onLoginClick" text="Войти">
-        <font>
-            <Font name="Sitka Text Italic" size="12.0"/>
-        </font>
-    </Button>
+            <TextField fx:id="loginField"
+                       promptText="Логин"
+                       maxWidth="220"
+                       style="-fx-background-color: #2B2B2B;
+                              -fx-background-radius: 8;
+                              -fx-text-fill: #FFFFFF;
+                              -fx-prompt-text-fill: #8A8A8A;
+                              -fx-padding: 8 12 8 12;
+                              -fx-font-size: 13;"/>
 
-    <Label fx:id="statusLabel" text=""/>
+            <PasswordField fx:id="passwordField"
+                           promptText="Пароль"
+                           maxWidth="220"
+                           style="-fx-background-color: #2B2B2B;
+                                  -fx-background-radius: 8;
+                                  -fx-text-fill: #FFFFFF;
+                                  -fx-prompt-text-fill: #8A8A8A;
+                                  -fx-padding: 8 12 8 12;
+                                  -fx-font-size: 13;"/>
 
+            <Button fx:id="loginButton"
+                    text="Войти"
+                    defaultButton="true"
+                    maxWidth="220"
+                    onAction="#onLoginClick"
+                    style="-fx-background-color: #4C6FFF;
+                           -fx-background-radius: 999;
+                           -fx-text-fill: #FFFFFF;
+                           -fx-font-size: 13;
+                           -fx-padding: 8 0 8 0;">
+                <font>
+                    <Font name="Segoe UI Semibold" size="13"/>
+                </font>
+            </Button>
+
+            <Label fx:id="statusLabel"
+                   text=""
+                   style="-fx-text-fill: #FF7070;
+                          -fx-font-size: 11;"/>
+
+        </VBox>
+
+    </children>
 </VBox>
