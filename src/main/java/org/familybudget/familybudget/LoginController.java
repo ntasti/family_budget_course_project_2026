@@ -72,4 +72,24 @@ public class LoginController {
         stage.setScene(scene);
         stage.show();
     }
+
+    //кнопкка регистрации метод онРегистрКлик
+    @FXML
+    protected void onRegisterClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("register-view.fxml")
+            );
+            Scene scene = new Scene(loader.load(), 420, 420);
+            Stage stage = new Stage();
+            stage.setTitle("Регистрация");
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия окна регистрации: " + e.getMessage());
+        }
+    }
+
 }

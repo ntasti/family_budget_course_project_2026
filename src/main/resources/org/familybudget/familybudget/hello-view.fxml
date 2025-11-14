@@ -59,20 +59,36 @@
                                   -fx-padding: 8 12 8 12;
                                   -fx-font-size: 13;"/>
 
+
+
             <Button fx:id="loginButton"
-                    text="Войти"
                     defaultButton="true"
                     maxWidth="220"
                     onAction="#onLoginClick"
+                    text="Войти"
                     style="-fx-background-color: #4C6FFF;
-                           -fx-background-radius: 999;
-                           -fx-text-fill: #FFFFFF;
-                           -fx-font-size: 13;
-                           -fx-padding: 8 0 8 0;">
+               -fx-background-radius: 999;
+               -fx-text-fill: #FFFFFF;
+               -fx-font-size: 13;
+               -fx-padding: 8 0 8 0;">
                 <font>
-                    <Font name="Segoe UI Semibold" size="13"/>
+                    <Font name="Segoe UI Semibold" size="13.0"/>
                 </font>
             </Button>
+
+            <Button text="Регистрация"
+                    onAction="#onRegisterClick"
+                    maxWidth="220"
+                    style="-fx-background-color: #444444;
+               -fx-background-radius: 999;
+               -fx-text-fill: #FFFFFF;
+               -fx-font-size: 13;
+               -fx-padding: 8 0 8 0;">
+                <font>
+                    <Font name="Segoe UI" size="13.0"/>
+                </font>
+            </Button>
+
 
             <Label fx:id="statusLabel"
                    text=""

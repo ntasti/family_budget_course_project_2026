@@ -62,9 +62,12 @@ public class MainController {
         String login = SessionContext.getLogin();
         String role = SessionContext.getRole();
         // пока жёстко забиваем название семьи
-        String familyName = "Наша семья";
 
-        familyNameLabel.setText("Семья: " + familyName);
+
+        loadFamilyInfo();      // выгрузка данных семьи
+        onRefreshBalance();
+        onRefreshOperations();
+
         userInfoLabel.setText("Пользователь: " + login + " (роль: " + role + ")");
 
         // кнопка категорий доступна только админу
@@ -218,6 +221,45 @@ public class MainController {
             }
         });
     }
+
+    //данные семьи
+    private void loadFamilyInfo() {
+        try {
+            String resp = ServerConnection.getInstance().sendCommand("GET_FAMILY_INFO");
+            if (resp == null) {
+                familyNameLabel.setText("Семья: (нет данных)");
+                return;
+            }
+
+            if (!resp.startsWith("OK FAMILY ")) {
+                familyNameLabel.setText("Семья: (ошибка)");
+                System.out.println("GET_FAMILY_INFO error: " + resp);
+                return;
+            }
+
+            // формат: OK FAMILY name=Моя новая семья code=FAM-B8878X
+            // распарсим по пробелам
+            String[] parts = resp.split("\\s+");
+            String namePart = null;
+            for (String p : parts) {
+                if (p.startsWith("name=")) {
+                    namePart = p.substring("name=".length());
+                    break;
+                }
+            }
+
+            if (namePart == null || namePart.isBlank()) {
+                familyNameLabel.setText("Семья: (без имени)");
+            } else {
+                familyNameLabel.setText("Семья: " + namePart);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            familyNameLabel.setText("Семья: (ошибка соединения)");
+        }
+    }
+
 
     //для кнопки обновления баланса
     @FXML

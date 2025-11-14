@@ -9,53 +9,85 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER"
+<VBox alignment="CENTER"
       spacing="10"
-      prefWidth="420"
-      prefHeight="340"
+      prefWidth="460"
+      prefHeight="360"
       style="-fx-background-color: #121212;"
       xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.familybudget.familybudget.CategoriesController">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="25" right="25" bottom="25" left="25"/>
     </padding>
 
     <children>
 
-        <Label text="Категории семьи"
-               style="-fx-text-fill: #FFFFFF;">
-            <font>
-                <Font name="Segoe UI Semibold" size="20"/>
-            </font>
-        </Label>
+        <!-- Внутренняя карточка -->
+        <VBox alignment="TOP_CENTER"
+              spacing="12"
+              prefWidth="420"
+              style="-fx-background-color: #1E1E1E;
+                     -fx-background-radius: 16;
+                     -fx-padding: 18 20 20 20;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 18, 0, 0, 4);
+                     -fx-font-family: 'Segoe UI';">
 
-        <ListView fx:id="categoriesList"
-                  prefHeight="200"
-                  prefWidth="360"
-                  style="-fx-background-color: #1E1E1E;
-                         -fx-control-inner-background: #1E1E1E;
-                         -fx-text-fill: #FFFFFF;
-                         -fx-background-radius: 8;"/>
+            <!-- Заголовок -->
+            <Label text="Категории семьи"
+                   style="-fx-text-fill: #FFFFFF;">
+                <font>
+                    <Font name="Segoe UI Semibold" size="20"/>
+                </font>
+            </Label>
 
-        <Label text="Новая категория"
-               style="-fx-text-fill: #CCCCCC;"/>
+            <!-- Подзаголовок -->
+            <Label text="Создайте и редактируйте категории для операций семьи"
+                   wrapText="true"
+                   style="-fx-text-fill: #888888; -fx-font-size: 11;"/>
 
-        <HBox spacing="8">
-            <TextField fx:id="newCategoryField"
-                       prefWidth="260"/>
-            <Button text="Добавить"
-                    onAction="#onAddCategoryClick"
-                    style="-fx-background-color: #4C6FFF;
-                           -fx-background-radius: 8;
-                           -fx-text-fill: white;
-                           -fx-padding: 5 12;"/>
-        </HBox>
+            <!-- Список категорий -->
+            <ListView fx:id="categoriesList"
+                      prefHeight="200"
+                      prefWidth="360"
+                      style="-fx-background-color: #1E1E1E;
+                             -fx-control-inner-background: #1E1E1E;
+                             -fx-text-fill: #FFFFFF;
+                             -fx-background-radius: 10;
+                             -fx-border-color: #2B2B2B;
+                             -fx-border-radius: 10;"/>
 
-        <Label fx:id="statusLabel"
-               style="-fx-text-fill: #FF7070; -fx-font-size: 11;"
-               text=""/>
+            <!-- Заголовок для новой категории -->
+            <Label text="Новая категория"
+                   style="-fx-text-fill: #CCCCCC; -fx-font-size: 12;"/>
 
+            <!-- Поле + кнопка -->
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <TextField fx:id="newCategoryField"
+                           promptText="Например: Еда, Такси, Подарки"
+                           prefWidth="260"
+                           style="-fx-background-color: #2B2B2B;
+                                  -fx-background-radius: 8;
+                                  -fx-text-fill: #FFFFFF;
+                                  -fx-prompt-text-fill: #8A8A8A;
+                                  -fx-border-color: transparent;
+                                  -fx-padding: 6 10 6 10;"/>
+
+                <Button text="Добавить"
+                        onAction="#onAddCategoryClick"
+                        style="-fx-background-color: #4C6FFF;
+                               -fx-background-radius: 999;
+                               -fx-text-fill: white;
+                               -fx-padding: 5 16;
+                               -fx-font-size: 12;"/>
+            </HBox>
+
+            <!-- Статус -->
+            <Label fx:id="statusLabel"
+                   style="-fx-text-fill: #FF7070; -fx-font-size: 11;"
+                   text=""/>
+
+        </VBox>
     </children>
 </VBox>
