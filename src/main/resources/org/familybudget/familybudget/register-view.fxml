@@ -10,8 +10,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="559.0" prefWidth="568.0" spacing="19" style="-fx-background-color: #121212;"
-      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+<VBox alignment="TOP_CENTER"
+      prefHeight="560.0"
+      prefWidth="580.0"
+      spacing="19"
+      style="-fx-background-color: #F2F3F7;"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.familybudget.familybudget.RegisterController">
 
     <padding>
@@ -21,68 +26,134 @@
     <children>
 
         <!-- Внутренняя карточка регистрации -->
-        <VBox alignment="TOP_CENTER" prefHeight="453.0" prefWidth="402.0" spacing="12"
-              style="-fx-background-color: #1E1E1E;                      -fx-background-radius: 16;                      -fx-padding: 18 20 20 20;                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 18, 0, 0, 4);                      -fx-font-family: 'Segoe UI';">
+        <VBox alignment="TOP_CENTER"
+              prefHeight="460.0"
+              prefWidth="420.0"
+              spacing="12"
+              style="-fx-background-color: #FFFFFF;
+                     -fx-background-radius: 16;
+                     -fx-padding: 18 20 20 20;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 18, 0, 0, 4);
+                     -fx-font-family: 'Segoe UI';">
 
             <!-- Заголовок -->
-            <Label style="-fx-text-fill: #FFFFFF;" text="Регистрация">
+            <Label text="Регистрация"
+                   style="-fx-text-fill: #222222;">
                 <font>
                     <Font name="Segoe UI Semibold" size="20"/>
                 </font>
             </Label>
 
             <!-- Подзаголовок -->
-            <Label style="-fx-text-fill: #888888; -fx-font-size: 11;"
-                   text="Создайте аккаунт и присоединитесь к семейному бюджету" wrapText="true"/>
+            <Label text="Создайте аккаунт и присоединитесь к семейному бюджету"
+                   wrapText="true"
+                   style="-fx-text-fill: #777777; -fx-font-size: 11;"/>
 
             <!-- Блок логина и пароля -->
             <VBox prefWidth="360" spacing="8">
 
-                <TextField fx:id="loginField" promptText="Email / логин"
-                           style="-fx-pref-width: 360;                                   -fx-background-color: #2B2B2B;                                   -fx-background-radius: 8;                                   -fx-text-fill: #FFFFFF;                                   -fx-prompt-text-fill: #8A8A8A;                                   -fx-border-color: transparent;                                   -fx-padding: 6 10 6 10;"/>
+                <TextField fx:id="loginField"
+                           promptText="Email / логин"
+                           style="-fx-pref-width: 360;
+                                  -fx-background-color: #F5F5F5;
+                                  -fx-background-radius: 8;
+                                  -fx-text-fill: #222222;
+                                  -fx-prompt-text-fill: #9E9E9E;
+                                  -fx-border-color: #DDDDDD;
+                                  -fx-border-radius: 8;
+                                  -fx-padding: 6 10 6 10;"/>
 
-                <PasswordField fx:id="passwordField" promptText="Пароль"
-                               style="-fx-pref-width: 360;                                       -fx-background-color: #2B2B2B;                                       -fx-background-radius: 8;                                       -fx-text-fill: #FFFFFF;                                       -fx-prompt-text-fill: #8A8A8A;                                       -fx-border-color: transparent;                                       -fx-padding: 6 10 6 10;"/>
+                <PasswordField fx:id="passwordField"
+                               promptText="Пароль"
+                               style="-fx-pref-width: 360;
+                                      -fx-background-color: #F5F5F5;
+                                      -fx-background-radius: 8;
+                                      -fx-text-fill: #222222;
+                                      -fx-prompt-text-fill: #9E9E9E;
+                                      -fx-border-color: #DDDDDD;
+                                      -fx-border-radius: 8;
+                                      -fx-padding: 6 10 6 10;"/>
 
-                <PasswordField fx:id="confirmPasswordField" promptText="Повторите пароль"
-                               style="-fx-pref-width: 360;                                       -fx-background-color: #2B2B2B;                                       -fx-background-radius: 8;                                       -fx-text-fill: #FFFFFF;                                       -fx-prompt-text-fill: #8A8A8A;                                       -fx-border-color: transparent;                                       -fx-padding: 6 10 6 10;"/>
+                <PasswordField fx:id="confirmPasswordField"
+                               promptText="Повторите пароль"
+                               style="-fx-pref-width: 360;
+                                      -fx-background-color: #F5F5F5;
+                                      -fx-background-radius: 8;
+                                      -fx-text-fill: #222222;
+                                      -fx-prompt-text-fill: #9E9E9E;
+                                      -fx-border-color: #DDDDDD;
+                                      -fx-border-radius: 8;
+                                      -fx-padding: 6 10 6 10;"/>
             </VBox>
 
             <!-- Блок семьи -->
-            <Label style="-fx-text-fill: #CCCCCC; -fx-font-size: 12; -fx-padding: 10 0 0 0;" text="Семья"/>
+            <Label text="Семья"
+                   style="-fx-text-fill: #555555; -fx-font-size: 12; -fx-padding: 10 0 0 0;"/>
 
             <VBox prefWidth="360" spacing="6">
 
                 <!-- Создать семью -->
-                <RadioButton fx:id="createFamilyRadio" style="-fx-text-fill: #FFFFFF; -fx-font-size: 12;"
-                             text="Создать новую семью"/>
+                <RadioButton fx:id="createFamilyRadio"
+                             text="Создать новую семью"
+                             style="-fx-text-fill: #222222; -fx-font-size: 12;"/>
 
-                <TextField fx:id="familyNameField" promptText="Название семьи"
-                           style="-fx-pref-width: 360;                                   -fx-background-color: #2B2B2B;                                   -fx-background-radius: 8;                                   -fx-text-fill: #FFFFFF;                                   -fx-prompt-text-fill: #8A8A8A;                                   -fx-border-color: transparent;                                   -fx-padding: 6 10 6 10;"/>
+                <TextField fx:id="familyNameField"
+                           promptText="Название семьи"
+                           style="-fx-pref-width: 360;
+                                  -fx-background-color: #F5F5F5;
+                                  -fx-background-radius: 8;
+                                  -fx-text-fill: #222222;
+                                  -fx-prompt-text-fill: #9E9E9E;
+                                  -fx-border-color: #DDDDDD;
+                                  -fx-border-radius: 8;
+                                  -fx-padding: 6 10 6 10;"/>
 
                 <!-- Присоединиться по коду -->
-                <RadioButton fx:id="joinFamilyRadio" style="-fx-text-fill: #FFFFFF; -fx-font-size: 12;"
-                             text="Присоединиться по коду XX-XXXX"/>
+                <RadioButton fx:id="joinFamilyRadio"
+                             text="Присоединиться по коду XX-XXXX"
+                             style="-fx-text-fill: #222222; -fx-font-size: 12;"/>
 
-                <TextField fx:id="familyCodeField" promptText="Код семьи"
-                           style="-fx-pref-width: 360;                                   -fx-background-color: #2B2B2B;                                   -fx-background-radius: 8;                                   -fx-text-fill: #FFFFFF;                                   -fx-prompt-text-fill: #8A8A8A;                                   -fx-border-color: transparent;                                   -fx-padding: 6 10 6 10;"/>
+                <TextField fx:id="familyCodeField"
+                           promptText="Код семьи"
+                           style="-fx-pref-width: 360;
+                                  -fx-background-color: #F5F5F5;
+                                  -fx-background-radius: 8;
+                                  -fx-text-fill: #222222;
+                                  -fx-prompt-text-fill: #9E9E9E;
+                                  -fx-border-color: #DDDDDD;
+                                  -fx-border-radius: 8;
+                                  -fx-padding: 6 10 6 10;"/>
             </VBox>
 
             <!-- Кнопки -->
-            <HBox alignment="CENTER_RIGHT" prefWidth="360" spacing="10" style="-fx-padding: 10 0 0 0;">
+            <HBox alignment="CENTER_RIGHT"
+                  prefWidth="360"
+                  spacing="10"
+                  style="-fx-padding: 10 0 0 0;">
 
-                <Button onAction="#onCancelClick"
-                        style="-fx-background-color: #444444;                                -fx-background-radius: 999;                                -fx-text-fill: white;                                -fx-padding: 6 16;                                -fx-font-size: 12;"
-                        text="Отмена"/>
+                <Button text="Отмена"
+                        onAction="#onCancelClick"
+                        style="-fx-background-color: #E0E0E0;
+                               -fx-background-radius: 999;
+                               -fx-text-fill: #333333;
+                               -fx-font-weight: bold;
+                               -fx-padding: 6 16;
+                               -fx-font-size: 12;"/>
 
-                <Button onAction="#onRegisterClick"
-                        style="-fx-background-color: #4C6FFF;                                -fx-background-radius: 999;                                -fx-text-fill: white;                                -fx-padding: 6 18;                                -fx-font-size: 12;"
-                        text="Зарегистрироваться"/>
+                <Button text="Зарегистрироваться"
+                        onAction="#onRegisterClick"
+                        style="-fx-background-color: #4C6FFF;
+                               -fx-background-radius: 999;
+                               -fx-text-fill: white;
+                               -fx-font-weight: bold;
+                               -fx-padding: 6 18;
+                               -fx-font-size: 12;"/>
             </HBox>
 
             <!-- Статус -->
-            <Label fx:id="statusLabel" style="-fx-text-fill: #FF7070; -fx-font-size: 11; -fx-padding: 4 0 0 0;"
-                   text=""/>
+            <Label fx:id="statusLabel"
+                   text=""
+                   style="-fx-text-fill: #D32F2F; -fx-font-size: 11; -fx-padding: 4 0 0 0;"/>
 
         </VBox>
     </children>

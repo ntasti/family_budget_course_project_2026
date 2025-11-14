@@ -138,7 +138,7 @@ public class RegisterController {
         );
 
         // --- УВЕЛИЧЕН РАЗМЕР ГЛАВНОГО ОКНА ---
-        Scene scene = new Scene(loader.load(), 1100, 800);
+        Scene scene = new Scene(loader.load(), 1190, 560);
 
         Stage stage = new Stage();
         stage.setTitle("Семейный бюджет");

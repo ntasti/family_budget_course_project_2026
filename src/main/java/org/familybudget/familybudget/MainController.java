@@ -11,9 +11,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MainController {
 
@@ -34,6 +35,37 @@ public class MainController {
 
     @FXML
     private Button manageCategoriesButton;
+
+    @FXML
+    private Button resetFiltersButton;
+
+    @FXML
+    private Button addOperationButton;
+
+    @FXML
+    private Button refreshOperationsButton;
+
+    @FXML
+    private Button logoutButton;
+
+    // Фильтры
+    @FXML
+    private ComboBox<String> typeFilterCombo;
+
+    @FXML
+    private ComboBox<String> categoryFilterCombo;
+
+    @FXML
+    private ComboBox<String> userFilterCombo;
+
+    @FXML
+    private DatePicker fromDatePicker;
+
+    @FXML
+    private DatePicker toDatePicker;
+
+    // полный список операций (до фильтрации)
+    private final List<OperationRow> allOperations = new ArrayList<>();
 
     // модель строки
     public static class OperationRow {
@@ -56,27 +88,184 @@ public class MainController {
     @FXML
     private void initialize() {
         String login = SessionContext.getLogin();
-        String role  = SessionContext.getRole();
+        String role = SessionContext.getRole();
 
         // инфо о пользователе
         userInfoLabel.setText("Пользователь: " + login + " (роль: " + role + ")");
 
-        // показать/спрятать кнопку категорий в зависимости от роли
-        if (manageCategoriesButton != null) {
-            boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
-            manageCategoriesButton.setVisible(isAdmin);
-            manageCategoriesButton.setManaged(isAdmin);
+        // показать кнопку категорий только админу
+        if ("ADMIN".equalsIgnoreCase(role) && manageCategoriesButton != null) {
+            manageCategoriesButton.setVisible(true);
+            manageCategoriesButton.setManaged(true);
+        } else if (manageCategoriesButton != null) {
+            manageCategoriesButton.setVisible(false);
+            manageCategoriesButton.setManaged(false);
         }
 
-        loadFamilyInfo();          // имя семьи
-        setupOperationsCellFactory();
+        // кнопки тулбара (белые -> серые при наведении)
+        setupToolbarButton(addOperationButton);
+        setupToolbarButton(manageCategoriesButton);
+
+
+
+
+        loadFamilyInfo();             // имя семьи
+        setupOperationsCellFactory(); // оформление таблицы операций
+        setupFilters();               // фильтры
 
         // сразу грузим данные
         onRefreshBalance();
         onRefreshOperations();
     }
 
-    // ----- БАЛАНС -----
+    // -------------------- СТИЛИ КНОПОК --------------------
+
+    private void setupHoverDark(Button btn, String normal, String hover) {
+        if (btn == null) return;
+        String base = "-fx-background-radius: 999; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-weight: bold; " +
+                "-fx-padding: 6 14;";
+
+        btn.setStyle("-fx-background-color: " + normal + ";" + base);
+
+        btn.setOnMouseEntered(e ->
+                btn.setStyle("-fx-background-color: " + hover + ";" + base));
+
+        btn.setOnMouseExited(e ->
+                btn.setStyle("-fx-background-color: " + normal + ";" + base));
+    }
+
+    // Белые кнопки тулбара, при наведении становятся серыми
+    private void setupToolbarButton(Button btn) {
+        if (btn == null) return;
+        String base = "-fx-background-radius: 999; " +
+                "-fx-text-fill: #333333; " +
+                "-fx-font-weight: bold; " +
+                "-fx-padding: 7 14; " +
+                "-fx-font-size: 13;";
+
+        String normal = "#FFFFFF";
+        String hover = "#E0E0E0";
+
+        btn.setStyle("-fx-background-color: " + normal + ";" + base);
+
+        btn.setOnMouseEntered(e ->
+                btn.setStyle("-fx-background-color: " + hover + ";" + base));
+
+        btn.setOnMouseExited(e ->
+                btn.setStyle("-fx-background-color: " + normal + ";" + base));
+    }
+
+    // -------------------- ФИЛЬТРЫ --------------------
+
+    private void setupFilters() {
+        // тип операции
+        if (typeFilterCombo != null) {
+            typeFilterCombo.setItems(FXCollections.observableArrayList(
+                    "Все операции",
+                    "Только доходы",
+                    "Только расходы"
+            ));
+            typeFilterCombo.getSelectionModel().selectFirst();
+            typeFilterCombo.valueProperty().addListener((obs, o, n) -> applyFilters());
+        }
+
+        // категория
+        if (categoryFilterCombo != null) {
+            categoryFilterCombo.setItems(FXCollections.observableArrayList("Все категории"));
+            categoryFilterCombo.getSelectionModel().selectFirst();
+            categoryFilterCombo.valueProperty().addListener((obs, o, n) -> applyFilters());
+        }
+
+        // пользователь
+        if (userFilterCombo != null) {
+            userFilterCombo.setItems(FXCollections.observableArrayList("Все пользователи"));
+            userFilterCombo.getSelectionModel().selectFirst();
+            userFilterCombo.valueProperty().addListener((obs, o, n) -> applyFilters());
+        }
+
+        // диапазон дат
+        if (fromDatePicker != null) {
+            fromDatePicker.valueProperty().addListener((obs, o, n) -> applyFilters());
+        }
+        if (toDatePicker != null) {
+            toDatePicker.valueProperty().addListener((obs, o, n) -> applyFilters());
+        }
+    }
+
+    // применяем фильтры к allOperations
+    private void applyFilters() {
+        List<OperationRow> filtered = new ArrayList<>(allOperations);
+
+        // --- тип операции ---
+        if (typeFilterCombo != null) {
+            String typeFilter = typeFilterCombo.getValue();
+            if ("Только доходы".equals(typeFilter)) {
+                filtered = filtered.stream()
+                        .filter(o -> "INCOME".equalsIgnoreCase(o.type))
+                        .collect(Collectors.toList());
+            } else if ("Только расходы".equals(typeFilter)) {
+                filtered = filtered.stream()
+                        .filter(o -> "EXPENSE".equalsIgnoreCase(o.type))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        // --- категория ---
+        if (categoryFilterCombo != null) {
+            String catFilter = categoryFilterCombo.getValue();
+            if (catFilter != null && !"Все категории".equals(catFilter)) {
+                filtered = filtered.stream()
+                        .filter(o -> catFilter.equals(o.category))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        // --- пользователь ---
+        if (userFilterCombo != null) {
+            String userFilter = userFilterCombo.getValue();
+            if (userFilter != null && !"Все пользователи".equals(userFilter)) {
+                filtered = filtered.stream()
+                        .filter(o -> userFilter.equals(o.user))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        // --- диапазон дат ---
+        LocalDate from = (fromDatePicker != null) ? fromDatePicker.getValue() : null;
+        LocalDate to = (toDatePicker != null) ? toDatePicker.getValue() : null;
+
+        if (from != null || to != null) {
+            filtered = filtered.stream()
+                    .filter(o -> {
+                        try {
+                            LocalDate d = LocalDate.parse(o.date); // формат YYYY-MM-DD
+                            if (from != null && d.isBefore(from)) return false;
+                            if (to != null && d.isAfter(to)) return false;
+                            return true;
+                        } catch (DateTimeParseException e) {
+                            return false;
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        operationsList.setItems(FXCollections.observableArrayList(filtered));
+    }
+
+    @FXML
+    private void onResetFiltersClick() {
+        if (typeFilterCombo != null) typeFilterCombo.getSelectionModel().selectFirst();
+        if (categoryFilterCombo != null) categoryFilterCombo.getSelectionModel().selectFirst();
+        if (userFilterCombo != null) userFilterCombo.getSelectionModel().selectFirst();
+        if (fromDatePicker != null) fromDatePicker.setValue(null);
+        if (toDatePicker != null) toDatePicker.setValue(null);
+        applyFilters();
+    }
+
+    // -------------------- БАЛАНС --------------------
+
     @FXML
     protected void onRefreshBalance() {
         try {
@@ -98,7 +287,8 @@ public class MainController {
         }
     }
 
-    // ----- ИСТОРИЯ ОПЕРАЦИЙ -----
+    // -------------------- ИСТОРИЯ ОПЕРАЦИЙ --------------------
+
     @FXML
     protected void onRefreshOperations() {
         try {
@@ -114,46 +304,49 @@ public class MainController {
             }
 
             String payload = resp.substring("OK OPERATIONS=".length()).trim();
-            if (payload.isEmpty()) {
-                operationsList.setItems(FXCollections.observableArrayList());
-                statusLabel.setText("Операций пока нет");
-                return;
-            }
 
-            List<OperationRow> rows = new ArrayList<>();
+            allOperations.clear();
 
-            // формат: id:type:categoryName:amount:userLogin:date
-            String[] items = payload.split(",");
-            for (String item : items) {
-                String line = item.trim();
-                if (line.isEmpty()) continue;
+            if (!payload.isEmpty()) {
+                // формат: id:type:categoryName:amount:userLogin:date
+                String[] items = payload.split(",");
+                for (String item : items) {
+                    String line = item.trim();
+                    if (line.isEmpty()) continue;
 
-                String[] parts = line.split(":");
-                if (parts.length < 6) {
-                    System.out.println("Некорректная строка: " + line);
-                    continue;
+                    String[] parts = line.split(":");
+                    if (parts.length < 6) {
+                        System.out.println("Некорректная строка: " + line);
+                        continue;
+                    }
+
+                    String type = parts[1];
+                    String category = parts[2];
+                    double amount;
+                    try {
+                        amount = Double.parseDouble(parts[3]);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Ошибка суммы в строке: " + line);
+                        continue;
+                    }
+                    String user = parts[4];
+                    String date = parts[5];
+
+                    allOperations.add(new OperationRow(type, amount, category, user, date));
                 }
 
-                String type     = parts[1];
-                String category = parts[2];
-                double amount;
-                try {
-                    amount = Double.parseDouble(parts[3]);
-                } catch (NumberFormatException e) {
-                    System.out.println("Ошибка суммы в строке: " + line);
-                    continue;
-                }
-                String user = parts[4];
-                String date = parts[5];
-
-                rows.add(new OperationRow(type, amount, category, user, date));
+                // новые сверху
+                allOperations.sort(Comparator.comparing((OperationRow o) -> o.date).reversed());
             }
 
-            // новые сверху
-            rows.sort(Comparator.comparing((OperationRow o) -> o.date).reversed());
+            statusLabel.setText(allOperations.isEmpty() ? "Операций пока нет" : "");
 
-            operationsList.setItems(FXCollections.observableArrayList(rows));
-            statusLabel.setText("");
+            // обновляем значения фильтров по категориям и пользователям
+            updateCategoryFilterItems();
+            updateUserFilterItems();
+
+            // применяем фильтры к новому списку
+            applyFilters();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -161,8 +354,47 @@ public class MainController {
         }
     }
 
-    // ----- ListView: оформление строк -----
+    private void updateCategoryFilterItems() {
+        if (categoryFilterCombo == null) return;
+
+        Set<String> cats = allOperations.stream()
+                .map(o -> o.category)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(TreeSet::new)); // сортируем
+
+        List<String> values = new ArrayList<>();
+        values.add("Все категории");
+        values.addAll(cats);
+
+        categoryFilterCombo.setItems(FXCollections.observableArrayList(values));
+        categoryFilterCombo.getSelectionModel().selectFirst();
+    }
+
+    private void updateUserFilterItems() {
+        if (userFilterCombo == null) return;
+
+        Set<String> users = allOperations.stream()
+                .map(o -> o.user)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        List<String> values = new ArrayList<>();
+        values.add("Все пользователи");
+        values.addAll(users);
+
+        userFilterCombo.setItems(FXCollections.observableArrayList(values));
+        userFilterCombo.getSelectionModel().selectFirst();
+    }
+
+    // -------------------- ОФОРМЛЕНИЕ ТАБЛИЦЫ --------------------
+
     private void setupOperationsCellFactory() {
+        // убираем синий focus-бордер
+        operationsList.setStyle(
+                "-fx-focus-color: transparent; " +
+                        "-fx-faint-focus-color: transparent;"
+        );
+
         operationsList.setCellFactory(list -> new ListCell<>() {
             @Override
             protected void updateItem(OperationRow item, boolean empty) {
@@ -171,6 +403,7 @@ public class MainController {
                 if (empty || item == null) {
                     setText(null);
                     setGraphic(null);
+                    setStyle(""); // сбрасываем стили
                     return;
                 }
 
@@ -178,40 +411,69 @@ public class MainController {
                 String sign = income ? "+" : "-";
                 String amountText = sign + String.format("%.0f BYN", item.amount);
 
+                // Сумма
                 Label amountLabel = new Label(amountText);
-                amountLabel.setPrefWidth(140);
+                amountLabel.setPrefWidth(150);
                 amountLabel.setAlignment(Pos.CENTER_LEFT);
                 amountLabel.setStyle(
-                        (income ? "-fx-text-fill: #5BD75B;" : "-fx-text-fill: #FF7070;")
-                                + "-fx-padding: 0 10 0 10;"
+                        (income ? "-fx-text-fill: #2E7D32;" : "-fx-text-fill: #C62828;") +
+                                "-fx-padding: 6 8 6 8;" +
+                                "-fx-font-size: 14;" +
+                                "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
                 );
 
+                // Категория
                 Label categoryLabel = new Label(item.category);
-                categoryLabel.setPrefWidth(220);
+                categoryLabel.setPrefWidth(250);
                 categoryLabel.setAlignment(Pos.CENTER_LEFT);
-                categoryLabel.setStyle("-fx-text-fill: #FFFFFF; -fx-padding: 0 10 0 10;");
+                categoryLabel.setStyle(
+                        "-fx-text-fill: #424242;" +
+                                "-fx-padding: 6 8 6 8;" +
+                                "-fx-font-size: 13;" +
+                                "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
+                );
 
+                // Пользователь
                 Label userLabel = new Label(item.user);
-                userLabel.setPrefWidth(180);
+                userLabel.setPrefWidth(200);
                 userLabel.setAlignment(Pos.CENTER_LEFT);
-                userLabel.setStyle("-fx-text-fill: #CCCCCC; -fx-padding: 0 10 0 10;");
+                userLabel.setStyle(
+                        "-fx-text-fill: #757575;" +
+                                "-fx-padding: 6 8 6 8;" +
+                                "-fx-font-size: 13;" +
+                                "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
+                );
 
+                // Дата
                 Label dateLabel = new Label(item.date);
-                dateLabel.setPrefWidth(140);
+                dateLabel.setPrefWidth(180);
                 dateLabel.setAlignment(Pos.CENTER_LEFT);
-                dateLabel.setStyle("-fx-text-fill: #CCCCCC; -fx-padding: 0 10 0 10;");
+                dateLabel.setStyle(
+                        "-fx-text-fill: #757575;" +
+                                "-fx-padding: 6 8 6 8;" +
+                                "-fx-font-size: 13;"
+                );
 
-                HBox hbox = new HBox(0);
-                hbox.setAlignment(Pos.CENTER_LEFT);
-                hbox.getChildren().addAll(amountLabel, categoryLabel, userLabel, dateLabel);
+                HBox row = new HBox(0);
+                row.setAlignment(Pos.CENTER_LEFT);
+
+                // фон строк (лёгкий зебра-эффект)
+                String bg = (getIndex() % 2 == 0) ? "#FFFFFF" : "#F9F9F9";
+                row.setStyle("-fx-background-color: " + bg + ";");
+
+                row.getChildren().addAll(amountLabel, categoryLabel, userLabel, dateLabel);
 
                 setText(null);
-                setGraphic(hbox);
+                setGraphic(row);
+
+                // горизонтальная линия под строкой
+                setStyle("-fx-border-color: #EFEFEF; -fx-border-width: 0 0 1 0;");
             }
         });
     }
 
-    // ----- ДАННЫЕ СЕМЬИ -----
+    // -------------------- ДАННЫЕ СЕМЬИ --------------------
+
     private void loadFamilyInfo() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("GET_FAMILY_NAME");
@@ -230,7 +492,6 @@ public class MainController {
                 return;
             }
 
-            // старый формат: OK FAMILY name=... code=...
             if (resp.startsWith("OK FAMILY ")) {
                 int nameIdx = resp.indexOf("name=");
                 if (nameIdx >= 0) {
@@ -260,7 +521,8 @@ public class MainController {
         }
     }
 
-    // ----- КНОПКИ -----
+    // -------------------- КНОПКИ --------------------
+
     @FXML
     protected void onAddOperationClick() {
         try {
@@ -304,35 +566,26 @@ public class MainController {
         }
     }
 
-    // ----- LOGOUT -----
     @FXML
-    private void onLogoutClick() {
-        // 1. очищаем сессию
+    protected void onLogoutClick() {
+        // чистим сессию
         SessionContext.clear();
+        // закрываем текущее окно
+        Stage current = (Stage) balanceLabel.getScene().getWindow();
+        current.close();
 
-        // 2. закрываем соединение с сервером
-        ServerConnection.disconnect();
-
-        // 3. закрываем это окно
-        Stage currentStage = (Stage) familyNameLabel.getScene().getWindow();
-        currentStage.close();
-
-        // 4. открываем окно логина
+        // снова открываем окно логина
         try {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("hello-view.fxml")
             );
-            Scene scene = new Scene(loader.load(),800,600);
+            Scene scene = new Scene(loader.load(), 800, 600);
             Stage stage = new Stage();
-
-            stage.setTitle("Вход в систему");
+            stage.setTitle("Семейный бюджет — вход");
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            // если не получилось открыть логин, хотя бы покажем ошибку
-            // (эта надпись уже не увидят, если окно закрыто, но на всякий случай)
-            // statusLabel может быть уже недоступен, поэтому без него
         }
     }
 }
