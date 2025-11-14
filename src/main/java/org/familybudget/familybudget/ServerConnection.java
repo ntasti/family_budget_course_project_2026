@@ -51,9 +51,36 @@ public class ServerConnection {
         return in.readLine();
     }
 
-    public synchronized void close() {
+    // аккуратное закрытие конкретного экземпляра
+    private void internalClose() {
         try {
-            if (socket != null) socket.close();
+            if (out != null) out.close();
+        } catch (Exception ignored) {}
+
+        try {
+            if (in != null) in.close();
+        } catch (Exception ignored) {}
+
+        try {
+            if (socket != null && !socket.isClosed()) socket.close();
         } catch (IOException ignored) {}
+
+        socket = null;
+        in     = null;
+        out    = null;
+    }
+
+    // старый вариант (если где-то уже используется)
+    public synchronized void close() {
+        internalClose();
+        instance = null;
+    }
+
+    // удобный статический метод для logout
+    public static synchronized void disconnect() {
+        if (instance != null) {
+            instance.internalClose();
+            instance = null;
+        }
     }
 }

@@ -25,4 +25,10 @@ public class SessionContext {
     public static String getRole() {
         return INSTANCE.role;
     }
+
+    // очистка сессии при logout
+    public static void clear() {
+        INSTANCE.login = null;
+        INSTANCE.role  = null;
+    }
 }

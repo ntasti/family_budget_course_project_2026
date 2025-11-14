@@ -2,13 +2,11 @@ package org.familybudget.familybudget;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.layout.HBox;
-import javafx.geometry.Pos;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -31,17 +29,15 @@ public class MainController {
     @FXML
     private Label statusLabel;
 
-    // список операций
     @FXML
     private ListView<OperationRow> operationsList;
-    //кнопка для админа по добавлению категорий
+
     @FXML
-    private javafx.scene.control.Button manageCategoriesButton;
+    private Button manageCategoriesButton;
 
-
-    // модель для одной строки в истории
+    // модель строки
     public static class OperationRow {
-        public String type;      // INCOME или EXPENSE
+        public String type;      // INCOME / EXPENSE
         public double amount;
         public String category;
         public String user;
@@ -60,25 +56,22 @@ public class MainController {
     @FXML
     private void initialize() {
         String login = SessionContext.getLogin();
-        String role = SessionContext.getRole();
-        // пока жёстко забиваем название семьи
+        String role  = SessionContext.getRole();
 
-
-        loadFamilyInfo();      // выгрузка данных семьи
-        onRefreshBalance();
-        onRefreshOperations();
-
+        // инфо о пользователе
         userInfoLabel.setText("Пользователь: " + login + " (роль: " + role + ")");
 
-        // кнопка категорий доступна только админу
-        if (!"ADMIN".equalsIgnoreCase(role) && manageCategoriesButton != null) {
-            manageCategoriesButton.setVisible(false);
-            manageCategoriesButton.setManaged(false);
+        // показать/спрятать кнопку категорий в зависимости от роли
+        if (manageCategoriesButton != null) {
+            boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
+            manageCategoriesButton.setVisible(isAdmin);
+            manageCategoriesButton.setManaged(isAdmin);
         }
 
+        loadFamilyInfo();          // имя семьи
         setupOperationsCellFactory();
 
-        // при старте сразу грузим данные
+        // сразу грузим данные
         onRefreshBalance();
         onRefreshOperations();
     }
@@ -109,7 +102,6 @@ public class MainController {
     @FXML
     protected void onRefreshOperations() {
         try {
-            // здесь важно, чтобы на сервере была команда GET_OPERATIONS
             String resp = ServerConnection.getInstance().sendCommand("GET_OPERATIONS");
             if (resp == null) {
                 statusLabel.setText("Нет ответа от сервера");
@@ -130,8 +122,7 @@ public class MainController {
 
             List<OperationRow> rows = new ArrayList<>();
 
-            // формат строки от сервера:
-            // id:type:categoryName:amount:userLogin:date
+            // формат: id:type:categoryName:amount:userLogin:date
             String[] items = payload.split(",");
             for (String item : items) {
                 String line = item.trim();
@@ -143,7 +134,7 @@ public class MainController {
                     continue;
                 }
 
-                String type = parts[1];
+                String type     = parts[1];
                 String category = parts[2];
                 double amount;
                 try {
@@ -158,7 +149,7 @@ public class MainController {
                 rows.add(new OperationRow(type, amount, category, user, date));
             }
 
-            // сортировка по дате НОВЫЕ ВВЕРХУ (дата в ISO, можно сортировать как строку)
+            // новые сверху
             rows.sort(Comparator.comparing((OperationRow o) -> o.date).reversed());
 
             operationsList.setItems(FXCollections.observableArrayList(rows));
@@ -170,7 +161,7 @@ public class MainController {
         }
     }
 
-    // оформление строк ListView
+    // ----- ListView: оформление строк -----
     private void setupOperationsCellFactory() {
         operationsList.setCellFactory(list -> new ListCell<>() {
             @Override
@@ -191,9 +182,7 @@ public class MainController {
                 amountLabel.setPrefWidth(140);
                 amountLabel.setAlignment(Pos.CENTER_LEFT);
                 amountLabel.setStyle(
-                        (income
-                                ? "-fx-text-fill: #5BD75B;"
-                                : "-fx-text-fill: #FF7070;")
+                        (income ? "-fx-text-fill: #5BD75B;" : "-fx-text-fill: #FF7070;")
                                 + "-fx-padding: 0 10 0 10;"
                 );
 
@@ -222,37 +211,48 @@ public class MainController {
         });
     }
 
-    //данные семьи
+    // ----- ДАННЫЕ СЕМЬИ -----
     private void loadFamilyInfo() {
         try {
-            String resp = ServerConnection.getInstance().sendCommand("GET_FAMILY_INFO");
+            String resp = ServerConnection.getInstance().sendCommand("GET_FAMILY_NAME");
             if (resp == null) {
                 familyNameLabel.setText("Семья: (нет данных)");
                 return;
             }
 
-            if (!resp.startsWith("OK FAMILY ")) {
-                familyNameLabel.setText("Семья: (ошибка)");
-                System.out.println("GET_FAMILY_INFO error: " + resp);
+            if (resp.startsWith("OK FAMILY_NAME=")) {
+                String name = resp.substring("OK FAMILY_NAME=".length()).trim();
+                if (name.isEmpty()) {
+                    familyNameLabel.setText("Семья: (без имени)");
+                } else {
+                    familyNameLabel.setText("Семья: " + name);
+                }
                 return;
             }
 
-            // формат: OK FAMILY name=Моя новая семья code=FAM-B8878X
-            // распарсим по пробелам
-            String[] parts = resp.split("\\s+");
-            String namePart = null;
-            for (String p : parts) {
-                if (p.startsWith("name=")) {
-                    namePart = p.substring("name=".length());
-                    break;
+            // старый формат: OK FAMILY name=... code=...
+            if (resp.startsWith("OK FAMILY ")) {
+                int nameIdx = resp.indexOf("name=");
+                if (nameIdx >= 0) {
+                    int start = nameIdx + "name=".length();
+                    int codeIdx = resp.indexOf(" code=", start);
+                    String name = (codeIdx > 0)
+                            ? resp.substring(start, codeIdx)
+                            : resp.substring(start);
+                    name = name.trim();
+                    if (name.isEmpty()) {
+                        familyNameLabel.setText("Семья: (без имени)");
+                    } else {
+                        familyNameLabel.setText("Семья: " + name);
+                    }
+                } else {
+                    familyNameLabel.setText("Семья: (без имени)");
                 }
+                return;
             }
 
-            if (namePart == null || namePart.isBlank()) {
-                familyNameLabel.setText("Семья: (без имени)");
-            } else {
-                familyNameLabel.setText("Семья: " + namePart);
-            }
+            familyNameLabel.setText("Семья: (ошибка)");
+            System.out.println("GET_FAMILY_NAME/FAMILY response: " + resp);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -260,8 +260,7 @@ public class MainController {
         }
     }
 
-
-    //для кнопки обновления баланса
+    // ----- КНОПКИ -----
     @FXML
     protected void onAddOperationClick() {
         try {
@@ -271,11 +270,10 @@ public class MainController {
             Scene scene = new Scene(loader.load());
             Stage stage = new Stage();
             stage.setTitle("Новая операция");
-            stage.initModality(Modality.APPLICATION_MODAL); // модальное окно
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(scene);
             stage.showAndWait();
 
-            // после закрытия окна — обновим баланс и список
             onRefreshBalance();
             onRefreshOperations();
 
@@ -285,27 +283,56 @@ public class MainController {
         }
     }
 
-    //кнопка для добавления категорий
     @FXML
     protected void onManageCategoriesClick() {
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+            FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("categories-view.fxml")
             );
-            javafx.scene.Scene scene = new javafx.scene.Scene(loader.load());
-            javafx.stage.Stage stage = new javafx.stage.Stage();
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
             stage.setTitle("Категории семьи");
-            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(scene);
             stage.showAndWait();
 
-            // после закрытия окна категорий можно обновить операции,
-            // вдруг добавили новые категории
             onRefreshOperations();
 
         } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Ошибка открытия окна категорий: " + e.getMessage());
+        }
+    }
+
+    // ----- LOGOUT -----
+    @FXML
+    private void onLogoutClick() {
+        // 1. очищаем сессию
+        SessionContext.clear();
+
+        // 2. закрываем соединение с сервером
+        ServerConnection.disconnect();
+
+        // 3. закрываем это окно
+        Stage currentStage = (Stage) familyNameLabel.getScene().getWindow();
+        currentStage.close();
+
+        // 4. открываем окно логина
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("hello-view.fxml")
+            );
+            Scene scene = new Scene(loader.load(),800,600);
+            Stage stage = new Stage();
+
+            stage.setTitle("Вход в систему");
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // если не получилось открыть логин, хотя бы покажем ошибку
+            // (эта надпись уже не увидят, если окно закрыто, но на всякий случай)
+            // statusLabel может быть уже недоступен, поэтому без него
         }
     }
 }

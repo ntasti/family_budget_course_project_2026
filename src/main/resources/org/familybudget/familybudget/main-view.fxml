@@ -19,19 +19,31 @@
     <children>
 
         <!-- Заголовок: семья + пользователь -->
-        <VBox alignment="CENTER" spacing="6">
-            <Label fx:id="familyNameLabel" style="-fx-text-fill: #FFFFFF;" text="Семья: ???">
-                <font>
-                    <Font name="Segoe UI Semibold" size="22"/>
-                </font>
-            </Label>
+        <!-- Верхняя панель: заголовок и кнопка Выйти -->
+        <HBox alignment="CENTER_RIGHT" spacing="20" prefWidth="900">
+            <VBox alignment="CENTER_LEFT" spacing="6">
+                <Label fx:id="familyNameLabel" style="-fx-text-fill: #FFFFFF;">
+                    <font>
+                        <Font name="Segoe UI Semibold" size="22"/>
+                    </font>
+                </Label>
 
-            <Label fx:id="userInfoLabel" style="-fx-text-fill: #AAAAAA;" text="Пользователь: ??? (роль: ???)">
-                <font>
-                    <Font name="Segoe UI" size="16"/>
-                </font>
-            </Label>
-        </VBox>
+                <Label fx:id="userInfoLabel" style="-fx-text-fill: #AAAAAA;">
+                    <font>
+                        <Font name="Segoe UI" size="16"/>
+                    </font>
+                </Label>
+            </VBox>
+
+            <Button text="Выйти"
+                    onAction="#onLogoutClick"
+                    style="-fx-background-color: #444444;
+                   -fx-background-radius: 999;
+                   -fx-text-fill: white;
+                   -fx-padding: 6 16;
+                   -fx-font-size: 12;"/>
+        </HBox>
+
 
         <!-- Блок баланса -->
         <VBox alignment="CENTER" spacing="5">
@@ -88,13 +100,18 @@
                    -fx-padding: 6 14;
                    -fx-font-size: 14;"/>
 
-            <Button text="Управлять категориями"
+            <Button fx:id="manageCategoriesButton"
+                    text="Управлять категориями"
                     onAction="#onManageCategoriesClick"
-                    style="-fx-background-color: #555555;
+                    visible="false"
+                    managed="false"
+                    style="-fx-background-color: #666666;
                -fx-background-radius: 8;
                -fx-text-fill: white;
-               -fx-padding: 6 14;
-               -fx-font-size: 13;"/>
+               -fx-padding: 6 18;
+               -fx-font-size: 14;"/>
+
+
 
         </HBox>
 
