@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="698.0" prefWidth="911.0" spacing="25" style="-fx-background-color: #121212;"
-      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+<VBox alignment="TOP_CENTER"
+      prefHeight="698.0"
+      prefWidth="911.0"
+      spacing="25"
+      style="-fx-background-color: #121212;"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.familybudget.familybudget.MainController">
 
     <padding>
@@ -18,32 +21,22 @@
 
     <children>
 
-        <!-- Заголовок: семья + пользователь -->
-        <!-- Верхняя панель: заголовок и кнопка Выйти -->
-        <HBox alignment="CENTER_RIGHT" spacing="20" prefWidth="900">
-            <VBox alignment="CENTER_LEFT" spacing="6">
-                <Label fx:id="familyNameLabel" style="-fx-text-fill: #FFFFFF;">
-                    <font>
-                        <Font name="Segoe UI Semibold" size="22"/>
-                    </font>
-                </Label>
+        <!-- 🔹 Информация о семье (вверху слева) -->
+        <VBox alignment="TOP_LEFT" spacing="6" prefWidth="880">
+            <Label fx:id="familyNameLabel"
+                   style="-fx-text-fill: #FFFFFF;">
+                <font>
+                    <Font name="Segoe UI Semibold" size="22"/>
+                </font>
+            </Label>
 
-                <Label fx:id="userInfoLabel" style="-fx-text-fill: #AAAAAA;">
-                    <font>
-                        <Font name="Segoe UI" size="16"/>
-                    </font>
-                </Label>
-            </VBox>
-
-            <Button text="Выйти"
-                    onAction="#onLogoutClick"
-                    style="-fx-background-color: #444444;
-                   -fx-background-radius: 999;
-                   -fx-text-fill: white;
-                   -fx-padding: 6 16;
-                   -fx-font-size: 12;"/>
-        </HBox>
-
+            <Label fx:id="userInfoLabel"
+                   style="-fx-text-fill: #AAAAAA;">
+                <font>
+                    <Font name="Segoe UI" size="16"/>
+                </font>
+            </Label>
+        </VBox>
 
         <!-- Блок баланса -->
         <VBox alignment="CENTER" spacing="5">
@@ -55,50 +48,64 @@
             </Label>
 
             <Button onAction="#onRefreshBalance"
-                    style="-fx-background-color: #4C6FFF;                            -fx-background-radius: 8;                            -fx-text-fill: white;                            -fx-padding: 6 14;                            -fx-font-size: 14;"
+                    style="-fx-background-color: #4C6FFF;
+                           -fx-background-radius: 8;
+                           -fx-text-fill: white;
+                           -fx-padding: 6 14;
+                           -fx-font-size: 14;"
                     text="Обновить баланс"/>
         </VBox>
 
-        <!-- Заголовок для истории -->
+        <!-- Заголовок истории -->
         <Label style="-fx-text-fill: #CCCCCC;" text="История операций">
             <font>
                 <Font name="Segoe UI Semibold" size="18"/>
             </font>
         </Label>
 
-        <!-- Подписи к столбцам (Сумма / Категория / Пользователь / Дата) -->
-        <HBox alignment="CENTER" prefHeight="19.0" prefWidth="782.0" spacing="0">
-            <Label prefWidth="140" style="-fx-text-fill: #888888; -fx-font-size: 13; -fx-padding: 0 10 0 10;"
+        <!-- Подписи к столбцам -->
+        <HBox alignment="CENTER" spacing="0">
+            <Label prefWidth="140"
+                   style="-fx-text-fill: #888888; -fx-font-size: 13;"
                    text="      Сумма"/>
-            <Label prefWidth="220" style="-fx-text-fill: #888888; -fx-font-size: 13; -fx-padding: 0 10 0 10;"
+            <Label prefWidth="220"
+                   style="-fx-text-fill: #888888; -fx-font-size: 13;"
                    text="              Категория"/>
-            <Label prefWidth="180" style="-fx-text-fill: #888888; -fx-font-size: 13; -fx-padding: 0 10 0 10;"
+            <Label prefWidth="180"
+                   style="-fx-text-fill: #888888; -fx-font-size: 13;"
                    text="   Пользователь"/>
-            <Label prefWidth="140" style="-fx-text-fill: #888888; -fx-font-size: 13; -fx-padding: 0 10 0 10;"
+            <Label prefWidth="140"
+                   style="-fx-text-fill: #888888; -fx-font-size: 13;"
                    text="       Дата"/>
         </HBox>
 
-
         <!-- Список операций -->
-        <ListView fx:id="operationsList" maxWidth="700" prefHeight="260"
-                  style="-fx-background-color: #1E1E1E;                          -fx-control-inner-background: #1E1E1E;                          -fx-font-size: 14;                          -fx-text-fill: #FFFFFF;                          -fx-background-radius: 10;"/>
+        <ListView fx:id="operationsList"
+                  maxWidth="700"
+                  prefHeight="260"
+                  style="-fx-background-color: #1E1E1E;
+                         -fx-control-inner-background: #1E1E1E;
+                         -fx-font-size: 14;
+                         -fx-text-fill: #FFFFFF;
+                         -fx-background-radius: 10;"/>
 
+        <!-- Кнопки операций -->
         <HBox alignment="CENTER" spacing="10">
             <Button text="Добавить операцию"
                     onAction="#onAddOperationClick"
                     style="-fx-background-color: #34C759;
-                   -fx-background-radius: 8;
-                   -fx-text-fill: white;
-                   -fx-padding: 6 14;
-                   -fx-font-size: 14;"/>
+                           -fx-background-radius: 8;
+                           -fx-text-fill: white;
+                           -fx-padding: 6 14;
+                           -fx-font-size: 14;"/>
 
             <Button text="Обновить операции"
                     onAction="#onRefreshOperations"
                     style="-fx-background-color: #4C6FFF;
-                   -fx-background-radius: 8;
-                   -fx-text-fill: white;
-                   -fx-padding: 6 14;
-                   -fx-font-size: 14;"/>
+                           -fx-background-radius: 8;
+                           -fx-text-fill: white;
+                           -fx-padding: 6 14;
+                           -fx-font-size: 14;"/>
 
             <Button fx:id="manageCategoriesButton"
                     text="Управлять категориями"
@@ -106,17 +113,27 @@
                     visible="false"
                     managed="false"
                     style="-fx-background-color: #666666;
-               -fx-background-radius: 8;
-               -fx-text-fill: white;
-               -fx-padding: 6 18;
-               -fx-font-size: 14;"/>
-
-
-
+                           -fx-background-radius: 8;
+                           -fx-text-fill: white;
+                           -fx-padding: 6 18;
+                           -fx-font-size: 14;"/>
         </HBox>
 
-        <!-- Строка для ошибок/статуса -->
-        <Label fx:id="statusLabel" style="-fx-text-fill: #FF7070; -fx-font-size: 12;" text=""/>
+        <!-- Ошибки -->
+        <Label fx:id="statusLabel"
+               style="-fx-text-fill: #FF7070; -fx-font-size: 12;"
+               text=""/>
+
+        <!-- 🔹 Кнопка выхода — в правом нижнем углу -->
+        <HBox alignment="BOTTOM_RIGHT" prefWidth="880">
+            <Button text="Выйти"
+                    onAction="#onLogoutClick"
+                    style="-fx-background-color: #444444;
+                           -fx-background-radius: 999;
+                           -fx-text-fill: white;
+                           -fx-padding: 6 16;
+                           -fx-font-size: 12;"/>
+        </HBox>
 
     </children>
 </VBox>
