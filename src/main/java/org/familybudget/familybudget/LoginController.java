@@ -80,7 +80,7 @@ public class LoginController {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("register-view.fxml")
             );
-            Scene scene = new Scene(loader.load(), 420, 420);
+            Scene scene = new Scene(loader.load(), 490, 490);
             Stage stage = new Stage();
             stage.setTitle("Регистрация");
             stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
