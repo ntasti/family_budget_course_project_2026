@@ -7,6 +7,10 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Pos;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,6 +34,10 @@ public class MainController {
     // список операций
     @FXML
     private ListView<OperationRow> operationsList;
+    //кнопка для админа по добавлению категорий
+    @FXML
+    private javafx.scene.control.Button manageCategoriesButton;
+
 
     // модель для одной строки в истории
     public static class OperationRow {
@@ -58,6 +66,12 @@ public class MainController {
 
         familyNameLabel.setText("Семья: " + familyName);
         userInfoLabel.setText("Пользователь: " + login + " (роль: " + role + ")");
+
+        // кнопка категорий доступна только админу
+        if (!"ADMIN".equalsIgnoreCase(role) && manageCategoriesButton != null) {
+            manageCategoriesButton.setVisible(false);
+            manageCategoriesButton.setManaged(false);
+        }
 
         setupOperationsCellFactory();
 
@@ -205,4 +219,51 @@ public class MainController {
         });
     }
 
+    //для кнопки обновления баланса
+    @FXML
+    protected void onAddOperationClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("add-operation-view.fxml")
+            );
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("Новая операция");
+            stage.initModality(Modality.APPLICATION_MODAL); // модальное окно
+            stage.setScene(scene);
+            stage.showAndWait();
+
+            // после закрытия окна — обновим баланс и список
+            onRefreshBalance();
+            onRefreshOperations();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия окна: " + e.getMessage());
+        }
+    }
+
+    //кнопка для добавления категорий
+    @FXML
+    protected void onManageCategoriesClick() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    HelloApplication.class.getResource("categories-view.fxml")
+            );
+            javafx.scene.Scene scene = new javafx.scene.Scene(loader.load());
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Категории семьи");
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.showAndWait();
+
+            // после закрытия окна категорий можно обновить операции,
+            // вдруг добавили новые категории
+            onRefreshOperations();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия окна категорий: " + e.getMessage());
+        }
+    }
 }
