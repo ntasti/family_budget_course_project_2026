@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.familybudget.familybudget.Controllers.AnalyticsController"
+            style="-fx-background-color: #F0F2F5;">
+
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <top>
+        <VBox spacing="10">
+            <Label text="Аналитика расходов по категориям"
+                   style="-fx-text-fill: #333333;">
+                <font>
+                    <Font name="Segoe UI Semibold" size="18"/>
+                </font>
+            </Label>
+
+            <HBox spacing="10">
+                <Label text="Период:" style="-fx-text-fill: #555555;"/>
+
+                <DatePicker fx:id="fromDatePicker" promptText="с"/>
+                <Label text="—" style="-fx-text-fill: #777777;"/>
+                <DatePicker fx:id="toDatePicker" promptText="по"/>
+
+                <Button text="Показать"
+                        onAction="#onCalculateClick"
+                        style="-fx-background-color: #4C6FFF;
+                               -fx-background-radius: 999;
+                               -fx-text-fill: white;
+                               -fx-font-weight: bold;
+                               -fx-padding: 4 14;"/>
+            </HBox>
+
+            <Label fx:id="statusLabel"
+                   style="-fx-text-fill: #D32F2F; -fx-font-size: 12;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <PieChart fx:id="categoryPieChart"
+                  legendVisible="true"
+                  labelsVisible="true"/>
+    </center>
+
+    <bottom>
+        <VBox spacing="4">
+            <Label fx:id="summaryLabel"
+                   style="-fx-text-fill: #444444; -fx-font-size: 13;"/>
+        </VBox>
+    </bottom>
+
+</BorderPane>

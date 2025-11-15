@@ -82,6 +82,11 @@ public class MainController {
     @FXML
     private DatePicker toDatePicker;
 
+    //analytics
+    @FXML
+    private Button analyticsButton;
+
+
     // полный список операций (до фильтрации)
     private final List<OperationRow> allOperations = new ArrayList<>();
 
@@ -127,11 +132,8 @@ public class MainController {
         // крупные тулбар-кнопки
         setupToolbarButton(addOperationButton);
         setupToolbarButton(manageCategoriesButton);
-        // маленькие круглые export/import НЕ трогаем стилем тулбара,
-        // чтобы остались иконками:
-        // setupToolbarButton(exportButton);
-        // setupToolbarButton(exportCsvButton);
-        // setupToolbarButton(importButton);
+        setupToolbarButton(analyticsButton);
+
 
         loadFamilyInfo();
         setupOperationsCellFactory();
@@ -544,6 +546,26 @@ public class MainController {
         } catch (IOException e) {
             e.printStackTrace();
             familyNameLabel.setText("Семья: (ошибка соединения)");
+        }
+    }
+
+    // -------------------- АНАЛИТИКА --------------------
+
+    @FXML
+    private void onOpenAnalyticsClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("analytics-view.fxml")
+            );
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("Аналитика расходов");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия аналитики: " + e.getMessage());
         }
     }
 
