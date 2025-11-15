@@ -129,16 +129,20 @@ public class MainController {
     @FXML
     private void initialize() {
         String login = SessionContext.getLogin();
-        String role = SessionContext.getRole();
+        String rawRole = SessionContext.getRole();
 
-        userInfoLabel.setText("Пользователь: " + login + " (роль: " + role + ")");
+        // определяем, админ ли пользователь
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(rawRole) || "1".equals(rawRole);
 
-        if ("ADMIN".equalsIgnoreCase(role) && manageCategoriesButton != null) {
-            manageCategoriesButton.setVisible(true);
-            manageCategoriesButton.setManaged(true);
-        } else if (manageCategoriesButton != null) {
-            manageCategoriesButton.setVisible(false);
-            manageCategoriesButton.setManaged(false);
+        // красивый текст роли для отображения
+        String roleLabel = isAdmin ? "ADMIN" : rawRole;
+
+        userInfoLabel.setText("Пользователь: " + login );
+
+        // показать / скрыть кнопку управления категориями
+        if (manageCategoriesButton != null) {
+            manageCategoriesButton.setVisible(isAdmin);
+            manageCategoriesButton.setManaged(isAdmin);
         }
 
         // крупные тулбар-кнопки
@@ -149,11 +153,12 @@ public class MainController {
         loadFamilyInfo();
         setupOperationsCellFactory();
         setupFilters();
-        setupChartsControls(); // <-- настройка переключателя диаграммы
+        setupChartsControls(); // <-- твой код для диаграмм
 
         onRefreshBalance();
         onRefreshOperations();
     }
+
 
     // -------------------- СТИЛИ КНОПОК --------------------
 

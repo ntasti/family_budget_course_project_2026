@@ -6,6 +6,7 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -45,15 +46,28 @@
             </Label>
 
             <!-- Подзаголовок -->
-            <Label text="Создайте аккаунт и присоединитесь к семейному бюджету"
+            <Label text="Создайте аккаунт, укажите своё имя и роль в семье"
                    wrapText="true"
                    style="-fx-text-fill: #777777; -fx-font-size: 11;"/>
 
-            <!-- Блок логина и пароля -->
+            <!-- Блок логина, пароля и личных данных -->
             <VBox prefWidth="360" spacing="8">
 
+                <!-- Имя пользователя -->
+                <TextField fx:id="nameField"
+                           promptText="Имя (как отображать в кабинете)"
+                           style="-fx-pref-width: 360;
+                                  -fx-background-color: #F5F5F5;
+                                  -fx-background-radius: 8;
+                                  -fx-text-fill: #222222;
+                                  -fx-prompt-text-fill: #9E9E9E;
+                                  -fx-border-color: #DDDDDD;
+                                  -fx-border-radius: 8;
+                                  -fx-padding: 6 10 6 10;"/>
+
+                <!-- Email / логин -->
                 <TextField fx:id="loginField"
-                           promptText="Email / логин"
+                           promptText="Email"
                            style="-fx-pref-width: 360;
                                   -fx-background-color: #F5F5F5;
                                   -fx-background-radius: 8;
@@ -84,6 +98,21 @@
                                       -fx-border-color: #DDDDDD;
                                       -fx-border-radius: 8;
                                       -fx-padding: 6 10 6 10;"/>
+
+                <!-- Роль в семье -->
+                <Label text="Роль в семье"
+                       style="-fx-text-fill: #555555; -fx-font-size: 12; -fx-padding: 6 0 0 0;"/>
+
+                <ComboBox fx:id="familyRoleCombo"
+                          promptText="Выберите роль: муж, жена, ребёнок, другое"
+                          style="-fx-pref-width: 360;
+                                 -fx-background-color: #F5F5F5;
+                                 -fx-background-radius: 8;
+                                 -fx-text-fill: #222222;
+                                 -fx-prompt-text-fill: #9E9E9E;
+                                 -fx-border-color: #DDDDDD;
+                                 -fx-border-radius: 8;
+                                 -fx-padding: 6 10 6 10;"/>
             </VBox>
 
             <!-- Блок семьи -->

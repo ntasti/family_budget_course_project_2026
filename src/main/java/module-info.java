@@ -17,3 +17,4 @@ module org.familybudget.familybudget {
     exports org.familybudget.familybudget.Server;
     opens org.familybudget.familybudget.Server to javafx.fxml;
 }
+

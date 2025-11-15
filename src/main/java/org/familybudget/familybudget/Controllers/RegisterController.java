@@ -1,5 +1,6 @@
 package org.familybudget.familybudget.Controllers;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -36,6 +37,10 @@ public class RegisterController {
     @FXML
     private Label statusLabel;
 
+
+    @FXML private TextField nameField;
+    @FXML private ComboBox<String> familyRoleCombo;
+
     @FXML
     private void initialize() {
         ToggleGroup group = new ToggleGroup();
@@ -44,6 +49,14 @@ public class RegisterController {
 
         createFamilyRadio.setSelected(true);
         updateFamilyFields();
+
+        familyRoleCombo.setItems(FXCollections.observableArrayList(
+                "Муж",
+                "Жена",
+                "Ребёнок",
+                "Другое"
+        ));
+
 
         group.selectedToggleProperty().addListener((obs, oldV, newV) -> updateFamilyFields());
     }
@@ -141,7 +154,7 @@ public class RegisterController {
         );
 
         // --- УВЕЛИЧЕН РАЗМЕР ГЛАВНОГО ОКНА ---
-        Scene scene = new Scene(loader.load(), 1190, 560);
+        Scene scene = new Scene(loader.load(), 1190, 1000);
 
         Stage stage = new Stage();
         stage.setTitle("Семейный бюджет");
