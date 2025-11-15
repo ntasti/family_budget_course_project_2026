@@ -10,7 +10,11 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.IOException;
+import javafx.stage.FileChooser;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -47,6 +51,18 @@ public class MainController {
 
     @FXML
     private Button logoutButton;
+
+    // сериализация (dat)
+    @FXML
+    private Button exportButton;
+
+    // экспорт CSV
+    @FXML
+    private Button exportCsvButton;
+
+    //  НОВОЕ: кнопка импорта .dat
+    @FXML
+    private Button importButton;
 
     // Фильтры
     @FXML
@@ -90,10 +106,8 @@ public class MainController {
         String login = SessionContext.getLogin();
         String role = SessionContext.getRole();
 
-        // инфо о пользователе
         userInfoLabel.setText("Пользователь: " + login + " (роль: " + role + ")");
 
-        // показать кнопку категорий только админу
         if ("ADMIN".equalsIgnoreCase(role) && manageCategoriesButton != null) {
             manageCategoriesButton.setVisible(true);
             manageCategoriesButton.setManaged(true);
@@ -102,18 +116,17 @@ public class MainController {
             manageCategoriesButton.setManaged(false);
         }
 
-        // кнопки тулбара (белые -> серые при наведении)
+        // тулбар-кнопки
         setupToolbarButton(addOperationButton);
         setupToolbarButton(manageCategoriesButton);
+        setupToolbarButton(exportButton);
+        setupToolbarButton(exportCsvButton);
+        setupToolbarButton(importButton);  // ✅ НОВОЕ
 
+        loadFamilyInfo();
+        setupOperationsCellFactory();
+        setupFilters();
 
-
-
-        loadFamilyInfo();             // имя семьи
-        setupOperationsCellFactory(); // оформление таблицы операций
-        setupFilters();               // фильтры
-
-        // сразу грузим данные
         onRefreshBalance();
         onRefreshOperations();
     }
@@ -136,7 +149,6 @@ public class MainController {
                 btn.setStyle("-fx-background-color: " + normal + ";" + base));
     }
 
-    // Белые кнопки тулбара, при наведении становятся серыми
     private void setupToolbarButton(Button btn) {
         if (btn == null) return;
         String base = "-fx-background-radius: 999; " +
@@ -160,7 +172,6 @@ public class MainController {
     // -------------------- ФИЛЬТРЫ --------------------
 
     private void setupFilters() {
-        // тип операции
         if (typeFilterCombo != null) {
             typeFilterCombo.setItems(FXCollections.observableArrayList(
                     "Все операции",
@@ -171,21 +182,18 @@ public class MainController {
             typeFilterCombo.valueProperty().addListener((obs, o, n) -> applyFilters());
         }
 
-        // категория
         if (categoryFilterCombo != null) {
             categoryFilterCombo.setItems(FXCollections.observableArrayList("Все категории"));
             categoryFilterCombo.getSelectionModel().selectFirst();
             categoryFilterCombo.valueProperty().addListener((obs, o, n) -> applyFilters());
         }
 
-        // пользователь
         if (userFilterCombo != null) {
             userFilterCombo.setItems(FXCollections.observableArrayList("Все пользователи"));
             userFilterCombo.getSelectionModel().selectFirst();
             userFilterCombo.valueProperty().addListener((obs, o, n) -> applyFilters());
         }
 
-        // диапазон дат
         if (fromDatePicker != null) {
             fromDatePicker.valueProperty().addListener((obs, o, n) -> applyFilters());
         }
@@ -194,11 +202,9 @@ public class MainController {
         }
     }
 
-    // применяем фильтры к allOperations
     private void applyFilters() {
         List<OperationRow> filtered = new ArrayList<>(allOperations);
 
-        // --- тип операции ---
         if (typeFilterCombo != null) {
             String typeFilter = typeFilterCombo.getValue();
             if ("Только доходы".equals(typeFilter)) {
@@ -212,7 +218,6 @@ public class MainController {
             }
         }
 
-        // --- категория ---
         if (categoryFilterCombo != null) {
             String catFilter = categoryFilterCombo.getValue();
             if (catFilter != null && !"Все категории".equals(catFilter)) {
@@ -222,7 +227,6 @@ public class MainController {
             }
         }
 
-        // --- пользователь ---
         if (userFilterCombo != null) {
             String userFilter = userFilterCombo.getValue();
             if (userFilter != null && !"Все пользователи".equals(userFilter)) {
@@ -232,7 +236,6 @@ public class MainController {
             }
         }
 
-        // --- диапазон дат ---
         LocalDate from = (fromDatePicker != null) ? fromDatePicker.getValue() : null;
         LocalDate to = (toDatePicker != null) ? toDatePicker.getValue() : null;
 
@@ -240,7 +243,7 @@ public class MainController {
             filtered = filtered.stream()
                     .filter(o -> {
                         try {
-                            LocalDate d = LocalDate.parse(o.date); // формат YYYY-MM-DD
+                            LocalDate d = LocalDate.parse(o.date);
                             if (from != null && d.isBefore(from)) return false;
                             if (to != null && d.isAfter(to)) return false;
                             return true;
@@ -308,7 +311,6 @@ public class MainController {
             allOperations.clear();
 
             if (!payload.isEmpty()) {
-                // формат: id:type:categoryName:amount:userLogin:date
                 String[] items = payload.split(",");
                 for (String item : items) {
                     String line = item.trim();
@@ -335,17 +337,13 @@ public class MainController {
                     allOperations.add(new OperationRow(type, amount, category, user, date));
                 }
 
-                // новые сверху
                 allOperations.sort(Comparator.comparing((OperationRow o) -> o.date).reversed());
             }
 
             statusLabel.setText(allOperations.isEmpty() ? "Операций пока нет" : "");
 
-            // обновляем значения фильтров по категориям и пользователям
             updateCategoryFilterItems();
             updateUserFilterItems();
-
-            // применяем фильтры к новому списку
             applyFilters();
 
         } catch (IOException e) {
@@ -360,7 +358,7 @@ public class MainController {
         Set<String> cats = allOperations.stream()
                 .map(o -> o.category)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(TreeSet::new)); // сортируем
+                .collect(Collectors.toCollection(TreeSet::new));
 
         List<String> values = new ArrayList<>();
         values.add("Все категории");
@@ -386,10 +384,9 @@ public class MainController {
         userFilterCombo.getSelectionModel().selectFirst();
     }
 
-    // -------------------- ОФОРМЛЕНИЕ ТАБЛИЦЫ --------------------
+    // -------------------- ОФОРМЛЕНИЕ СПИСКА --------------------
 
     private void setupOperationsCellFactory() {
-        // убираем синий focus-бордер
         operationsList.setStyle(
                 "-fx-focus-color: transparent; " +
                         "-fx-faint-focus-color: transparent;"
@@ -403,7 +400,7 @@ public class MainController {
                 if (empty || item == null) {
                     setText(null);
                     setGraphic(null);
-                    setStyle(""); // сбрасываем стили
+                    setStyle("");
                     return;
                 }
 
@@ -411,7 +408,6 @@ public class MainController {
                 String sign = income ? "+" : "-";
                 String amountText = sign + String.format("%.0f BYN", item.amount);
 
-                // Сумма
                 Label amountLabel = new Label(amountText);
                 amountLabel.setPrefWidth(150);
                 amountLabel.setAlignment(Pos.CENTER_LEFT);
@@ -422,7 +418,6 @@ public class MainController {
                                 "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
                 );
 
-                // Категория
                 Label categoryLabel = new Label(item.category);
                 categoryLabel.setPrefWidth(250);
                 categoryLabel.setAlignment(Pos.CENTER_LEFT);
@@ -433,7 +428,6 @@ public class MainController {
                                 "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
                 );
 
-                // Пользователь
                 Label userLabel = new Label(item.user);
                 userLabel.setPrefWidth(200);
                 userLabel.setAlignment(Pos.CENTER_LEFT);
@@ -444,7 +438,6 @@ public class MainController {
                                 "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
                 );
 
-                // Дата
                 Label dateLabel = new Label(item.date);
                 dateLabel.setPrefWidth(180);
                 dateLabel.setAlignment(Pos.CENTER_LEFT);
@@ -456,17 +449,12 @@ public class MainController {
 
                 HBox row = new HBox(0);
                 row.setAlignment(Pos.CENTER_LEFT);
-
-                // фон строк (лёгкий зебра-эффект)
                 String bg = (getIndex() % 2 == 0) ? "#FFFFFF" : "#F9F9F9";
                 row.setStyle("-fx-background-color: " + bg + ";");
-
                 row.getChildren().addAll(amountLabel, categoryLabel, userLabel, dateLabel);
 
                 setText(null);
                 setGraphic(row);
-
-                // горизонтальная линия под строкой
                 setStyle("-fx-border-color: #EFEFEF; -fx-border-width: 0 0 1 0;");
             }
         });
@@ -568,13 +556,10 @@ public class MainController {
 
     @FXML
     protected void onLogoutClick() {
-        // чистим сессию
         SessionContext.clear();
-        // закрываем текущее окно
         Stage current = (Stage) balanceLabel.getScene().getWindow();
         current.close();
 
-        // снова открываем окно логина
         try {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("hello-view.fxml")
@@ -588,4 +573,280 @@ public class MainController {
             e.printStackTrace();
         }
     }
+
+    // -------------------- ЭКСПОРТ (dat) --------------------
+
+    @FXML
+    private void onExportOperationsClick() {
+        if (allOperations.isEmpty()) {
+            statusLabel.setText("Нет операций для экспорта");
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Экспорт операций (dat)");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Файл операций (*.dat)", "*.dat")
+        );
+
+        File file = chooser.showSaveDialog(balanceLabel.getScene().getWindow());
+        if (file == null) return;
+
+        List<OperationExportItem> exportList = allOperations.stream()
+                .map(OperationExportItem::new)
+                .collect(Collectors.toList());
+
+        try (ObjectOutputStream oos =
+                     new ObjectOutputStream(new FileOutputStream(file))) {
+
+            oos.writeObject(exportList);
+            statusLabel.setText("Экспортировано (dat) операций: " + exportList.size());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка экспорта: " + e.getMessage());
+        }
+    }
+
+    // -------------------- ЭКСПОРТ CSV --------------------
+
+    @FXML
+    private void onExportOperationsCsvClick() {
+        List<OperationRow> toExport = new ArrayList<>(operationsList.getItems());
+        if (toExport.isEmpty()) {
+            statusLabel.setText("Нет операций для экспорта в CSV");
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Экспорт операций в CSV");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV файлы (*.csv)", "*.csv")
+        );
+
+        File file = chooser.showSaveDialog(balanceLabel.getScene().getWindow());
+        if (file == null) return;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("type;amount;category;user;date\n");
+        for (OperationRow o : toExport) {
+            sb.append(o.type).append(";");
+            sb.append(o.amount).append(";");
+            sb.append(escapeCsv(o.category)).append(";");
+            sb.append(escapeCsv(o.user)).append(";");
+            sb.append(o.date).append("\n");
+        }
+
+        try (OutputStream os = new FileOutputStream(file);
+             Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+
+            // 👇 ДОБАВЛЯЕМ BOM
+            writer.write('\uFEFF');
+
+            writer.write(sb.toString());
+            statusLabel.setText("Экспортировано в CSV: " + toExport.size());
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка экспорта CSV: " + e.getMessage());
+        }
+    }
+
+    private String escapeCsv(String s) {
+        if (s == null) return "";
+        if (s.contains(";") || s.contains("\"")) {
+            return "\"" + s.replace("\"", "\"\"") + "\"";
+        }
+        return s;
+    }
+
+    // -------------------- ИМПОРТ (dat) --------------------
+
+    // -------------------- ИМПОРТ (dat) С ЗАПИСЬЮ НА СЕРВЕР --------------------
+    @FXML
+    private void onImportOperationsClick() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Импорт операций (dat)");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Файл операций (*.dat)", "*.dat")
+        );
+
+        File file = chooser.showOpenDialog(balanceLabel.getScene().getWindow());
+        if (file == null) return;
+
+        try (ObjectInputStream ois =
+                     new ObjectInputStream(new java.io.FileInputStream(file))) {
+
+            Object obj = ois.readObject();
+            if (!(obj instanceof java.util.List<?> rawList)) {
+                statusLabel.setText("Неверный формат файла");
+                return;
+            }
+
+            java.util.List<OperationExportItem> imported = new java.util.ArrayList<>();
+            for (Object o : rawList) {
+                if (o instanceof OperationExportItem item) {
+                    imported.add(item);
+                }
+            }
+
+            if (imported.isEmpty()) {
+                statusLabel.setText("В файле нет операций");
+                return;
+            }
+
+            ServerConnection conn = ServerConnection.getInstance();
+
+            // 1) Загружаем текущие категории семьи
+            Map<String, Long> categoryMap;
+            try {
+                categoryMap = loadCategoryMap();
+            } catch (IOException e) {
+                e.printStackTrace();
+                statusLabel.setText("Не удалось загрузить категории: " + e.getMessage());
+                return;
+            }
+
+            int okCount = 0;
+            int skipCount = 0;
+
+            // 2) Для каждой импортированной операции создаём запись на сервере
+            for (OperationExportItem it : imported) {
+                String catName = it.getCategory();
+                if (catName == null || catName.isBlank()) {
+                    System.out.println("Пропущена операция без категории");
+                    skipCount++;
+                    continue;
+                }
+
+                // ищем id категории
+                Long categoryId = categoryMap.get(catName);
+                if (categoryId == null) {
+                    // такой категории пока нет – пробуем создать
+                    String respCat = conn.sendCommand("ADD_CATEGORY " + catName);
+                    if (respCat != null && respCat.startsWith("OK CATEGORY_CREATED")) {
+                        // формат: OK CATEGORY_CREATED id:name
+                        String tail = respCat.substring("OK CATEGORY_CREATED".length()).trim(); // "id:name"
+                        String[] idName = tail.split(":", 2);
+                        if (idName.length == 2) {
+                            try {
+                                long newId = Long.parseLong(idName[0]);
+                                categoryId = newId;
+                                categoryMap.put(catName, newId);
+                            } catch (NumberFormatException ex) {
+                                System.out.println("Не удалось распарсить id категории из ответа: " + respCat);
+                                skipCount++;
+                                continue;
+                            }
+                        } else {
+                            System.out.println("Неожиданный формат ответа ADD_CATEGORY: " + respCat);
+                            skipCount++;
+                            continue;
+                        }
+                    } else {
+                        // не удалось создать категорию (нет прав, ошибка и т.п.)
+                        System.out.println("Нельзя создать категорию '" + catName + "': " + respCat);
+                        skipCount++;
+                        continue;
+                    }
+                }
+
+                // 3) В зависимости от типа создаём доход или расход
+                String type = it.getType();
+                double amount = it.getAmount();
+                if (amount <= 0) {
+                    System.out.println("Пропущена операция с некорректной суммой: " + amount);
+                    skipCount++;
+                    continue;
+                }
+
+                String cmd;
+                if ("INCOME".equalsIgnoreCase(type)) {
+                    cmd = "ADD_INCOME " + categoryId + " " + amount + " Импорт";
+                } else if ("EXPENSE".equalsIgnoreCase(type)) {
+                    cmd = "ADD_EXPENSE " + categoryId + " " + amount + " Импорт";
+                } else {
+                    System.out.println("Неизвестный тип операции: " + type);
+                    skipCount++;
+                    continue;
+                }
+
+                String respOp = conn.sendCommand(cmd);
+                if (respOp != null && (respOp.startsWith("OK INCOME_ADDED") || respOp.startsWith("OK EXPENSE_ADDED"))) {
+                    okCount++;
+                } else {
+                    System.out.println("Ошибка при создании операции: " + respOp);
+                    skipCount++;
+                }
+            }
+
+            // 4) После импорта обновляем данные с сервера
+            onRefreshBalance();
+            onRefreshOperations();
+
+            statusLabel.setText("Импортировано в семью операций: " + okCount +
+                    (skipCount > 0 ? (" (пропущено: " + skipCount + ")") : ""));
+
+            // (опционально) всплывающее окно
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Импорт завершён");
+            alert.setHeaderText("Успешно создано операций: " + okCount);
+            alert.setContentText(
+                    "Все операции записаны на сервер в вашу семью.\n" +
+                            "Дата и пользователь берутся как при обычном добавлении (текущий пользователь, текущая дата)." +
+                            (skipCount > 0 ? ("\nПропущено операций: " + skipCount + " (смотрите лог в консоли).") : "")
+            );
+            alert.showAndWait();
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка импорта: " + e.getMessage());
+        }
+    }
+
+
+    // Загружаем категории семьи с сервера и строим карту "Название -> id"
+    private Map<String, Long> loadCategoryMap() throws IOException {
+        Map<String, Long> result = new HashMap<>();
+
+        String resp = ServerConnection.getInstance().sendCommand("LIST_CATEGORIES");
+        if (resp == null) {
+            throw new IOException("Нет ответа от сервера при LIST_CATEGORIES");
+        }
+
+        if (!resp.startsWith("OK CATEGORIES=")) {
+            // если семей нет, сервер может вернуть OK CATEGORIES= или ошибку
+            if (resp.startsWith("OK CATEGORIES=")) {
+                return result;
+            } else {
+                throw new IOException("Ошибка LIST_CATEGORIES: " + resp);
+            }
+        }
+
+        String payload = resp.substring("OK CATEGORIES=".length()).trim();
+        if (payload.isEmpty()) {
+            return result; // категорий ещё нет
+        }
+
+        // формат: id:name,id:name,...
+        String[] parts = payload.split(",");
+        for (String p : parts) {
+            String line = p.trim();
+            if (line.isEmpty()) continue;
+
+            String[] idName = line.split(":", 2);
+            if (idName.length == 2) {
+                try {
+                    long id = Long.parseLong(idName[0]);
+                    String name = idName[1];
+                    result.put(name, id);
+                } catch (NumberFormatException ignored) {
+                    System.out.println("Некорректная категория: " + line);
+                }
+            }
+        }
+
+        return result;
+    }
+
+
 }

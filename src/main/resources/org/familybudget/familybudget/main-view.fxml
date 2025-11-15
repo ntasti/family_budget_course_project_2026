@@ -12,7 +12,7 @@
         <Insets bottom="20" left="20" right="20" top="20"/>
     </padding>
 
-    <!--  ЛЕВАЯ ПАНЕЛЬ ФИЛЬТРОВ  -->
+    <!-- ЛЕВАЯ ПАНЕЛЬ ФИЛЬТРОВ -->
     <left>
         <VBox alignment="TOP_CENTER" prefWidth="250" spacing="14"
               style="-fx-background-color: #FFFFFF;
@@ -21,9 +21,7 @@
                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 14, 0, 0, 3);
                      -fx-font-family: 'Segoe UI';">
 
-            <!-- Заголовок фильтров с иконкой -->
             <HBox alignment="CENTER_LEFT" spacing="8">
-
                 <SVGPath content="
         M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5
         m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5
@@ -36,15 +34,11 @@
                         <Font name="Segoe UI Semibold" size="18"/>
                     </font>
                 </Label>
-
             </HBox>
 
-            <!-- Тип -->
             <VBox alignment="TOP_LEFT" spacing="4">
                 <Label style="-fx-text-fill: #777777; -fx-font-size: 11;" text="Тип операции">
-                    <font>
-                        <Font size="14.0"/>
-                    </font>
+                    <font><Font size="14.0"/></font>
                 </Label>
                 <ComboBox fx:id="typeFilterCombo" prefWidth="180"
                           style="-fx-background-radius: 8;
@@ -54,12 +48,9 @@
                                  -fx-border-radius: 8;"/>
             </VBox>
 
-            <!-- Категория -->
             <VBox alignment="TOP_LEFT" spacing="4">
                 <Label style="-fx-text-fill: #777777; -fx-font-size: 11;" text="Категория">
-                    <font>
-                        <Font size="14.0"/>
-                    </font>
+                    <font><Font size="14.0"/></font>
                 </Label>
                 <ComboBox fx:id="categoryFilterCombo" prefWidth="180"
                           style="-fx-background-radius: 8;
@@ -69,12 +60,9 @@
                                  -fx-border-radius: 8;"/>
             </VBox>
 
-            <!-- Пользователь -->
             <VBox alignment="TOP_LEFT" spacing="4">
                 <Label style="-fx-text-fill: #777777; -fx-font-size: 11;" text="Пользователь">
-                    <font>
-                        <Font size="14.0"/>
-                    </font>
+                    <font><Font size="14.0"/></font>
                 </Label>
                 <ComboBox fx:id="userFilterCombo" prefWidth="180"
                           style="-fx-background-radius: 8;
@@ -84,12 +72,9 @@
                                  -fx-border-radius: 8;"/>
             </VBox>
 
-            <!-- Даты -->
             <VBox alignment="TOP_LEFT" spacing="4">
                 <Label style="-fx-text-fill: #777777; -fx-font-size: 11;" text="Диапазон дат">
-                    <font>
-                        <Font size="14.0"/>
-                    </font>
+                    <font><Font size="14.0"/></font>
                 </Label>
                 <HBox spacing="6">
                     <DatePicker fx:id="fromDatePicker" prefWidth="90" promptText="с" style="-fx-background-radius: 8;"/>
@@ -98,7 +83,6 @@
                 </HBox>
             </VBox>
 
-            <!-- Сброс фильтров (такая же форма/цвет, как обновление) -->
             <Button fx:id="resetFiltersButton"
                     maxWidth="Infinity"
                     onAction="#onResetFiltersClick"
@@ -109,7 +93,6 @@
                            -fx-padding: 6 14;
                            -fx-font-size: 12;"
                     text="Сбросить"/>
-
         </VBox>
     </left>
 
@@ -122,11 +105,8 @@
                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 14, 0, 0, 3);
                      -fx-font-family: 'Segoe UI';">
 
-            <!-- Инфо пользователя -->
             <VBox alignment="TOP_LEFT" spacing="10">
-
                 <HBox spacing="10" alignment="CENTER_LEFT">
-
                     <SVGPath content="
             M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0
             M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8
@@ -148,12 +128,9 @@
                 </HBox>
 
                 <Separator style="-fx-background-color: #DDDDDD;"/>
-
             </VBox>
 
-            <!-- КНОПКИ (белые) -->
             <VBox alignment="TOP_LEFT" spacing="8">
-
                 <Button fx:id="addOperationButton"
                         maxWidth="200"
                         prefHeight="41"
@@ -166,13 +143,11 @@
                                -fx-padding: 7 14;
                                -fx-font-size: 13;"
                         text="Добавить операцию">
-
                     <graphic>
                         <SVGPath content="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16
                            M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"
                                  style="-fx-fill: #333333; -fx-scale-x: 1.0; -fx-scale-y: 1.0;"/>
                     </graphic>
-
                 </Button>
 
                 <Button fx:id="manageCategoriesButton"
@@ -189,7 +164,6 @@
                                -fx-padding: 7 14;
                                -fx-font-size: 13;"
                         text="Управлять категориями">
-
                     <graphic>
                         <SVGPath content="
             M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0
@@ -198,14 +172,24 @@
             m0 5.586 7 7L13.586 9l-7-7H2z"
                                  style="-fx-fill: #333333; -fx-scale-x: 1.0; -fx-scale-y: 1.0;"/>
                     </graphic>
-
                 </Button>
+
+             <!-- 🆕 ИМПОРТ .dat -->
+            <Button fx:id="importButton"
+                    maxWidth="220"
+                    prefHeight="41"
+                    onAction="#onImportOperationsClick"
+                    graphicTextGap="8"
+                    style="-fx-background-color: #FFFFFF; -fx-background-radius: 999; -fx-text-fill: #333333; -fx-font-weight: bold; -fx-padding: 7 14; -fx-font-size: 13;" text="Импорт (dat)">
+                <graphic>
+                    <SVGPath content=" M14 4.5V11h-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM4.151 15.29a1.2 1.2 0 0 1-.111-.449h.764a.58.58 0 0 0 .255.384q.105.073.25.114.142.041.319.041.245 0 .413-.07a.56.56 0 0 0 .255-.193.5.5 0 0 0 .084-.29.39.39 0 0 0-.152-.326q-.152-.12-.463-.193l-.618-.143a1.7 1.7 0 0 1-.539-.214 1 1 0 0 1-.352-.367 1.1 1.1 0 0 1-.123-.524q0-.366.19-.639.192-.272.528-.422.337-.15.777-.149.456 0 .779.152.326.153.5.41.18.255.2.566h-.75a.56.56 0 0 0-.12-.258.6.6 0 0 0-.246-.181.9.9 0 0 0-.37-.068q-.324 0-.512.152a.47.47 0 0 0-.185.384q0 .18.144.3a1 1 0 0 0 .404.175l.621.143q.326.075.566.211a1 1 0 0 1 .375.358q.135.222.135.56 0 .37-.188.656a1.2 1.2 0 0 1-.539.439q-.351.158-.858.158-.381 0-.665-.09a1.4 1.4 0 0 1-.478-.252 1.1 1.1 0 0 1-.29-.375m-3.104-.033a1.3 1.3 0 0 1-.082-.466h.764a.6.6 0 0 0 .074.27.5.5 0 0 0 .454.246q.285 0 .422-.164.137-.165.137-.466v-2.745h.791v2.725q0 .66-.357 1.005-.355.345-.985.345a1.6 1.6 0 0 1-.568-.094 1.15 1.15 0 0 1-.407-.266 1.1 1.1 0 0 1-.243-.39m9.091-1.585v.522q0 .384-.117.641a.86.86 0 0 1-.322.387.9.9 0 0 1-.47.126.9.9 0 0 1-.47-.126.87.87 0 0 1-.32-.387 1.55 1.55 0 0 1-.117-.641v-.522q0-.386.117-.641a.87.87 0 0 1 .32-.387.87.87 0 0 1 .47-.129q.265 0 .47.129a.86.86 0 0 1 .322.387q.117.255.117.641m.803.519v-.513q0-.565-.205-.973a1.46 1.46 0 0 0-.59-.63q-.38-.22-.916-.22-.534 0-.92.22a1.44 1.44 0 0 0-.589.628q-.205.407-.205.975v.513q0 .562.205.973.205.407.589.626.386.217.92.217.536 0 .917-.217.384-.22.589-.626.204-.41.205-.973m1.29-.935v2.675h-.746v-3.999h.662l1.752 2.66h.032v-2.66h.75v4h-.656l-1.761-2.676z" style="-fx-fill: #333333; -fx-scale-x: 1.0; -fx-scale-y: 1.0;"/>
+        </graphic>
+        </Button>
 
             </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>
 
-            <!-- Кнопка выхода снизу -->
             <Button fx:id="logoutButton"
                     maxWidth="Infinity"
                     onAction="#onLogoutClick"
@@ -217,34 +201,26 @@
                -fx-padding: 7 14;
                -fx-font-size: 13;"
                     text="Выйти">
-
                 <graphic>
                     <SVGPath content="
             M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z
             M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z"
                              style="-fx-fill: white; -fx-scale-x: 1.0; -fx-scale-y: 1.0;"/>
                 </graphic>
-
             </Button>
-
-
         </VBox>
     </right>
 
-    <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ-->
+    <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ -->
     <center>
         <VBox alignment="TOP_CENTER" spacing="20">
 
-            <!-- БАЛАНС -->
             <VBox alignment="CENTER" spacing="5">
                 <Label style="-fx-text-fill: #777;" text="Текущий баланс"/>
                 <Label fx:id="balanceLabel" style="-fx-text-fill: #4C6FFF;">
-                    <font>
-                        <Font name="Segoe UI Semibold" size="28"/>
-                    </font>
+                    <font><Font name="Segoe UI Semibold" size="28"/></font>
                 </Label>
 
-                <!-- ОБНОВИТЬ БАЛАНС: тот же цвет и форма, что сброс -->
                 <Button onAction="#onRefreshBalance"
                         graphicTextGap="8"
                         style="-fx-background-color: #4C6FFF;
@@ -254,24 +230,19 @@
                                -fx-padding: 6 14;
                                -fx-font-size: 14;"
                         text="Обновить баланс">
-
                     <graphic>
                         <SVGPath content="M17.65 6.35A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L14 10h6V4l-2.35 2.35Z"
                                  style="-fx-fill: white; -fx-scale-x: 0.9; -fx-scale-y: 0.9;"/>
                     </graphic>
-
                 </Button>
-
             </VBox>
 
             <Label style="-fx-text-fill: #444;" text="История операций">
-                <font>
-                    <Font name="Segoe UI Semibold" size="18"/>
-                </font>
+                <font><Font name="Segoe UI Semibold" size="18"/></font>
             </Label>
 
             <!-- Блок операций -->
-            <VBox maxWidth="820" spacing="0"
+            <VBox maxWidth="820" spacing="8"
                   style="-fx-background-color: white;
                          -fx-background-radius: 12;
                          -fx-border-radius: 12;
@@ -279,6 +250,7 @@
                          -fx-padding: 12 12 12 12;
                          -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 2);">
 
+                <!-- Заголовки колонок -->
                 <HBox spacing="0" style="-fx-padding: 0 4 6 4;">
                     <Label prefWidth="150" style="-fx-text-fill: #777; -fx-font-size: 14;" text="Сумма"/>
                     <Label prefWidth="250" style="-fx-text-fill: #777; -fx-font-size: 14;" text="Категория"/>
@@ -286,6 +258,7 @@
                     <Label prefWidth="180" style="-fx-text-fill: #777; -fx-font-size: 14;" text="Дата"/>
                 </HBox>
 
+                <!-- Список операций -->
                 <ListView fx:id="operationsList" prefHeight="320"
                           style="-fx-background-color: white;
                                  -fx-control-inner-background: white;
@@ -293,9 +266,41 @@
                                  -fx-background-insets: 0;
                                  -fx-border-insets: 0;"/>
 
+                <!-- КНОПКИ ЭКСПОРТА / ИМПОРТА ВНИЗУ СПРАВА -->
+                <HBox alignment="CENTER_RIGHT" spacing="6">
+                    <!-- Пустое пространство слева, чтобы прижать вправо можно не добавлять Region,
+                         так как alignment=CENTER_RIGHT -->
+
+                    <!-- Экспорт JSON -->
+                    <Button fx:id="exportButton"
+                            onAction="#onExportOperationsClick"
+                            prefWidth="32" prefHeight="32"
+                            style="-fx-background-color: #FFFFFF;
+                                   -fx-background-radius: 16;
+                                   -fx-padding: 4;">
+                        <graphic>
+                            <SVGPath content="
+                  M14 4.5V11h-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM4.151 15.29a1.2 1.2 0 0 1-.111-.449h.764a.58.58 0 0 0 .255.384q.105.073.25.114.142.041.319.041.245 0 .413-.07a.56.56 0 0 0 .255-.193.5.5 0 0 0 .084-.29.39.39 0 0 0-.152-.326q-.152-.12-.463-.193l-.618-.143a1.7 1.7 0 0 1-.539-.214 1 1 0 0 1-.352-.367 1.1 1.1 0 0 1-.123-.524q0-.366.19-.639.192-.272.528-.422.337-.15.777-.149.456 0 .779.152.326.153.5.41.18.255.2.566h-.75a.56.56 0 0 0-.12-.258.6.6 0 0 0-.246-.181.9.9 0 0 0-.37-.068q-.324 0-.512.152a.47.47 0 0 0-.185.384q0 .18.144.3a1 1 0 0 0 .404.175l.621.143q.326.075.566.211a1 1 0 0 1 .375.358q.135.222.135.56 0 .37-.188.656a1.2 1.2 0 0 1-.539.439q-.351.158-.858.158-.381 0-.665-.09a1.4 1.4 0 0 1-.478-.252 1.1 1.1 0 0 1-.29-.375m-3.104-.033a1.3 1.3 0 0 1-.082-.466h.764a.6.6 0 0 0 .074.27.5.5 0 0 0 .454.246q.285 0 .422-.164.137-.165.137-.466v-2.745h.791v2.725q0 .66-.357 1.005-.355.345-.985.345a1.6 1.6 0 0 1-.568-.094 1.15 1.15 0 0 1-.407-.266 1.1 1.1 0 0 1-.243-.39m9.091-1.585v.522q0 .384-.117.641a.86.86 0 0 1-.322.387.9.9 0 0 1-.47.126.9.9 0 0 1-.47-.126.87.87 0 0 1-.32-.387 1.55 1.55 0 0 1-.117-.641v-.522q0-.386.117-.641a.87.87 0 0 1 .32-.387.87.87 0 0 1 .47-.129q.265 0 .47.129a.86.86 0 0 1 .322.387q.117.255.117.641m.803.519v-.513q0-.565-.205-.973a1.46 1.46 0 0 0-.59-.63q-.38-.22-.916-.22-.534 0-.92.22a1.44 1.44 0 0 0-.589.628q-.205.407-.205.975v.513q0 .562.205.973.205.407.589.626.386.217.92.217.536 0 .917-.217.384-.22.589-.626.204-.41.205-.973m1.29-.935v2.675h-.746v-3.999h.662l1.752 2.66h.032v-2.66h.75v4h-.656l-1.761-2.676z"
+                                     style="-fx-fill: #333333; -fx-scale-x: 0.9; -fx-scale-y: 0.9;"/>
+                        </graphic>
+                    </Button>
+
+                    <!-- Экспорт CSV -->
+                    <Button fx:id="exportCsvButton"
+                            onAction="#onExportOperationsCsvClick"
+                            prefWidth="32" prefHeight="32"
+                            style="-fx-background-color: #FFFFFF;
+                                   -fx-background-radius: 16;
+                                   -fx-padding: 4;">
+                        <graphic>
+                            <SVGPath content="
+                M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM3.517 14.841a1.13 1.13 0 0 0 .401.823q.195.162.478.252.284.091.665.091.507 0 .859-.158.354-.158.539-.44.187-.284.187-.656 0-.336-.134-.56a1 1 0 0 0-.375-.357 2 2 0 0 0-.566-.21l-.621-.144a1 1 0 0 1-.404-.176.37.37 0 0 1-.144-.299q0-.234.185-.384.188-.152.512-.152.214 0 .37.068a.6.6 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.1 1.1 0 0 0-.2-.566 1.2 1.2 0 0 0-.5-.41 1.8 1.8 0 0 0-.78-.152q-.439 0-.776.15-.337.149-.527.421-.19.273-.19.639 0 .302.122.524.124.223.352.367.228.143.539.213l.618.144q.31.073.463.193a.39.39 0 0 1 .152.326.5.5 0 0 1-.085.29.56.56 0 0 1-.255.193q-.167.07-.413.07-.175 0-.32-.04a.8.8 0 0 1-.248-.115.58.58 0 0 1-.255-.384zM.806 13.693q0-.373.102-.633a.87.87 0 0 1 .302-.399.8.8 0 0 1 .475-.137q.225 0 .398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.4 1.4 0 0 0-.489-.272 1.8 1.8 0 0 0-.606-.097q-.534 0-.911.223-.375.222-.572.632-.195.41-.196.979v.498q0 .568.193.976.197.407.572.626.375.217.914.217.439 0 .785-.164t.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.8.8 0 0 1-.118.363.7.7 0 0 1-.272.25.9.9 0 0 1-.401.087.85.85 0 0 1-.478-.132.83.83 0 0 1-.299-.392 1.7 1.7 0 0 1-.102-.627zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879z"
+                                     style="-fx-fill: #333333; -fx-scale-x: 0.9; -fx-scale-y: 0.9;"/>
+                        </graphic>
+                    </Button>
+                </HBox>
             </VBox>
 
-            <!-- ОБНОВИТЬ ОПЕРАЦИИ: тот же стиль, что ОБНОВИТЬ БАЛАНС -->
             <HBox alignment="CENTER">
                 <Button fx:id="refreshOperationsButton"
                         onAction="#onRefreshOperations"
@@ -307,13 +312,11 @@
                -fx-padding: 6 14;
                -fx-font-size: 14;"
                         text="Обновить операции">
-
                     <graphic>
                         <SVGPath content="M17.65 6.35A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L14 10h6V4l-2.35 2.35Z"
                                  style="-fx-fill: white; -fx-scale-x: 0.9; -fx-scale-y: 0.9;"/>
                     </graphic>
                 </Button>
-
             </HBox>
 
             <Label fx:id="statusLabel" style="-fx-text-fill: #D32F2F; -fx-font-size: 12;"/>
