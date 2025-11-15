@@ -254,9 +254,11 @@
                 <HBox spacing="0" style="-fx-padding: 0 4 6 4;">
                     <Label prefWidth="150" style="-fx-text-fill: #777; -fx-font-size: 14;" text="Сумма"/>
                     <Label prefWidth="250" style="-fx-text-fill: #777; -fx-font-size: 14;" text="Категория"/>
-                    <Label prefWidth="200" style="-fx-text-fill: #777; -fx-font-size: 14;" text="Пользователь"/>
-                    <Label prefWidth="180" style="-fx-text-fill: #777; -fx-font-size: 14;" text="Дата"/>
+                    <Label prefWidth="180" style="-fx-text-fill: #777; -fx-font-size: 14;" text="Пользователь"/>
+                    <Label prefWidth="130" style="-fx-text-fill: #777; -fx-font-size: 14;" text="Дата"/>
+                    <Label prefWidth="80"  style="-fx-text-fill: #777; -fx-font-size: 14;" text="Время"/>
                 </HBox>
+
 
                 <!-- Список операций -->
                 <ListView fx:id="operationsList" prefHeight="320"

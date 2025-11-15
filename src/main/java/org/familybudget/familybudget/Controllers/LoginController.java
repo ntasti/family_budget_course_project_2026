@@ -8,7 +8,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.familybudget.familybudget.HelloApplication;
-import org.familybudget.familybudget.ServerConnection;
+import org.familybudget.familybudget.Server.ServerConnection;
 import org.familybudget.familybudget.SessionContext;
 
 public class LoginController {

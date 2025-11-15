@@ -1,4 +1,4 @@
-package org.familybudget.familybudget;
+package org.familybudget.familybudget.Server;
 
 import java.io.*;
 import java.net.Socket;

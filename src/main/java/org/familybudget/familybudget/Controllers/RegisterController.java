@@ -7,7 +7,7 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.familybudget.familybudget.HelloApplication;
-import org.familybudget.familybudget.ServerConnection;
+import org.familybudget.familybudget.Server.ServerConnection;
 import org.familybudget.familybudget.SessionContext;
 
 public class RegisterController {

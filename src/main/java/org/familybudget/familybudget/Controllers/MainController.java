@@ -9,16 +9,14 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
 import javafx.stage.FileChooser;
 import org.familybudget.familybudget.HelloApplication;
 import org.familybudget.familybudget.DTO.OperationExportItem;
-import org.familybudget.familybudget.ServerConnection;
+import org.familybudget.familybudget.Server.ServerConnection;
 import org.familybudget.familybudget.SessionContext;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -64,7 +62,7 @@ public class MainController {
     @FXML
     private Button exportCsvButton;
 
-    //  НОВОЕ: кнопка импорта .dat
+    // импорт .dat
     @FXML
     private Button importButton;
 
@@ -94,14 +92,20 @@ public class MainController {
         public String category;
         public String user;
         public String date;      // "2025-11-14"
+        public String time;      // "14:35"
 
-        public OperationRow(String type, double amount,
-                            String category, String user, String date) {
+        public OperationRow(String type,
+                            double amount,
+                            String category,
+                            String user,
+                            String date,
+                            String time) {
             this.type = type;
             this.amount = amount;
             this.category = category;
             this.user = user;
             this.date = date;
+            this.time = time;
         }
     }
 
@@ -120,12 +124,14 @@ public class MainController {
             manageCategoriesButton.setManaged(false);
         }
 
-        // тулбар-кнопки
+        // крупные тулбар-кнопки
         setupToolbarButton(addOperationButton);
         setupToolbarButton(manageCategoriesButton);
-        setupToolbarButton(exportButton);
-        setupToolbarButton(exportCsvButton);
-        setupToolbarButton(importButton);  // ✅ НОВОЕ
+        // маленькие круглые export/import НЕ трогаем стилем тулбара,
+        // чтобы остались иконками:
+        // setupToolbarButton(exportButton);
+        // setupToolbarButton(exportCsvButton);
+        // setupToolbarButton(importButton);
 
         loadFamilyInfo();
         setupOperationsCellFactory();
@@ -247,7 +253,7 @@ public class MainController {
             filtered = filtered.stream()
                     .filter(o -> {
                         try {
-                            LocalDate d = LocalDate.parse(o.date);
+                            LocalDate d = LocalDate.parse(o.date); // только дата, без времени
                             if (from != null && d.isBefore(from)) return false;
                             if (to != null && d.isAfter(to)) return false;
                             return true;
@@ -320,7 +326,9 @@ public class MainController {
                     String line = item.trim();
                     if (line.isEmpty()) continue;
 
-                    String[] parts = line.split(":");
+                    // формат строки с сервера:
+                    // id:type:categoryName:amount:userLogin:2024-12-08 14:35
+                    String[] parts = line.split(":", 6);
                     if (parts.length < 6) {
                         System.out.println("Некорректная строка: " + line);
                         continue;
@@ -328,6 +336,7 @@ public class MainController {
 
                     String type = parts[1];
                     String category = parts[2];
+
                     double amount;
                     try {
                         amount = Double.parseDouble(parts[3]);
@@ -335,13 +344,28 @@ public class MainController {
                         System.out.println("Ошибка суммы в строке: " + line);
                         continue;
                     }
-                    String user = parts[4];
-                    String date = parts[5];
 
-                    allOperations.add(new OperationRow(type, amount, category, user, date));
+                    String user = parts[4];
+                    String dateTime = parts[5];
+
+                    String date = dateTime;
+                    String time = "";
+                    if (dateTime != null && !dateTime.isBlank()) {
+                        String[] dt = dateTime.split(" ", 2);
+                        date = dt[0];
+                        if (dt.length > 1) {
+                            time = dt[1];
+                        }
+                    }
+
+                    allOperations.add(new OperationRow(type, amount, category, user, date, time));
                 }
 
-                allOperations.sort(Comparator.comparing((OperationRow o) -> o.date).reversed());
+                // сортируем по дате и времени (от новых к старым)
+                Comparator<OperationRow> cmp =
+                        Comparator.<OperationRow, String>comparing(o -> o.date)
+                                .thenComparing(o -> o.time);
+                allOperations.sort(cmp.reversed());
             }
 
             statusLabel.setText(allOperations.isEmpty() ? "Операций пока нет" : "");
@@ -433,7 +457,7 @@ public class MainController {
                 );
 
                 Label userLabel = new Label(item.user);
-                userLabel.setPrefWidth(200);
+                userLabel.setPrefWidth(180);
                 userLabel.setAlignment(Pos.CENTER_LEFT);
                 userLabel.setStyle(
                         "-fx-text-fill: #757575;" +
@@ -443,9 +467,19 @@ public class MainController {
                 );
 
                 Label dateLabel = new Label(item.date);
-                dateLabel.setPrefWidth(180);
+                dateLabel.setPrefWidth(130);
                 dateLabel.setAlignment(Pos.CENTER_LEFT);
                 dateLabel.setStyle(
+                        "-fx-text-fill: #757575;" +
+                                "-fx-padding: 6 8 6 8;" +
+                                "-fx-font-size: 13;" +
+                                "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
+                );
+
+                Label timeLabel = new Label(item.time);
+                timeLabel.setPrefWidth(80);
+                timeLabel.setAlignment(Pos.CENTER_LEFT);
+                timeLabel.setStyle(
                         "-fx-text-fill: #757575;" +
                                 "-fx-padding: 6 8 6 8;" +
                                 "-fx-font-size: 13;"
@@ -455,7 +489,7 @@ public class MainController {
                 row.setAlignment(Pos.CENTER_LEFT);
                 String bg = (getIndex() % 2 == 0) ? "#FFFFFF" : "#F9F9F9";
                 row.setStyle("-fx-background-color: " + bg + ";");
-                row.getChildren().addAll(amountLabel, categoryLabel, userLabel, dateLabel);
+                row.getChildren().addAll(amountLabel, categoryLabel, userLabel, dateLabel, timeLabel);
 
                 setText(null);
                 setGraphic(row);
@@ -632,21 +666,20 @@ public class MainController {
         if (file == null) return;
 
         StringBuilder sb = new StringBuilder();
-        sb.append("type;amount;category;user;date\n");
+        sb.append("type;amount;category;user;date;time\n");
         for (OperationRow o : toExport) {
             sb.append(o.type).append(";");
             sb.append(o.amount).append(";");
             sb.append(escapeCsv(o.category)).append(";");
             sb.append(escapeCsv(o.user)).append(";");
-            sb.append(o.date).append("\n");
+            sb.append(o.date).append(";");
+            sb.append(o.time == null ? "" : o.time).append("\n");
         }
 
         try (OutputStream os = new FileOutputStream(file);
              Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
 
-            // 👇 ДОБАВЛЯЕМ BOM
-            writer.write('\uFEFF');
-
+            writer.write('\uFEFF'); // BOM
             writer.write(sb.toString());
             statusLabel.setText("Экспортировано в CSV: " + toExport.size());
         } catch (IOException e) {
@@ -664,8 +697,8 @@ public class MainController {
     }
 
     // -------------------- ИМПОРТ (dat) --------------------
+    // (оставляю твой код импорта как есть, без изменений)
 
-    // -------------------- ИМПОРТ (dat) С ЗАПИСЬЮ НА СЕРВЕР --------------------
     @FXML
     private void onImportOperationsClick() {
         FileChooser chooser = new FileChooser();
@@ -700,7 +733,6 @@ public class MainController {
 
             ServerConnection conn = ServerConnection.getInstance();
 
-            // 1) Загружаем текущие категории семьи
             Map<String, Long> categoryMap;
             try {
                 categoryMap = loadCategoryMap();
@@ -713,7 +745,6 @@ public class MainController {
             int okCount = 0;
             int skipCount = 0;
 
-            // 2) Для каждой импортированной операции создаём запись на сервере
             for (OperationExportItem it : imported) {
                 String catName = it.getCategory();
                 if (catName == null || catName.isBlank()) {
@@ -722,14 +753,11 @@ public class MainController {
                     continue;
                 }
 
-                // ищем id категории
                 Long categoryId = categoryMap.get(catName);
                 if (categoryId == null) {
-                    // такой категории пока нет – пробуем создать
                     String respCat = conn.sendCommand("ADD_CATEGORY " + catName);
                     if (respCat != null && respCat.startsWith("OK CATEGORY_CREATED")) {
-                        // формат: OK CATEGORY_CREATED id:name
-                        String tail = respCat.substring("OK CATEGORY_CREATED".length()).trim(); // "id:name"
+                        String tail = respCat.substring("OK CATEGORY_CREATED".length()).trim();
                         String[] idName = tail.split(":", 2);
                         if (idName.length == 2) {
                             try {
@@ -747,14 +775,12 @@ public class MainController {
                             continue;
                         }
                     } else {
-                        // не удалось создать категорию (нет прав, ошибка и т.п.)
                         System.out.println("Нельзя создать категорию '" + catName + "': " + respCat);
                         skipCount++;
                         continue;
                     }
                 }
 
-                // 3) В зависимости от типа создаём доход или расход
                 String type = it.getType();
                 double amount = it.getAmount();
                 if (amount <= 0) {
@@ -783,14 +809,12 @@ public class MainController {
                 }
             }
 
-            // 4) После импорта обновляем данные с сервера
             onRefreshBalance();
             onRefreshOperations();
 
             statusLabel.setText("Импортировано в семью операций: " + okCount +
                     (skipCount > 0 ? (" (пропущено: " + skipCount + ")") : ""));
 
-            // (опционально) всплывающее окно
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Импорт завершён");
             alert.setHeaderText("Успешно создано операций: " + okCount);
@@ -807,8 +831,6 @@ public class MainController {
         }
     }
 
-
-    // Загружаем категории семьи с сервера и строим карту "Название -> id"
     private Map<String, Long> loadCategoryMap() throws IOException {
         Map<String, Long> result = new HashMap<>();
 
@@ -818,7 +840,6 @@ public class MainController {
         }
 
         if (!resp.startsWith("OK CATEGORIES=")) {
-            // если семей нет, сервер может вернуть OK CATEGORIES= или ошибку
             if (resp.startsWith("OK CATEGORIES=")) {
                 return result;
             } else {
@@ -828,10 +849,9 @@ public class MainController {
 
         String payload = resp.substring("OK CATEGORIES=".length()).trim();
         if (payload.isEmpty()) {
-            return result; // категорий ещё нет
+            return result;
         }
 
-        // формат: id:name,id:name,...
         String[] parts = payload.split(",");
         for (String p : parts) {
             String line = p.trim();
@@ -851,6 +871,4 @@ public class MainController {
 
         return result;
     }
-
-
 }
