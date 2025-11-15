@@ -69,7 +69,7 @@ public class LoginController {
         FXMLLoader loader = new FXMLLoader(
                 HelloApplication.class.getResource("main-view.fxml")
         );
-        Scene scene = new Scene(loader.load(), 1450, 800);
+        Scene scene = new Scene(loader.load(), 1450, 1000);
         Stage stage = new Stage();
         stage.setTitle("Семейный бюджет");
         stage.setScene(scene);

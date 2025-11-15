@@ -14,6 +14,8 @@ import org.familybudget.familybudget.HelloApplication;
 import org.familybudget.familybudget.DTO.OperationExportItem;
 import org.familybudget.familybudget.Server.ServerConnection;
 import org.familybudget.familybudget.SessionContext;
+import javafx.scene.chart.PieChart;
+import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -82,10 +84,20 @@ public class MainController {
     @FXML
     private DatePicker toDatePicker;
 
-    //analytics
+    // analytics
     @FXML
     private Button analyticsButton;
 
+    // ОДНА круговая диаграмма + выбор типа
+    @FXML
+    private PieChart categoryPieChart;
+
+    @FXML
+    private ComboBox<String> chartTypeCombo;
+
+    // агрегированные данные по категориям
+    private Map<String, Double> incomeTotalsByCategory = new HashMap<>();
+    private Map<String, Double> expenseTotalsByCategory = new HashMap<>();
 
     // полный список операций (до фильтрации)
     private final List<OperationRow> allOperations = new ArrayList<>();
@@ -134,10 +146,10 @@ public class MainController {
         setupToolbarButton(manageCategoriesButton);
         setupToolbarButton(analyticsButton);
 
-
         loadFamilyInfo();
         setupOperationsCellFactory();
         setupFilters();
+        setupChartsControls(); // <-- настройка переключателя диаграммы
 
         onRefreshBalance();
         onRefreshOperations();
@@ -179,6 +191,27 @@ public class MainController {
 
         btn.setOnMouseExited(e ->
                 btn.setStyle("-fx-background-color: " + normal + ";" + base));
+    }
+
+    // -------------------- НАСТРОЙКА ВЫБОРА ТИПА ДИАГРАММЫ --------------------
+
+    private void setupChartsControls() {
+        if (chartTypeCombo == null) return;
+
+        chartTypeCombo.setItems(FXCollections.observableArrayList(
+                "Структура расходов",
+                "Структура доходов"
+        ));
+
+        // по умолчанию — структура расходов
+        chartTypeCombo.getSelectionModel().select("Структура расходов");
+
+        chartTypeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            refreshCategoryChart();
+        });
+
+        // если данные уже будут, после загрузки сразу перерисуем
+        refreshCategoryChart();
     }
 
     // -------------------- ФИЛЬТРЫ --------------------
@@ -267,6 +300,9 @@ public class MainController {
         }
 
         operationsList.setItems(FXCollections.observableArrayList(filtered));
+
+        // обновляем диаграммы по отфильтрованному списку
+        updateChartsFromList(filtered);
     }
 
     @FXML
@@ -549,10 +585,78 @@ public class MainController {
         }
     }
 
-    // -------------------- АНАЛИТИКА --------------------
+    // -------------------- ДИАГРАММЫ ДОХОДОВ/РАСХОДОВ --------------------
+
+    private void updateChartsFromList(List<OperationRow> rows) {
+        // собираем суммы по категориям для доходов и расходов
+        Map<String, Double> incomeMap = new HashMap<>();
+        Map<String, Double> expenseMap = new HashMap<>();
+
+        for (OperationRow o : rows) {
+            if (o == null || o.category == null) continue;
+            double amt = o.amount;
+            if (amt <= 0) continue;
+
+            if ("INCOME".equalsIgnoreCase(o.type)) {
+                incomeMap.merge(o.category, amt, Double::sum);
+            } else if ("EXPENSE".equalsIgnoreCase(o.type)) {
+                expenseMap.merge(o.category, amt, Double::sum);
+            }
+        }
+
+        incomeTotalsByCategory = incomeMap;
+        expenseTotalsByCategory = expenseMap;
+
+        // перерисовываем диаграмму в соответствии с выбранным типом
+        refreshCategoryChart();
+    }
+
+    /**
+     * Перезаполняет единственную круговую диаграмму categoryPieChart
+     * на основании выбранного в chartTypeCombo типа:
+     * - "Структура расходов"  -> расходы
+     * - "Структура доходов"   -> доходы
+     *
+     * Подпись каждого сектора: "<Категория> (XX.X%)"
+     */
+    private void refreshCategoryChart() {
+        if (categoryPieChart == null) return;
+
+        String chartType = chartTypeCombo != null ? chartTypeCombo.getValue() : null;
+        Map<String, Double> sourceMap;
+
+        if ("Структура доходов".equals(chartType)) {
+            sourceMap = incomeTotalsByCategory;
+        } else {
+            // по умолчанию — структура расходов
+            sourceMap = expenseTotalsByCategory;
+        }
+
+        ObservableList<PieChart.Data> data = FXCollections.observableArrayList();
+
+        double total = sourceMap.values().stream()
+                .mapToDouble(Double::doubleValue)
+                .sum();
+
+        for (Map.Entry<String, Double> e : sourceMap.entrySet()) {
+            String name = e.getKey();
+            double sum = e.getValue();
+            double percent = (total == 0) ? 0 : sum / total * 100.0;
+
+            // только название категории и процент
+            String label = String.format("%s (%.1f%%)", name, percent);
+            data.add(new PieChart.Data(label, sum));
+        }
+
+        categoryPieChart.setData(data);
+        categoryPieChart.setLabelsVisible(true);
+        categoryPieChart.setLegendVisible(true);
+    }
+
+    // -------------------- КНОПКИ --------------------
 
     @FXML
-    private void onOpenAnalyticsClick() {
+    protected void onOpenAnalyticsClick() {
         try {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("analytics-view.fxml")
@@ -568,8 +672,6 @@ public class MainController {
             statusLabel.setText("Ошибка открытия аналитики: " + e.getMessage());
         }
     }
-
-    // -------------------- КНОПКИ --------------------
 
     @FXML
     protected void onAddOperationClick() {
@@ -719,7 +821,6 @@ public class MainController {
     }
 
     // -------------------- ИМПОРТ (dat) --------------------
-    // (оставляю твой код импорта как есть, без изменений)
 
     @FXML
     private void onImportOperationsClick() {
