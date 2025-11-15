@@ -17,7 +17,7 @@
       style="-fx-background-color: #F2F3F7;"
       xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.familybudget.familybudget.RegisterController">
+      fx:controller="org.familybudget.familybudget.Controllers.RegisterController">
 
     <padding>
         <Insets bottom="25" left="25" right="25" top="25"/>

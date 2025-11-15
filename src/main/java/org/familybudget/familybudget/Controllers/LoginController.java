@@ -1,4 +1,4 @@
-package org.familybudget.familybudget;
+package org.familybudget.familybudget.Controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -7,6 +7,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.familybudget.familybudget.HelloApplication;
+import org.familybudget.familybudget.ServerConnection;
+import org.familybudget.familybudget.SessionContext;
 
 public class LoginController {
 

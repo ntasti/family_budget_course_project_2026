@@ -1,9 +1,10 @@
-package org.familybudget.familybudget;
+package org.familybudget.familybudget.Controllers;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.familybudget.familybudget.ServerConnection;
 
 import java.io.IOException;
 import java.util.ArrayList;

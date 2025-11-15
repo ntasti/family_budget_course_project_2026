@@ -1,4 +1,6 @@
-package org.familybudget.familybudget;
+package org.familybudget.familybudget.DTO;
+
+import org.familybudget.familybudget.Controllers.MainController;
 
 import java.io.Serializable;
 

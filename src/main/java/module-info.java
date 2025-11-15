@@ -10,4 +10,8 @@ module org.familybudget.familybudget {
 
     opens org.familybudget.familybudget to javafx.fxml;
     exports org.familybudget.familybudget;
+    exports org.familybudget.familybudget.Controllers;
+    opens org.familybudget.familybudget.Controllers to javafx.fxml;
+    exports org.familybudget.familybudget.DTO;
+    opens org.familybudget.familybudget.DTO to javafx.fxml;
 }

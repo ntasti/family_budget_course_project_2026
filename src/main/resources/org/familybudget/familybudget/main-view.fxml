@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Font?>
 
 <BorderPane style="-fx-background-color: #F0F2F5;" xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.familybudget.familybudget.MainController">
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.familybudget.familybudget.Controllers.MainController">
 
     <padding>
         <Insets bottom="20" left="20" right="20" top="20"/>

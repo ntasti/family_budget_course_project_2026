@@ -1,4 +1,4 @@
-package org.familybudget.familybudget;
+package org.familybudget.familybudget.Controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -6,6 +6,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.familybudget.familybudget.HelloApplication;
+import org.familybudget.familybudget.ServerConnection;
+import org.familybudget.familybudget.SessionContext;
 
 public class RegisterController {
 
