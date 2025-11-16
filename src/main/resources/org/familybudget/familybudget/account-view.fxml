@@ -1,119 +1,185 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Button?>
 <VBox alignment="TOP_CENTER"
       prefHeight="520.0"
       prefWidth="720.0"
       spacing="18"
-      style="-fx-background-color: #F2F3F7;"
+      style="-fx-background-color: linear-gradient(to bottom, #F5F7FB, #E6EBF5);"
       xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.familybudget.familybudget.Controllers.AccountController">
 
     <padding>
-        <Insets bottom="20" left="20" right="20" top="20"/>
+        <Insets bottom="24" left="24" right="24" top="24"/>
     </padding>
 
     <children>
 
-        <VBox alignment="TOP_LEFT"
-              prefWidth="660"
-              spacing="14"
-              style="-fx-background-color: #FFFFFF;
-                     -fx-background-radius: 16;
-                     -fx-padding: 20 24 20 24;
-                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 18, 0, 0, 4);
-                     -fx-font-family: 'Segoe UI';">
-
-            <!-- Заголовок блока -->
-            <Label text="Имя пользователя"
+        <!-- Верхний заголовок страницы -->
+        <HBox alignment="CENTER_LEFT"
+              spacing="10"
+              prefWidth="660">
+            <Label text="Аккаунт"
                    style="-fx-text-fill: #222222;">
                 <font>
-                    <Font name="Segoe UI Semibold" size="20"/>
+                    <Font name="Segoe UI Semibold" size="24"/>
                 </font>
             </Label>
 
-            <!-- Само имя -->
-            <Label fx:id="userNameLabel"
-                   text="user"
-                   style="-fx-text-fill: #333333;">
-                <font>
-                    <Font name="Segoe UI" size="14"/>
-                </font>
-            </Label>
-
-            <!-- Почта -->
-            <Label fx:id="userEmailLabel"
-                   text="email"
-                   style="-fx-text-fill: #777777;">
+            <Label text="Управление профилем и семьёй"
+                   style="-fx-text-fill: #7986A5;">
                 <font>
                     <Font name="Segoe UI" size="13"/>
                 </font>
             </Label>
+        </HBox>
 
-            <Separator />
+        <!-- Основная карточка -->
+        <VBox alignment="TOP_LEFT"
+              prefWidth="660"
+              spacing="18"
+              style="-fx-background-color: #FFFFFF;
+                     -fx-background-radius: 18;
+                     -fx-padding: 22 24 24 24;
+                     -fx-effect: dropshadow(gaussian, rgba(15,26,54,0.18), 22, 0.1, 0, 8);
+                     -fx-font-family: 'Segoe UI';">
+
+            <!-- Шапка карточки: аватар + имя + почта -->
+            <HBox spacing="16" alignment="CENTER_LEFT">
+
+                <!-- Простая "заглушка"-аватар -->
+                <VBox alignment="CENTER" spacing="2"
+                      prefHeight="52" prefWidth="52"
+                      style="-fx-background-color: linear-gradient(to bottom right, #5C6BC0, #3949AB);
+                             -fx-background-radius: 999;">
+                    <Label text="👤"
+                           style="-fx-text-fill: white;">
+                        <font>
+                            <Font name="Segoe UI Emoji" size="24"/>
+                        </font>
+                    </Label>
+                </VBox>
+
+                <VBox alignment="CENTER_LEFT" spacing="4">
+                    <Label text="Имя пользователя"
+                           style="-fx-text-fill: #8891A8; -fx-letter-spacing: 0.4;">
+                        <font>
+                            <Font name="Segoe UI Semibold" size="11"/>
+                        </font>
+                    </Label>
+
+                    <Label fx:id="userNameLabel"
+                           text="user"
+                           style="-fx-text-fill: #222222;">
+                        <font>
+                            <Font name="Segoe UI Semibold" size="18"/>
+                        </font>
+                    </Label>
+
+                    <Label fx:id="userEmailLabel"
+                           text="email"
+                           style="-fx-text-fill: #7A7F90;">
+                        <font>
+                            <Font name="Segoe UI" size="13"/>
+                        </font>
+                    </Label>
+                </VBox>
+            </HBox>
+
+            <Separator/>
 
             <!-- Код семьи для админа -->
             <VBox fx:id="familyCodeBox"
-                  spacing="4"
-                  style="-fx-padding: 4 0 8 0;">
+                  spacing="6"
+                  style="-fx-padding: 2 0 4 0;">
 
                 <Label text="Код для присоединения к семье"
-                       style="-fx-text-fill: #555555;">
+                       style="-fx-text-fill: #4A5568;">
                     <font>
                         <Font name="Segoe UI Semibold" size="14"/>
                     </font>
                 </Label>
 
-                <Label fx:id="familyCodeLabel"
-                       text="—"
-                       style="-fx-text-fill: #333333;">
-                    <font>
-                        <Font name="Segoe UI" size="13"/>
-                    </font>
-                </Label>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Label fx:id="familyCodeLabel"
+                           text="—"
+                           style="-fx-text-fill: #1E293B;
+                                  -fx-background-color: #F3F4FF;
+                                  -fx-background-radius: 999;
+                                  -fx-padding: 4 10 4 10;">
+                        <font>
+                            <Font name="Segoe UI Semibold" size="13"/>
+                        </font>
+                    </Label>
+
+                    <Label text="Передайте этот код членам семьи, чтобы они могли присоединиться."
+                           wrapText="true"
+                           style="-fx-text-fill: #9AA3BA;">
+                        <font>
+                            <Font name="Segoe UI" size="11"/>
+                        </font>
+                    </Label>
+                </HBox>
             </VBox>
 
-            <Separator />
+            <Separator/>
 
-            <!-- Члены семьи -->
-            <Label text="Члены семьи"
-                   style="-fx-text-fill: #555555;">
-                <font>
-                    <Font name="Segoe UI Semibold" size="14"/>
-                </font>
-            </Label>
+            <!-- Заголовок блока членов семьи -->
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Члены семьи"
+                       style="-fx-text-fill: #4A5568;">
+                    <font>
+                        <Font name="Segoe UI Semibold" size="14"/>
+                    </font>
+                </Label>
 
-            <ListView fx:id="familyMembersList"
-                      prefHeight="260"
-                      style="-fx-background-radius: 12;
-                             -fx-border-radius: 12;
-                             -fx-border-color: #E0E0E0;"/>
+                <Label text="Список всех пользователей, привязанных к данной семье."
+                       style="-fx-text-fill: #A0AEC0;">
+                    <font>
+                        <Font name="Segoe UI" size="11"/>
+                    </font>
+                </Label>
+            </HBox>
 
+            <!-- Список -->
+            <VBox spacing="8">
+                <ListView fx:id="familyMembersList"
+                          prefHeight="230"
+                          style="-fx-background-radius: 12;
+                                 -fx-background-color: #FAFBFF;
+                                 -fx-border-radius: 12;
+                                 -fx-border-color: #E0E4F2;
+                                 -fx-padding: 4;"/>
 
-            <Button fx:id="removeMemberButton"
-                    text="Удалить выбранного"
-                    onAction="#onRemoveMemberClick"
-                    style="-fx-background-color: #FF4B55;
-               -fx-background-radius: 999;
-               -fx-text-fill: white;
-               -fx-font-weight: bold;
-               -fx-padding: 6 16;
-               -fx-font-size: 12;"/>
+                <HBox alignment="CENTER_RIGHT">
+                    <Button fx:id="removeMemberButton"
+                            text="Удалить выбранного"
+                            onAction="#onRemoveMemberClick"
+                            style="-fx-background-color: linear-gradient(to right, #FF6B6B, #FF4B55);
+                                   -fx-background-radius: 999;
+                                   -fx-text-fill: white;
+                                   -fx-font-weight: bold;
+                                   -fx-padding: 7 18;
+                                   -fx-font-size: 12;
+                                   -fx-cursor: hand;">
+                    </Button>
+                </HBox>
+            </VBox>
 
             <!-- Статус/ошибки -->
             <Label fx:id="statusLabel"
                    textFill="#D32F2F"
-                   style="-fx-font-size: 11; -fx-padding: 6 0 0 0;"/>
+                   style="-fx-font-size: 11;
+                          -fx-padding: 4 0 0 2;"/>
 
         </VBox>
     </children>

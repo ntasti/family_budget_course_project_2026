@@ -98,43 +98,38 @@ public class AccountController {
             String resp = ServerConnection.getInstance()
                     .sendCommand("LIST_FAMILY_MEMBERS");
 
-            if (resp == null) {
-                statusLabel.setText("Ошибка: нет ответа от сервера");
-                return;
-            }
-
-            if (!resp.startsWith("OK FAMILY_MEMBERS=")) {
-                statusLabel.setText("Ошибка списка семьи: " + resp);
+            if (resp == null || !resp.startsWith("OK FAMILY_MEMBERS=")) {
+                statusLabel.setText("Ошибка: " + resp);
                 return;
             }
 
             String payload = resp.substring("OK FAMILY_MEMBERS=".length()).trim();
-            if (payload.isEmpty()) {
-                familyMembersList.getItems().clear();
-                return;
-            }
+            familyMembersList.getItems().clear();
+
+            if (payload.isEmpty()) return;
 
             List<FamilyMemberItem> items = new ArrayList<>();
-            String[] parts = payload.split(",");
-            for (String p : parts) {
-                String line = p.trim();
-                if (line.isEmpty()) continue;
 
-                String[] nameEmail = line.split("\\|", 2);
-                String name = nameEmail[0];
-                String email = nameEmail.length > 1 ? nameEmail[1] : "";
+            for (String part : payload.split(",")) {
+                part = part.trim();
+                if (part.isEmpty()) continue;
 
-                items.add(new FamilyMemberItem(name, email));
+                String[] fields = part.split("\\|", 2);
+
+                String name = fields[0];
+                String login = fields.length > 1 ? fields[1] : "";
+
+                items.add(new FamilyMemberItem(name, login));
             }
 
             familyMembersList.setItems(FXCollections.observableArrayList(items));
             statusLabel.setText("");
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            statusLabel.setText("Ошибка списка семьи: " + e.getMessage());
+        } catch (Exception e) {
+            statusLabel.setText("Ошибка: " + e.getMessage());
         }
     }
+
 
     @FXML
     private void onRemoveMemberClick() {
