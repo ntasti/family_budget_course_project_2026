@@ -16,10 +16,10 @@ import java.util.List;
 public class AccountController {
 
     @FXML
-    private Label userNameLabel;
+    private Label userNameLabel;      // Имя (отображаемое)
 
     @FXML
-    private Label userEmailLabel;
+    private Label userEmailLabel;     // Логин / email
 
     @FXML
     private Label familyCodeLabel;
@@ -36,13 +36,11 @@ public class AccountController {
     @FXML
     private Button removeMemberButton;
 
-
     @FXML
     private void initialize() {
         String login = SessionContext.getLogin();
         String role  = SessionContext.getRole();
         String name  = SessionContext.getUserName();
-
 
         boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
 
@@ -50,9 +48,11 @@ public class AccountController {
             name = login;
         }
 
-        userNameLabel.setText(name);
-        userEmailLabel.setText(login);
-        // пока отдельного имени нет — используем логин как имя и почту
+        // В шапке:
+        userNameLabel.setText(name);   // Имя
+        userEmailLabel.setText(login); // Логин / email
+
+        // Кнопка удаления только для админа
         if (removeMemberButton != null) {
             removeMemberButton.setVisible(isAdmin);
             removeMemberButton.setManaged(isAdmin);
@@ -71,7 +71,6 @@ public class AccountController {
             }
 
             if (resp.startsWith("OK FAMILY_CODE=")) {
-                // формат: OK FAMILY_CODE=XX-XXXX NAME=SomeName
                 String tail = resp.substring("OK FAMILY_CODE=".length()).trim();
                 String code = tail;
                 int nameIdx = tail.indexOf(" NAME=");
@@ -98,38 +97,51 @@ public class AccountController {
             String resp = ServerConnection.getInstance()
                     .sendCommand("LIST_FAMILY_MEMBERS");
 
-            if (resp == null || !resp.startsWith("OK FAMILY_MEMBERS=")) {
-                statusLabel.setText("Ошибка: " + resp);
+            if (resp == null) {
+                statusLabel.setText("Ошибка: нет ответа от сервера");
+                return;
+            }
+
+            if (!resp.startsWith("OK FAMILY_MEMBERS=")) {
+                statusLabel.setText("Ошибка списка семьи: " + resp);
                 return;
             }
 
             String payload = resp.substring("OK FAMILY_MEMBERS=".length()).trim();
             familyMembersList.getItems().clear();
 
-            if (payload.isEmpty()) return;
+            if (payload.isEmpty()) {
+                return; // список пустой
+            }
 
             List<FamilyMemberItem> items = new ArrayList<>();
 
-            for (String part : payload.split(",")) {
-                part = part.trim();
-                if (part.isEmpty()) continue;
+            String[] parts = payload.split(",");
+            for (String p : parts) {
+                String line = p.trim();
+                if (line.isEmpty()) continue;
 
-                String[] fields = part.split("\\|", 2);
+                // ПРОТОКОЛ: login|name
+                String[] loginName = line.split("\\|", 2);
+                String login = loginName[0];
+                String name  = loginName.length > 1 ? loginName[1] : "";
 
-                String name = fields[0];
-                String login = fields.length > 1 ? fields[1] : "";
+                if (name == null || name.isBlank()) {
+                    name = "(без имени)";
+                }
 
-                items.add(new FamilyMemberItem(name, login));
+                // В ListView хотим видеть "login — name"
+                items.add(new FamilyMemberItem(login, name));
             }
 
             familyMembersList.setItems(FXCollections.observableArrayList(items));
             statusLabel.setText("");
 
         } catch (Exception e) {
-            statusLabel.setText("Ошибка: " + e.getMessage());
+            e.printStackTrace();
+            statusLabel.setText("Ошибка списка семьи: " + e.getMessage());
         }
     }
-
 
     @FXML
     private void onRemoveMemberClick() {
@@ -139,9 +151,8 @@ public class AccountController {
             return;
         }
 
-        String loginToRemove = selected.getEmail();
+        String loginToRemove = selected.getLogin();
 
-        // на всякий случай не даём удалить себя на клиенте тоже
         if (loginToRemove.equals(SessionContext.getLogin())) {
             statusLabel.setText("Нельзя удалить самого себя");
             return;
@@ -158,7 +169,7 @@ public class AccountController {
 
             if (resp.startsWith("OK MEMBER_REMOVED")) {
                 statusLabel.setText("Участник удалён");
-                loadFamilyMembers();   // обновляем список
+                loadFamilyMembers();
             } else {
                 statusLabel.setText("Ошибка удаления: " + resp);
             }
@@ -168,24 +179,31 @@ public class AccountController {
         }
     }
 
+    // элемент списка: логин + имя
     public static class FamilyMemberItem {
+        private final String login;
         private final String name;
-        private final String email;
 
-        public FamilyMemberItem(String name, String email) {
+        public FamilyMemberItem(String login, String name) {
+            this.login = login;
             this.name = name;
-            this.email = email;
         }
 
-        public String getEmail() {
-            return email;
+        public String getLogin() {
+            return login;
+        }
+
+        public String getName() {
+            return name;
         }
 
         @Override
         public String toString() {
-            // то, что увидим в ListView
-            return name + " — " + email;
+            // как будет отображаться в ListView
+            return login + " — " + name;
         }
     }
+
+
 
 }
