@@ -41,7 +41,7 @@ public class RegisterController {
 
     @FXML private TextField nameField;
 
-    @FXML private ComboBox<String> familyRoleCombo;
+
 
     @FXML
     private void initialize() {
@@ -52,12 +52,7 @@ public class RegisterController {
         createFamilyRadio.setSelected(true);
         updateFamilyFields();
 
-        familyRoleCombo.setItems(FXCollections.observableArrayList(
-                "Муж",
-                "Жена",
-                "Ребёнок",
-                "Другое"
-        ));
+
 
 
         group.selectedToggleProperty().addListener((obs, oldV, newV) -> updateFamilyFields());

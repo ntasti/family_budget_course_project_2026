@@ -99,20 +99,9 @@
                                       -fx-border-radius: 8;
                                       -fx-padding: 6 10 6 10;"/>
 
-                <!-- Роль в семье -->
-                <Label text="Роль в семье"
-                       style="-fx-text-fill: #555555; -fx-font-size: 12; -fx-padding: 6 0 0 0;"/>
+               
 
-                <ComboBox fx:id="familyRoleCombo"
-                          promptText="Выберите роль: муж, жена, ребёнок, другое"
-                          style="-fx-pref-width: 360;
-                                 -fx-background-color: #F5F5F5;
-                                 -fx-background-radius: 8;
-                                 -fx-text-fill: #222222;
-                                 -fx-prompt-text-fill: #9E9E9E;
-                                 -fx-border-color: #DDDDDD;
-                                 -fx-border-radius: 8;
-                                 -fx-padding: 6 10 6 10;"/>
+
             </VBox>
 
             <!-- Блок семьи -->
