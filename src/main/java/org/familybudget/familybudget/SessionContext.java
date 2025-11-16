@@ -6,11 +6,19 @@ public class SessionContext {
 
     private String login;
     private String role;
+    private  String userName;
 
     private SessionContext() {}
 
     public static SessionContext getInstance() {
         return INSTANCE;
+    }
+
+    public static void setUser(String login, String role,String userName) {
+        INSTANCE.login = login;
+        INSTANCE.role = role;
+        INSTANCE.userName=userName;
+
     }
 
     public static void setUser(String login, String role) {
@@ -26,9 +34,17 @@ public class SessionContext {
         return INSTANCE.role;
     }
 
+
+    public static String getUserName() {
+        return INSTANCE.userName;
+    }
+
+
+
     // очистка сессии при logout
     public static void clear() {
         INSTANCE.login = null;
         INSTANCE.role  = null;
+
     }
 }

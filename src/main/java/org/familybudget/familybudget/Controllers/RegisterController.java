@@ -38,7 +38,9 @@ public class RegisterController {
     private Label statusLabel;
 
 
+
     @FXML private TextField nameField;
+
     @FXML private ComboBox<String> familyRoleCombo;
 
     @FXML
@@ -69,10 +71,15 @@ public class RegisterController {
 
     @FXML
     private void onRegisterClick() {
+        String userName = nameField.getText();
         String login = loginField.getText();
         String pass = passwordField.getText();
         String pass2 = confirmPasswordField.getText();
 
+        if (userName == null || userName.isBlank()) {
+            statusLabel.setText("Введите имя");
+            return;
+        }
         if (login == null || login.isBlank()
                 || pass == null || pass.isBlank()
                 || pass2 == null || pass2.isBlank()) {
@@ -87,7 +94,7 @@ public class RegisterController {
 
         try {
             String resp = ServerConnection.getInstance()
-                    .sendCommand("REGISTER " + login + " " + pass);
+                    .sendCommand("REGISTER " + login + " " + pass + " " + userName);
 
             if (resp == null) {
                 statusLabel.setText("Нет ответа от сервера");
@@ -104,7 +111,7 @@ public class RegisterController {
                 return;
             }
 
-            SessionContext.setUser(login, "MEMBER");
+            SessionContext.setUser(login, "MEMBER",userName);
 
             if (createFamilyRadio.isSelected()) {
                 String famName = familyNameField.getText();
