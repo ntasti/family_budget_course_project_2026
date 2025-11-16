@@ -198,6 +198,28 @@ public class MainController {
                 btn.setStyle("-fx-background-color: " + normal + ";" + base));
     }
 
+
+    // -------------------- ЛИЧНЫЙ КАБИНЕТ --------------------
+
+    @FXML
+    private void onOpenAccountClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("account-view.fxml")
+            );
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("Личный кабинет");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия личного кабинета: " + e.getMessage());
+        }
+    }
+
+
     // -------------------- НАСТРОЙКА ВЫБОРА ТИПА ДИАГРАММЫ --------------------
 
     private void setupChartsControls() {
