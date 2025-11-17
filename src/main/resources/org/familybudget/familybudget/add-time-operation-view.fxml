@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER"
+      spacing="10"
+      prefWidth="480"
+      prefHeight="420"
+      style="-fx-background-color: #F0F2F5;"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.familybudget.familybudget.Controllers.AddTimeOperationController">
+
+    <padding>
+        <Insets top="25" right="25" bottom="25" left="25"/>
+    </padding>
+
+    <children>
+
+        <!-- Внутренняя карточка -->
+        <VBox alignment="TOP_CENTER"
+              spacing="12"
+              prefWidth="440"
+              style="-fx-background-color: #FFFFFF;
+                     -fx-background-radius: 16;
+                     -fx-padding: 18 20 20 20;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 18, 0, 0, 4);
+                     -fx-font-family: 'Segoe UI';">
+
+            <!-- Заголовок -->
+            <Label text="Запланированная трата"
+                   style="-fx-text-fill: #222222;">
+                <font>
+                    <Font name="Segoe UI Semibold" size="20"/>
+                </font>
+            </Label>
+
+            <!-- Подзаголовок -->
+            <Label text="Укажите параметры траты и расписание списаний"
+                   wrapText="true"
+                   style="-fx-text-fill: #777777; -fx-font-size: 11;"/>
+
+            <!-- Форма -->
+            <VBox spacing="8" prefWidth="380">
+
+                <!-- Категория -->
+                <Label text="Категория"
+                       style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
+                <ComboBox fx:id="categoryComboBox"
+                          promptText="Выберите категорию"
+                          prefWidth="380"
+                          style="-fx-background-color: #F5F5F5;
+                                 -fx-background-radius: 8;
+                                 -fx-text-fill: #222222;
+                                 -fx-prompt-text-fill: #999999;
+                                 -fx-border-color: #DDDDDD;
+                                 -fx-border-radius: 8;
+                                 -fx-padding: 6 10 6 10;"/>
+
+                <!-- Сумма -->
+                <Label text="Сумма (BYN)"
+                       style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
+                <TextField fx:id="amountField"
+                           promptText="Например: 120.50"
+                           prefWidth="380"
+                           style="-fx-background-color: #F5F5F5;
+                                  -fx-background-radius: 8;
+                                  -fx-text-fill: #222222;
+                                  -fx-prompt-text-fill: #999999;
+                                  -fx-border-color: #DDDDDD;
+                                  -fx-border-radius: 8;
+                                  -fx-padding: 6 10 6 10;"/>
+
+                <!-- Важность -->
+                <CheckBox fx:id="importantCheckBox"
+                          text="Важная трата"
+                          style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
+
+                <!-- Дата/время -->
+                <HBox spacing="10">
+                    <VBox spacing="4">
+                        <Label text="Дата первого списания"
+                               style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
+                        <DatePicker fx:id="startDatePicker"
+                                    prefWidth="180"/>
+                    </VBox>
+
+                    <VBox spacing="4">
+                        <Label text="Время"
+                               style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
+                        <TextField fx:id="timeField"
+                                   promptText="ЧЧ:ММ"
+                                   prefWidth="120"
+                                   style="-fx-background-color: #F5F5F5;
+                                          -fx-background-radius: 8;
+                                          -fx-text-fill: #222222;
+                                          -fx-prompt-text-fill: #999999;
+                                          -fx-border-color: #DDDDDD;
+                                          -fx-border-radius: 8;
+                                          -fx-padding: 6 10 6 10;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Периодичность и окончание -->
+                <HBox spacing="10">
+                    <VBox spacing="4">
+                        <Label text="Периодичность"
+                               style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
+                        <ComboBox fx:id="periodComboBox"
+                                  promptText="ONCE / DAILY / WEEKLY / MONTHLY"
+                                  prefWidth="180"
+                                  style="-fx-background-color: #F5F5F5;
+                                         -fx-background-radius: 8;
+                                         -fx-text-fill: #222222;
+                                         -fx-prompt-text-fill: #999999;
+                                         -fx-border-color: #DDDDDD;
+                                         -fx-border-radius: 8;
+                                         -fx-padding: 6 10 6 10;"/>
+                    </VBox>
+
+                    <VBox spacing="4">
+                        <Label text="Дата окончания (необязательно)"
+                               style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
+                        <DatePicker fx:id="endDatePicker"
+                                    prefWidth="180"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Комментарий -->
+                <Label text="Комментарий"
+                       style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
+                <TextField fx:id="commentField"
+                           promptText="Например: Абонемент в спортзал"
+                           prefWidth="380"
+                           style="-fx-background-color: #F5F5F5;
+                                  -fx-background-radius: 8;
+                                  -fx-text-fill: #222222;
+                                  -fx-prompt-text-fill: #999999;
+                                  -fx-border-color: #DDDDDD;
+                                  -fx-border-radius: 8;
+                                  -fx-padding: 6 10 6 10;"/>
+
+            </VBox>
+
+            <!-- Кнопки -->
+            <HBox spacing="10"
+                  alignment="CENTER_RIGHT"
+                  prefWidth="380"
+                  style="-fx-padding: 6 0 0 0;">
+
+                <Button text="Отмена"
+                        onAction="#onCancelClick"
+                        style="-fx-background-color: #E0E0E0;
+                               -fx-background-radius: 999;
+                               -fx-text-fill: #333333;
+                               -fx-font-weight: bold;
+                               -fx-padding: 5 16;"/>
+
+                <Button text="Сохранить"
+                        onAction="#onSaveClick"
+                        style="-fx-background-color: #4C6FFF;
+                               -fx-background-radius: 999;
+                               -fx-text-fill: white;
+                               -fx-font-weight: bold;
+                               -fx-padding: 5 18;"/>
+            </HBox>
+
+            <!-- Статус -->
+            <Label fx:id="statusLabel"
+                   style="-fx-text-fill: #D32F2F; -fx-font-size: 11;"
+                   text=""/>
+
+        </VBox>
+    </children>
+</VBox>

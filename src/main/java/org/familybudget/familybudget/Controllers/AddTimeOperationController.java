@@ -7,14 +7,14 @@ import javafx.stage.Stage;
 import org.familybudget.familybudget.Server.ServerConnection;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-public class AddOperationController {
-
-    @FXML
-    private ComboBox<String> typeComboBox;      // "INCOME" / "EXPENSE"
+public class AddTimeOperationController {
 
     @FXML
     private ComboBox<CategoryItem> categoryComboBox;
@@ -23,12 +23,27 @@ public class AddOperationController {
     private TextField amountField;
 
     @FXML
+    private CheckBox importantCheckBox;
+
+    @FXML
+    private DatePicker startDatePicker;
+
+    @FXML
+    private TextField timeField;
+
+    @FXML
+    private ComboBox<String> periodComboBox;
+
+    @FXML
+    private DatePicker endDatePicker;
+
+    @FXML
     private TextField commentField;
 
     @FXML
     private Label statusLabel;
 
-    // маленькая модель категории
+    // маленькая модель категории (такая же, как в AddOperationController)
     public static class CategoryItem {
         private final long id;
         private final String name;
@@ -48,17 +63,13 @@ public class AddOperationController {
 
         @Override
         public String toString() {
-            return name; // так будет отображаться в ComboBox
+            return name;
         }
     }
 
     @FXML
     private void initialize() {
-        // тип операции
-        typeComboBox.setItems(FXCollections.observableArrayList("INCOME", "EXPENSE"));
-        typeComboBox.getSelectionModel().select("EXPENSE");
-
-        // только числа в поле суммы (до двух знаков после точки)
+        // только числа в поле суммы (до двух знаков)
         UnaryOperator<TextFormatter.Change> filter = change -> {
             String newText = change.getControlNewText();
             if (newText.matches("\\d*(\\.\\d{0,2})?")) {
@@ -67,6 +78,16 @@ public class AddOperationController {
             return null;
         };
         amountField.setTextFormatter(new TextFormatter<>(filter));
+
+        // периодичность — значения совпадают с протоколом сервера
+        periodComboBox.setItems(
+                FXCollections.observableArrayList("ONCE", "DAILY", "WEEKLY", "MONTHLY")
+        );
+        periodComboBox.getSelectionModel().select("MONTHLY");
+
+        // дефолтная дата/время
+        startDatePicker.setValue(LocalDate.now());
+        timeField.setText(LocalTime.now().withSecond(0).withNano(0).toString()); // HH:mm
 
         loadCategories();
     }
@@ -124,17 +145,16 @@ public class AddOperationController {
     private void onSaveClick() {
         statusLabel.setText("");
 
-        String type = typeComboBox.getValue();
         CategoryItem category = categoryComboBox.getValue();
         String amountStr = amountField.getText();
+        boolean important = importantCheckBox.isSelected();
+        LocalDate startDate = startDatePicker.getValue();
+        String timeStr = timeField.getText();
+        String period = periodComboBox.getValue();
+        LocalDate endDate = endDatePicker.getValue();
         String comment = commentField.getText() == null ? "" : commentField.getText().trim();
 
         // --- валидация ---
-        if (type == null || type.isBlank()) {
-            statusLabel.setText("Выберите тип операции");
-            return;
-        }
-
         if (category == null) {
             statusLabel.setText("Выберите категорию");
             return;
@@ -158,22 +178,54 @@ public class AddOperationController {
             return;
         }
 
-        try {
-            String cmd;
-            if ("INCOME".equalsIgnoreCase(type)) {
-                cmd = "ADD_INCOME " + category.getId() + " " + amount + " " + comment;
-            } else { // EXPENSE
-                cmd = "ADD_EXPENSE " + category.getId() + " " + amount + " " + comment;
-            }
+        if (startDate == null) {
+            statusLabel.setText("Выберите дату первого списания");
+            return;
+        }
 
-            String resp = ServerConnection.getInstance().sendCommand(cmd);
+        LocalTime time;
+        try {
+            time = LocalTime.parse(timeStr);
+        } catch (DateTimeParseException e) {
+            statusLabel.setText("Некорректное время (формат ЧЧ:ММ)");
+            return;
+        }
+
+        if (period == null || period.isBlank()) {
+            statusLabel.setText("Выберите периодичность");
+            return;
+        }
+
+        if (endDate != null && endDate.isBefore(startDate)) {
+            statusLabel.setText("Дата окончания раньше даты начала");
+            return;
+        }
+
+        // --- формируем команду SCHEDULE_EXPENSE ---
+        String endDateStr = (endDate == null) ? "NULL" : endDate.toString();
+
+        StringBuilder cmd = new StringBuilder("SCHEDULE_EXPENSE ");
+        cmd.append(category.getId()).append(" ")
+                .append(amount).append(" ")
+                .append(important ? "1" : "0").append(" ")
+                .append(startDate.toString()).append(" ")
+                .append(time.toString()).append(" ")
+                .append(period).append(" ")
+                .append(endDateStr);
+
+        if (!comment.isEmpty()) {
+            cmd.append(" ").append(comment);
+        }
+
+        try {
+            String resp = ServerConnection.getInstance().sendCommand(cmd.toString());
             if (resp == null) {
                 statusLabel.setText("Нет ответа от сервера");
                 return;
             }
 
-            if (resp.startsWith("OK")) {
-                // успех — просто закрываем окно
+            if (resp.startsWith("OK EXPENSE_SCHEDULED")) {
+                // успех — закрываем окно
                 Stage stage = (Stage) amountField.getScene().getWindow();
                 stage.close();
             } else {

@@ -95,6 +95,9 @@ public class MainController {
     @FXML
     private ComboBox<String> chartTypeCombo;
 
+    @FXML
+    private  Button addTimeOperationButton;
+
     // агрегированные данные по категориям
     private Map<String, Double> incomeTotalsByCategory = new HashMap<>();
     private Map<String, Double> expenseTotalsByCategory = new HashMap<>();
@@ -760,6 +763,24 @@ public class MainController {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    protected void onAddTimeOperationClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("add-time-operation-view.fxml")
+            );
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("Выставления запланированных трат");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия выставления запланированных трат: " + e.getMessage());
         }
     }
 
