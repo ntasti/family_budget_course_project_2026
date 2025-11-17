@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -783,6 +784,28 @@ public class MainController {
             statusLabel.setText("Ошибка открытия выставления запланированных трат: " + e.getMessage());
         }
     }
+
+    @FXML
+    private void onOpenPlannedListClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/org/familybudget/familybudget/planned-operations-view.fxml")
+            );
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Запланированные списания");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(addOperationButton.getScene().getWindow()); // или любое окно-родитель
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // можно вывести алерт
+        }
+    }
+
 
     // -------------------- ЭКСПОРТ (dat) --------------------
 
