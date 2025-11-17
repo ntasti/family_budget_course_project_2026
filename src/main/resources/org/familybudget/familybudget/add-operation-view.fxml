@@ -102,7 +102,11 @@
                                   -fx-border-color: #DDDDDD;
                                   -fx-border-radius: 8;
                                   -fx-padding: 6 10 6 10;"/>
-
+                <!--  приоритет траты -->
+                <CheckBox fx:id="importantCheckBox"
+                          text="Важная трата"
+                          selected="false"
+                          style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
             </VBox>
 
             <!-- Кнопки -->

@@ -27,6 +27,9 @@ public class AddOperationController {
 
     @FXML
     private Label statusLabel;
+    @FXML
+    private CheckBox importantCheckBox;
+
 
     // маленькая модель категории
     public static class CategoryItem {
@@ -128,6 +131,7 @@ public class AddOperationController {
         CategoryItem category = categoryComboBox.getValue();
         String amountStr = amountField.getText();
         String comment = commentField.getText() == null ? "" : commentField.getText().trim();
+        boolean important = importantCheckBox != null && importantCheckBox.isSelected();
 
         // --- валидация ---
         if (type == null || type.isBlank()) {
@@ -161,10 +165,14 @@ public class AddOperationController {
         try {
             String cmd;
             if ("INCOME".equalsIgnoreCase(type)) {
+                // Для дохода приоритет не используем — можно оставить старый формат
                 cmd = "ADD_INCOME " + category.getId() + " " + amount + " " + comment;
             } else { // EXPENSE
-                cmd = "ADD_EXPENSE " + category.getId() + " " + amount + " " + comment;
+                // Новый формат: флаг 0/1 + комментарий
+                cmd = "ADD_EXPENSE " + category.getId() + " " + amount + " "
+                      + (important ? "1 " : "0 ") + comment;
             }
+
 
             String resp = ServerConnection.getInstance().sendCommand(cmd);
             if (resp == null) {
@@ -184,6 +192,9 @@ public class AddOperationController {
             e.printStackTrace();
             statusLabel.setText("Ошибка соединения: " + e.getMessage());
         }
+
+
+
     }
 
     @FXML
