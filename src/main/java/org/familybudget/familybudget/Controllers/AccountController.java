@@ -11,8 +11,8 @@ import org.familybudget.familybudget.Server.ServerConnection;
 import org.familybudget.familybudget.SessionContext;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AccountController {
 
@@ -269,7 +269,6 @@ public class AccountController {
             return login + " — " + name;
         }
     }
-
-
-
 }
+
+

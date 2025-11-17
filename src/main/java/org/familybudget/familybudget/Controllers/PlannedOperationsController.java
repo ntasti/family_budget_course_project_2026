@@ -8,6 +8,8 @@ import javafx.stage.Stage;
 import org.familybudget.familybudget.Server.ServerConnection;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,63 +62,76 @@ public class PlannedOperationsController {
     }
 
     private void loadPlanned() {
-        statusLabel.setText("");
-
         try {
-            String resp = ServerConnection.getInstance().sendCommand("LIST_PLANNED");
+            String resp = ServerConnection.getInstance()
+                    .sendCommand("LIST_PLANNED");
             if (resp == null) {
                 statusLabel.setText("Нет ответа от сервера");
                 return;
             }
-
             if (!resp.startsWith("OK PLANNED=")) {
-                statusLabel.setText("Ошибка получения списка: " + resp);
+                statusLabel.setText("Ошибка: " + resp);
                 return;
             }
 
             String payload = resp.substring("OK PLANNED=".length()).trim();
-            List<PlannedItem> items = new ArrayList<>();
-
-            if (!payload.isEmpty()) {
-                String[] rows = payload.split(",");
-                for (String row : rows) {
-                    String line = row.trim();
-                    if (line.isEmpty()) continue;
-
-                    // id:type:categoryId:amount:dateStart:time:period:endDate:isImportant:comment
-                    String[] parts = line.split(":", 10);
-                    if (parts.length < 9) continue;
-
-                    try {
-                        long id = Long.parseLong(parts[0]);
-                        String type = parts[1];
-                        long categoryId = Long.parseLong(parts[2]);
-                        double amount = Double.parseDouble(parts[3]);
-                        String dateStart = parts[4];
-                        String time = parts[5];
-                        String period = parts[6];
-                        String endDate = parts[7]; // можем пока не показывать
-                        boolean important = "1".equals(parts[8]);
-                        String comment = (parts.length == 10) ? parts[9] : "";
-
-                        items.add(new PlannedItem(
-                                id, type, categoryId, amount,
-                                dateStart, time, period, endDate,
-                                important, comment
-                        ));
-                    } catch (NumberFormatException ignored) {
-                    }
-                }
+            if (payload.isEmpty()) {
+                plannedTable.setItems(FXCollections.observableArrayList());
+                statusLabel.setText("Запланированных списаний нет");
+                return;
             }
 
-            plannedTable.setItems(FXCollections.observableArrayList(items));
+            var items = FXCollections.<PlannedItem>observableArrayList();
+
+            // одна строка формата:
+            // id:type:catId:amount:dateStart:HH:MM:PERIOD:endDate:isImportant:comment...
+            String[] rows = payload.split(",");
+            for (String row : rows) {
+                row = row.trim();
+                if (row.isEmpty()) continue;
+
+                String[] p = row.split(":", 11);
+                if (p.length < 10) {
+                    continue;
+                }
+
+                long id      = Long.parseLong(p[0]);
+                String type  = p[1];
+                long catId   = Long.parseLong(p[2]);
+                double amount = Double.parseDouble(p[3]);
+
+                // дата и время храним сразу строками
+                String dateStartStr = p[4];                 // "2025-11-17"
+                String timeStr      = p[5] + ":" + p[6];    // "22:04"
+
+                String period      = p[7];                  // DAILY / WEEKLY / MONTHLY / ONCE
+                String endDateStr  = p[8];                  // может быть "null" или пусто
+                boolean important  = "1".equals(p[9]);
+                String comment     = (p.length >= 11) ? p[10] : "";
+
+                items.add(new PlannedItem(
+                        id,
+                        type,
+                        catId,
+                        amount,
+                        dateStartStr,
+                        timeStr,
+                        period,
+                        endDateStr,
+                        important,
+                        comment
+                ));
+            }
+
+            plannedTable.setItems(items);
             statusLabel.setText("");
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            statusLabel.setText("Ошибка соединения: " + e.getMessage());
+            statusLabel.setText("Ошибка загрузки: " + e.getMessage());
         }
     }
+
 
     @FXML
     private void onRefreshClick() {
