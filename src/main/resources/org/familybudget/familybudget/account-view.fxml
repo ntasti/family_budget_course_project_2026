@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.TextField?>
 <VBox alignment="TOP_CENTER"
       prefHeight="520.0"
       prefWidth="720.0"
@@ -174,6 +175,41 @@
                     </Button>
                 </HBox>
             </VBox>
+
+            <!-- Блок присоединения к семье по коду, по умолчанию скрыт -->
+            <VBox fx:id="joinFamilyBox"
+                  spacing="6"
+                  managed="false"
+                  visible="false"
+                  style="-fx-padding: 8 0 0 0;">
+
+                <Label text="Вы не состоите в семье"
+                       style="-fx-text-fill: #555555;">
+                    <font>
+                        <Font name="Segoe UI Semibold" size="14"/>
+                    </font>
+                </Label>
+
+                <HBox spacing="6">
+                    <TextField fx:id="joinCodeField"
+                               promptText="Код семьи (например, FAM-0001)"
+                               style="-fx-background-radius: 8;
+                          -fx-background-color: #F5F5F5;
+                          -fx-border-color: #DDDDDD;
+                          -fx-border-radius: 8;"/>
+
+                    <Button fx:id="joinFamilyButton"
+                            text="Присоединиться"
+                            onAction="#onJoinFamilyClick"
+                            style="-fx-background-color: #4C6FFF;
+                       -fx-background-radius: 999;
+                       -fx-text-fill: white;
+                       -fx-font-weight: bold;
+                       -fx-padding: 6 14;
+                       -fx-font-size: 12;"/>
+                </HBox>
+            </VBox>
+
 
             <!-- Статус/ошибки -->
             <Label fx:id="statusLabel"

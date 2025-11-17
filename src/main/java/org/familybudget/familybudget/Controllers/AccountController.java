@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import org.familybudget.familybudget.Server.ServerConnection;
 import org.familybudget.familybudget.SessionContext;
@@ -36,6 +37,16 @@ public class AccountController {
     @FXML
     private Button removeMemberButton;
 
+    //  блок присоединения по коду
+    @FXML
+    private VBox joinFamilyBox;       // контейнер с полем и кнопкой
+
+    @FXML
+    private TextField joinCodeField;  // поле ввода кода семьи
+
+    @FXML
+    private Button joinFamilyButton;  // кнопка "Присоединиться"
+
     @FXML
     private void initialize() {
         String login = SessionContext.getLogin();
@@ -62,6 +73,19 @@ public class AccountController {
         loadFamilyMembers();
     }
 
+
+    // показываем блок "Присоединиться к семье по коду"
+    private void showJoinFamilyBox() {
+        if (joinFamilyBox != null) {
+            joinFamilyBox.setVisible(true);
+            joinFamilyBox.setManaged(true);
+        }
+        // можно дополнительно скрыть блок с кодом семьи
+        if (familyCodeBox != null) {
+            familyCodeBox.setVisible(false);
+            familyCodeBox.setManaged(false);
+        }
+    }
     private void loadFamilyCode() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("GET_FAMILY_CODE");
@@ -80,6 +104,7 @@ public class AccountController {
                 familyCodeLabel.setText(code);
             } else if (resp.startsWith("ERROR NO_FAMILY")) {
                 familyCodeLabel.setText("Семья ещё не создана");
+                showJoinFamilyBox();
             } else if (resp.startsWith("ERROR ACCESS_DENIED")) {
                 familyCodeBox.setManaged(false);
                 familyCodeBox.setVisible(false);
@@ -101,7 +126,13 @@ public class AccountController {
                 statusLabel.setText("Ошибка: нет ответа от сервера");
                 return;
             }
-
+            // если пользователя удалили из семьи
+            if (resp.startsWith("ERROR NO_FAMILY")) {
+                familyMembersList.getItems().clear();
+                statusLabel.setText("Вы не состоите ни в одной семье");
+                showJoinFamilyBox();   // ← тоже показываем присоединение
+                return;
+            }
             if (!resp.startsWith("OK FAMILY_MEMBERS=")) {
                 statusLabel.setText("Ошибка списка семьи: " + resp);
                 return;
@@ -140,6 +171,41 @@ public class AccountController {
         } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Ошибка списка семьи: " + e.getMessage());
+        }
+    }
+
+
+    // ==== НОВОЕ: обработчик кнопки "Присоединиться по коду" ====
+    @FXML
+    private void onJoinFamilyClick() {
+        String code = joinCodeField.getText();
+        if (code == null || code.isBlank()) {
+            statusLabel.setText("Введите код семьи");
+            return;
+        }
+
+        try {
+            String resp = ServerConnection.getInstance()
+                    .sendCommand("JOIN_FAMILY " + code.trim());
+
+            if (resp == null) {
+                statusLabel.setText("Нет ответа от сервера");
+                return;
+            }
+
+            if (resp.startsWith("OK JOINED")) {
+                statusLabel.setText("Вы успешно присоединились к семье");
+                // прячем блок присоединения и обновляем данные
+                joinFamilyBox.setVisible(false);
+                joinFamilyBox.setManaged(false);
+                loadFamilyCode();
+                loadFamilyMembers();
+            } else {
+                statusLabel.setText("Ошибка присоединения: " + resp);
+            }
+
+        } catch (IOException e) {
+            statusLabel.setText("Ошибка соединения: " + e.getMessage());
         }
     }
 
