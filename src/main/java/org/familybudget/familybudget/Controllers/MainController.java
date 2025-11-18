@@ -102,6 +102,7 @@ public class MainController {
 
 
 
+
     // агрегированные данные по категориям
     private Map<String, Double> incomeTotalsByCategory = new HashMap<>();
     private Map<String, Double> expenseTotalsByCategory = new HashMap<>();
@@ -167,6 +168,32 @@ public class MainController {
 
         onRefreshBalance();
         onRefreshOperations();
+    }
+
+
+    // -------------------- ПЛАН ПО ЗАТРАТ ПО КАТЕГОРИЯМ --------------------
+
+    @FXML
+    private void onOpenCategoryPlanClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/org/familybudget/familybudget/category-plan-view.fxml")
+            );
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("План по категориям");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(balanceLabel.getScene().getWindow()); // или любой контрол с текущей сцены
+            stage.setResizable(false);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // если есть статусЛейбл:
+            // statusLabel.setText("Не удалось открыть окно планирования: " + e.getMessage());
+        }
     }
 
 
