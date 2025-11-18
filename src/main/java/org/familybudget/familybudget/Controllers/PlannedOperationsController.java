@@ -3,7 +3,11 @@ package org.familybudget.familybudget.Controllers;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.familybudget.familybudget.Server.ServerConnection;
 
@@ -174,6 +178,32 @@ public class PlannedOperationsController {
     private void onCloseClick() {
         Stage stage = (Stage) plannedTable.getScene().getWindow();
         stage.close();
+    }
+
+    // открыть окно добавления запланированной операции
+    @FXML
+    private void onAddNewClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/org/familybudget/familybudget/add-time-operation-view.fxml")
+            );
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Запланировать списание");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(plannedTable.getScene().getWindow());
+            stage.setResizable(false);
+            stage.showAndWait();
+
+            // после закрытия окна обновляем список
+            loadPlanned();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия окна: " + e.getMessage());
+        }
     }
 
     // --- Модель строки для таблицы ---

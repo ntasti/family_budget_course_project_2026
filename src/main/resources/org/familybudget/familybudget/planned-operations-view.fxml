@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.shape.SVGPath?>
 <VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.familybudget.familybudget.Controllers.PlannedOperationsController"
@@ -18,13 +19,28 @@
     </padding>
 
     <children>
+        <HBox alignment="CENTER_RIGHT"
+              prefWidth="480"
+              spacing="10">
 
-        <Label text="Запланированные списания"
-               style="-fx-text-fill: #222;">
-            <font>
-                <Font name="Segoe UI Semibold" size="20"/>
-            </font>
-        </Label>
+            <Button onAction="#onAddNewClick"
+                    style="
+                -fx-background-color: #4CAF50;
+                -fx-background-radius: 50;
+                -fx-min-width: 32;
+                -fx-min-height: 32;
+                -fx-max-width: 32;
+                -fx-max-height: 32;
+                -fx-padding: 0;
+            ">
+                <graphic>
+                    <SVGPath content="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16
+                           M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"
+                             style="-fx-fill: #fff; -fx-scale-x: 1.0; -fx-scale-y: 1.0;"/>
+                </graphic>
+            </Button>
+
+        </HBox>
 
         <Label text="Здесь видно, какие операции будут списываться автоматически."
                wrapText="true"
@@ -49,12 +65,17 @@
             </columns>
         </TableView>
 
+        <!-- Кнопки управления -->
         <HBox spacing="10" alignment="CENTER_RIGHT" prefWidth="480">
+
+
+
+
             <Button text="Обновить"
                     onAction="#onRefreshClick"
-                    style="-fx-background-color: #4C6FFF;
+                    style="-fx-background-color: #FFFFFF;
                            -fx-background-radius: 999;
-                           -fx-text-fill: white;
+                           -fx-text-fill: #333;
                            -fx-font-weight: bold;
                            -fx-padding: 5 14;"/>
 

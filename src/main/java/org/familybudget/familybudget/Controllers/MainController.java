@@ -88,6 +88,10 @@ public class MainController {
     // analytics
     @FXML
     private Button analyticsButton;
+    @FXML
+    private Button accountButton;
+    @FXML
+    private Button openPlannedListButton;
 
     // ОДНА круговая диаграмма + выбор типа
     @FXML
@@ -96,8 +100,7 @@ public class MainController {
     @FXML
     private ComboBox<String> chartTypeCombo;
 
-    @FXML
-    private  Button addTimeOperationButton;
+
 
     // агрегированные данные по категориям
     private Map<String, Double> incomeTotalsByCategory = new HashMap<>();
@@ -153,6 +156,9 @@ public class MainController {
         setupToolbarButton(addOperationButton);
         setupToolbarButton(manageCategoriesButton);
         setupToolbarButton(analyticsButton);
+        setupToolbarButton(accountButton);
+        setupToolbarButton(openPlannedListButton);
+        setupToolbarButton(importButton);
 
         loadFamilyInfo();
         setupOperationsCellFactory();
@@ -767,23 +773,7 @@ public class MainController {
         }
     }
 
-    @FXML
-    protected void onAddTimeOperationClick() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("add-time-operation-view.fxml")
-            );
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("Выставления запланированных трат");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(scene);
-            stage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-            statusLabel.setText("Ошибка открытия выставления запланированных трат: " + e.getMessage());
-        }
-    }
+
 
     @FXML
     private void onOpenPlannedListClick() {
