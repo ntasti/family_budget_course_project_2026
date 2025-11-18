@@ -256,6 +256,17 @@
                -fx-font-size: 13;"
                         text="План по категориям"/>
 
+                <Button fx:id="accountsButton"
+                        maxWidth="220"
+                        prefHeight="41"
+                        onAction="#onOpenAccountsClick"
+                        text="Счета"
+                        style="-fx-background-color: #FFFFFF;
+               -fx-background-radius: 999;
+               -fx-text-fill: #333333;
+               -fx-font-weight: bold;
+               -fx-padding: 7 14;
+               -fx-font-size: 13;"/>
 
             </VBox>
 

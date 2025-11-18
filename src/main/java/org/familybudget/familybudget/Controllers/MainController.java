@@ -92,7 +92,8 @@ public class MainController {
     private Button accountButton;
     @FXML
     private Button openPlannedListButton;
-
+    @FXML
+    private Button accountsButton;
     // ОДНА круговая диаграмма + выбор типа
     @FXML
     private PieChart categoryPieChart;
@@ -230,27 +231,6 @@ public class MainController {
 
         btn.setOnMouseExited(e ->
                 btn.setStyle("-fx-background-color: " + normal + ";" + base));
-    }
-
-
-    // -------------------- ЛИЧНЫЙ КАБИНЕТ --------------------
-
-    @FXML
-    private void onOpenAccountClick() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("account-view.fxml")
-            );
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("Личный кабинет");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(scene);
-            stage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-            statusLabel.setText("Ошибка открытия личного кабинета: " + e.getMessage());
-        }
     }
 
 
@@ -797,8 +777,6 @@ public class MainController {
         }
     }
 
-
-
     @FXML
     private void onOpenPlannedListClick() {
         try {
@@ -820,7 +798,45 @@ public class MainController {
         }
     }
 
+    @FXML
+    private void onOpenAccountsClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("accounts-view.fxml"));
+            Parent root = loader.load();
 
+            Stage stage = new Stage();
+            stage.setTitle("Счета");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(balanceLabel.getScene().getWindow());
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Не удалось открыть окно счетов: " + e.getMessage());
+        }
+    }
+
+    // -------------------- ЛИЧНЫЙ КАБИНЕТ --------------------
+
+    @FXML
+    private void onOpenAccountClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("account-view.fxml")
+            );
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("Личный кабинет");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия личного кабинета: " + e.getMessage());
+        }
+    }
     // -------------------- ЭКСПОРТ (dat) --------------------
 
     @FXML
