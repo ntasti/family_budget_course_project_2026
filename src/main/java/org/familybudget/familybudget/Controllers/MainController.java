@@ -100,8 +100,8 @@ public class MainController {
 
     @FXML
     private ComboBox<String> chartTypeCombo;
-
-
+    @FXML
+    private Button categoryPlanButton;
 
 
     // агрегированные данные по категориям
@@ -146,7 +146,7 @@ public class MainController {
         // красивый текст роли для отображения
         String roleLabel = isAdmin ? "ADMIN" : rawRole;
 
-        userInfoLabel.setText("Пользователь: " + login );
+        userInfoLabel.setText("Пользователь: " + login);
 
         // показать / скрыть кнопку управления категориями
         if (manageCategoriesButton != null) {
@@ -161,6 +161,8 @@ public class MainController {
         setupToolbarButton(accountButton);
         setupToolbarButton(openPlannedListButton);
         setupToolbarButton(importButton);
+        setupToolbarButton(categoryPlanButton);
+        setupToolbarButton(accountsButton);
 
         loadFamilyInfo();
         setupOperationsCellFactory();
@@ -181,7 +183,7 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("category-plan-list-view.fxml")
             );
-            Scene scene = new Scene(loader.load(),650,400);
+            Scene scene = new Scene(loader.load(), 650, 400);
             Stage stage = new Stage();
             stage.setTitle("План по категориям");
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -194,15 +196,14 @@ public class MainController {
     }
 
 
-
     // -------------------- СТИЛИ КНОПОК --------------------
 
     private void setupHoverDark(Button btn, String normal, String hover) {
         if (btn == null) return;
         String base = "-fx-background-radius: 999; " +
-                "-fx-text-fill: white; " +
-                "-fx-font-weight: bold; " +
-                "-fx-padding: 6 14;";
+                      "-fx-text-fill: white; " +
+                      "-fx-font-weight: bold; " +
+                      "-fx-padding: 6 14;";
 
         btn.setStyle("-fx-background-color: " + normal + ";" + base);
 
@@ -216,10 +217,10 @@ public class MainController {
     private void setupToolbarButton(Button btn) {
         if (btn == null) return;
         String base = "-fx-background-radius: 999; " +
-                "-fx-text-fill: #333333; " +
-                "-fx-font-weight: bold; " +
-                "-fx-padding: 7 14; " +
-                "-fx-font-size: 13;";
+                      "-fx-text-fill: #333333; " +
+                      "-fx-font-weight: bold; " +
+                      "-fx-padding: 7 14; " +
+                      "-fx-font-size: 13;";
 
         String normal = "#FFFFFF";
         String hover = "#E0E0E0";
@@ -496,7 +497,7 @@ public class MainController {
     private void setupOperationsCellFactory() {
         operationsList.setStyle(
                 "-fx-focus-color: transparent; " +
-                        "-fx-faint-focus-color: transparent;"
+                "-fx-faint-focus-color: transparent;"
         );
 
         operationsList.setCellFactory(list -> new ListCell<>() {
@@ -520,9 +521,9 @@ public class MainController {
                 amountLabel.setAlignment(Pos.CENTER_LEFT);
                 amountLabel.setStyle(
                         (income ? "-fx-text-fill: #2E7D32;" : "-fx-text-fill: #C62828;") +
-                                "-fx-padding: 6 8 6 8;" +
-                                "-fx-font-size: 14;" +
-                                "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
+                        "-fx-padding: 6 8 6 8;" +
+                        "-fx-font-size: 14;" +
+                        "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
                 );
 
                 Label categoryLabel = new Label(item.category);
@@ -530,9 +531,9 @@ public class MainController {
                 categoryLabel.setAlignment(Pos.CENTER_LEFT);
                 categoryLabel.setStyle(
                         "-fx-text-fill: #424242;" +
-                                "-fx-padding: 6 8 6 8;" +
-                                "-fx-font-size: 13;" +
-                                "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
+                        "-fx-padding: 6 8 6 8;" +
+                        "-fx-font-size: 13;" +
+                        "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
                 );
 
                 Label userLabel = new Label(item.user);
@@ -540,9 +541,9 @@ public class MainController {
                 userLabel.setAlignment(Pos.CENTER_LEFT);
                 userLabel.setStyle(
                         "-fx-text-fill: #757575;" +
-                                "-fx-padding: 6 8 6 8;" +
-                                "-fx-font-size: 13;" +
-                                "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
+                        "-fx-padding: 6 8 6 8;" +
+                        "-fx-font-size: 13;" +
+                        "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
                 );
 
                 Label dateLabel = new Label(item.date);
@@ -550,9 +551,9 @@ public class MainController {
                 dateLabel.setAlignment(Pos.CENTER_LEFT);
                 dateLabel.setStyle(
                         "-fx-text-fill: #757575;" +
-                                "-fx-padding: 6 8 6 8;" +
-                                "-fx-font-size: 13;" +
-                                "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
+                        "-fx-padding: 6 8 6 8;" +
+                        "-fx-font-size: 13;" +
+                        "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
                 );
 
                 Label timeLabel = new Label(item.time);
@@ -560,8 +561,8 @@ public class MainController {
                 timeLabel.setAlignment(Pos.CENTER_LEFT);
                 timeLabel.setStyle(
                         "-fx-text-fill: #757575;" +
-                                "-fx-padding: 6 8 6 8;" +
-                                "-fx-font-size: 13;"
+                        "-fx-padding: 6 8 6 8;" +
+                        "-fx-font-size: 13;"
                 );
 
                 HBox row = new HBox(0);
@@ -657,7 +658,7 @@ public class MainController {
      * на основании выбранного в chartTypeCombo типа:
      * - "Структура расходов"  -> расходы
      * - "Структура доходов"   -> доходы
-     *
+     * <p>
      * Подпись каждого сектора: "<Категория> (XX.X%)"
      */
     private void refreshCategoryChart() {
@@ -1037,15 +1038,15 @@ public class MainController {
             onRefreshOperations();
 
             statusLabel.setText("Импортировано в семью операций: " + okCount +
-                    (skipCount > 0 ? (" (пропущено: " + skipCount + ")") : ""));
+                                (skipCount > 0 ? (" (пропущено: " + skipCount + ")") : ""));
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Импорт завершён");
             alert.setHeaderText("Успешно создано операций: " + okCount);
             alert.setContentText(
                     "Все операции записаны на сервер в вашу семью.\n" +
-                            "Дата и пользователь берутся как при обычном добавлении (текущий пользователь, текущая дата)." +
-                            (skipCount > 0 ? ("\nПропущено операций: " + skipCount + " (смотрите лог в консоли).") : "")
+                    "Дата и пользователь берутся как при обычном добавлении (текущий пользователь, текущая дата)." +
+                    (skipCount > 0 ? ("\nПропущено операций: " + skipCount + " (смотрите лог в консоли).") : "")
             );
             alert.showAndWait();
 
