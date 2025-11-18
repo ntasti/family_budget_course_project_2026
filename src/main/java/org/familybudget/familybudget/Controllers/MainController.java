@@ -175,26 +175,23 @@ public class MainController {
 
     @FXML
     private void onOpenCategoryPlanClick() {
+
         try {
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/org/familybudget/familybudget/category-plan-view.fxml")
+                    HelloApplication.class.getResource("category-plan-list-view.fxml")
             );
-            Parent root = loader.load();
-
+            Scene scene = new Scene(loader.load(),650,400);
             Stage stage = new Stage();
             stage.setTitle("План по категориям");
-            stage.setScene(new Scene(root));
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(balanceLabel.getScene().getWindow()); // или любой контрол с текущей сцены
-            stage.setResizable(false);
-            stage.show();
-
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
-            // если есть статусЛейбл:
-            // statusLabel.setText("Не удалось открыть окно планирования: " + e.getMessage());
+            statusLabel.setText("Ошибка открытия алана: " + e.getMessage());
         }
     }
+
 
 
     // -------------------- СТИЛИ КНОПОК --------------------

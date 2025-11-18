@@ -2,7 +2,10 @@ package org.familybudget.familybudget.Controllers;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.familybudget.familybudget.Server.ServerConnection;
 
@@ -15,7 +18,7 @@ import java.util.Locale;
 public class CategoryPlanController {
 
     @FXML
-    private ComboBox<CategoryItem> categoryComboBox;
+    private ComboBox<AddOperationController.CategoryItem> categoryComboBox;
 
     @FXML
     private DatePicker fromDatePicker;
@@ -29,13 +32,31 @@ public class CategoryPlanController {
     @FXML
     private Label statusLabel;
 
+    // данные для редактирования
+    private String  initialCategoryName;
+    private LocalDate initialFrom;
+    private LocalDate initialTo;
+    private Double initialAmount;
+
+    // null = создаём новый план
+    private Long planId;
+    private Long categoryId;
+
     @FXML
     private void initialize() {
         loadCategories();
-        // по умолчанию – текущий месяц
+
         LocalDate today = LocalDate.now();
         fromDatePicker.setValue(today.withDayOfMonth(1));
         toDatePicker.setValue(today.withDayOfMonth(today.lengthOfMonth()));
+
+        // если данные для редактирования уже проставлены — отображаем
+        if (initialCategoryName != null) {
+            selectCategoryByName(initialCategoryName);
+            fromDatePicker.setValue(initialFrom);
+            toDatePicker.setValue(initialTo);
+            amountField.setText(String.format(Locale.US, "%.2f", initialAmount));
+        }
     }
 
     private void loadCategories() {
@@ -58,7 +79,7 @@ public class CategoryPlanController {
                 return;
             }
 
-            List<CategoryItem> items = new ArrayList<>();
+            List<AddOperationController.CategoryItem> items = new ArrayList<>();
             String[] parts = payload.split(",");
             for (String p : parts) {
                 p = p.trim();
@@ -69,11 +90,16 @@ public class CategoryPlanController {
 
                 long id = Long.parseLong(pair[0]);
                 String name = pair[1];
-                items.add(new CategoryItem(id, name));
+                items.add(new AddOperationController.CategoryItem(id, name));
             }
 
             categoryComboBox.setItems(FXCollections.observableArrayList(items));
             statusLabel.setText("");
+
+            // если редактируем и уже знаем категорию — выделим её
+            if (initialCategoryName != null) {
+                selectCategoryByName(initialCategoryName);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,11 +107,21 @@ public class CategoryPlanController {
         }
     }
 
+    private void selectCategoryByName(String name) {
+        if (categoryComboBox == null) return;
+        for (AddOperationController.CategoryItem item : categoryComboBox.getItems()) {
+            if (item.name.equals(name)) {
+                categoryComboBox.setValue(item);
+                break;
+            }
+        }
+    }
+
     @FXML
     private void onSaveClick() {
         statusLabel.setText("");
 
-        CategoryItem cat = categoryComboBox.getValue();
+        AddOperationController.CategoryItem cat = categoryComboBox.getValue();
         if (cat == null) {
             statusLabel.setText("Выберите категорию");
             return;
@@ -100,23 +136,41 @@ public class CategoryPlanController {
 
         double amount;
         try {
-            amount = Double.parseDouble(amountField.getText().trim().replace(",", "."));
+            amount = Double.parseDouble(
+                    amountField.getText().trim().replace(",", ".")
+            );
         } catch (Exception e) {
             statusLabel.setText("Некорректная сумма");
             return;
         }
 
-        // форматируем сумму с точкой
-        String amountStr = String.format(Locale.US, "%.2f", amount);
-
         try {
-            String cmd = String.format(
-                    "SET_CATEGORY_PLAN %d %s %s %s",
-                    cat.id,
-                    from,
-                    to,
-                    amountStr
-            );
+            String amountStr = String.format(Locale.US, "%.2f", amount);
+            long selectedCategoryId = cat.getId();
+
+            String cmd;
+
+            // ---- ВАЖНО: выбор SET или UPDATE ----
+            if (planId == null) {
+                // создаём новый план
+                cmd = String.format(
+                        "SET_CATEGORY_PLAN %d %s %s %s",
+                        selectedCategoryId,
+                        from,
+                        to,
+                        amountStr
+                );
+            } else {
+                // редактируем существующий план
+                cmd = String.format(
+                        "UPDATE_CATEGORY_PLAN %d %d %s %s %s",
+                        planId,
+                        selectedCategoryId,
+                        from,
+                        to,
+                        amountStr
+                );
+            }
 
             String resp = ServerConnection.getInstance().sendCommand(cmd);
             if (resp == null) {
@@ -124,9 +178,11 @@ public class CategoryPlanController {
                 return;
             }
 
-            if (resp.startsWith("OK PLAN_SET")) {
+            if (resp.startsWith("OK PLAN_SET") || resp.startsWith("OK PLAN_UPDATED")) {
                 statusLabel.setStyle("-fx-text-fill: #388E3C; -fx-font-size: 11;");
                 statusLabel.setText("План успешно сохранён");
+                // если нужно, сразу закрываем:
+                // onCancelClick();
             } else {
                 statusLabel.setStyle("-fx-text-fill: #D32F2F; -fx-font-size: 11;");
                 statusLabel.setText("Ошибка: " + resp);
@@ -138,6 +194,17 @@ public class CategoryPlanController {
         }
     }
 
+    // ===== Кнопка "Очистить" внутри диалога =====
+    @FXML
+    private void onAddClick() {
+        // это не создание нового плана в БД, а просто очистка полей формы
+        planId = null;                // чтобы после очистки сохранить как новый, если надо
+        if (categoryComboBox != null) categoryComboBox.setValue(null);
+        if (fromDatePicker != null) fromDatePicker.setValue(LocalDate.now());
+        if (toDatePicker != null) toDatePicker.setValue(LocalDate.now());
+        if (amountField != null) amountField.clear();
+        statusLabel.setText("");
+    }
 
     @FXML
     private void onCancelClick() {
@@ -145,19 +212,27 @@ public class CategoryPlanController {
         stage.close();
     }
 
-    // маленькая модель для ComboBox
-    public static class CategoryItem {
-        final long id;
-        final String name;
+    // вызывается ТОЛЬКО при редактировании из таблицы
+    public void setInitialData(long planId,
+                               long categoryId,
+                               String categoryName,
+                               LocalDate from,
+                               LocalDate to,
+                               double amount) {
+        this.planId = planId;
+        this.categoryId = categoryId;
+        this.initialCategoryName = categoryName;
+        this.initialFrom = from;
+        this.initialTo = to;
+        this.initialAmount = amount;
 
-        public CategoryItem(long id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
+        // если контролы уже инициализированы – сразу проставим
+        if (fromDatePicker != null) fromDatePicker.setValue(from);
+        if (toDatePicker != null) toDatePicker.setValue(to);
+        if (amountField != null)
+            amountField.setText(String.format(Locale.US, "%.2f", amount));
+        if (categoryComboBox != null && !categoryComboBox.getItems().isEmpty()) {
+            selectCategoryByName(categoryName);
         }
     }
 }

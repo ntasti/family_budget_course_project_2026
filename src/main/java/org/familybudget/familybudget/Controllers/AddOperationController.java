@@ -31,7 +31,7 @@ public class AddOperationController {
     // маленькая модель категории
     public static class CategoryItem {
         private final long id;
-        private final String name;
+        protected final String name;
 
         public CategoryItem(long id, String name) {
             this.id = id;
