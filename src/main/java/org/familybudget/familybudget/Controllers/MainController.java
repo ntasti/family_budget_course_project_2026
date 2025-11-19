@@ -1079,7 +1079,7 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("accounts-view.fxml"));
-            Scene scene = new Scene(loader.load(), 550, 300);
+            Scene scene = new Scene(loader.load(), 650, 300);
             Stage stage = new Stage();
             stage.setTitle("Счета");
             stage.initModality(Modality.WINDOW_MODAL);
@@ -1157,7 +1157,6 @@ public class MainController {
     }
 
 
-// -------------------- ЭКСПОРТ CSV --------------------
 
     // -------------------- ЭКСПОРТ CSV --------------------
 
@@ -1218,8 +1217,6 @@ public class MainController {
         }
         return s;
     }
-
-// -------------------- ИМПОРТ (dat) --------------------
 
 
     // -------------------- ИМПОРТ (dat) --------------------

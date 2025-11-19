@@ -66,35 +66,41 @@
         </TableView>
 
         <!-- Кнопки управления -->
-        <HBox spacing="10" alignment="CENTER_RIGHT" prefWidth="480">
+        <HBox spacing="8" alignment="CENTER_RIGHT" prefWidth="480">
 
-
-
+            <Region HBox.hgrow="ALWAYS"/>
 
             <Button text="Обновить"
                     onAction="#onRefreshClick"
-                    style="-fx-background-color: #FFFFFF;
-                           -fx-background-radius: 999;
-                           -fx-text-fill: #333;
-                           -fx-font-weight: bold;
-                           -fx-padding: 5 14;"/>
+                    style="-fx-background-color: #4C6FFF;
+                   -fx-background-radius: 999;
+                   -fx-text-fill: white;
+                   -fx-font-family: 'Segoe UI';
+                   -fx-font-weight: bold;
+                   -fx-padding: 6 16;
+                   -fx-font-size: 12;"/>
 
             <Button text="Удалить выбранное"
                     onAction="#onDeleteClick"
-                    style="-fx-background-color: #FF4B55;
-                           -fx-background-radius: 999;
-                           -fx-text-fill: white;
-                           -fx-font-weight: bold;
-                           -fx-padding: 5 14;"/>
+                    style="-fx-background-color: #D9534F;
+                   -fx-background-radius: 999;
+                   -fx-text-fill: white;
+                   -fx-font-family: 'Segoe UI';
+                   -fx-font-weight: bold;
+                   -fx-padding: 6 16;
+                   -fx-font-size: 12;"/>
 
             <Button text="Закрыть"
                     onAction="#onCloseClick"
                     style="-fx-background-color: #E0E0E0;
-                           -fx-background-radius: 999;
-                           -fx-text-fill: #333;
-                           -fx-font-weight: bold;
-                           -fx-padding: 5 14;"/>
+                   -fx-background-radius: 999;
+                   -fx-text-fill: #333333;
+                   -fx-font-family: 'Segoe UI';
+                   -fx-font-weight: bold;
+                   -fx-padding: 6 16;
+                   -fx-font-size: 12;"/>
         </HBox>
+
 
         <Label fx:id="statusLabel"
                style="-fx-text-fill: #D32F2F; -fx-font-size: 11;"

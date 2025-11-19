@@ -9,7 +9,7 @@
 <VBox alignment="CENTER"
       spacing="10"
       prefWidth="480"
-      prefHeight="420"
+      prefHeight="440"
       style="-fx-background-color: #F0F2F5;"
       xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -23,14 +23,13 @@
 
         <!-- Внутренняя карточка -->
         <VBox alignment="TOP_CENTER"
-              spacing="12"
+              spacing="14"
               prefWidth="440"
               style="-fx-background-color: #FFFFFF;
                      -fx-background-radius: 16;
-                     -fx-padding: 18 20 20 20;
+                     -fx-padding: 18 20 22 20;
                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 18, 0, 0, 4);
                      -fx-font-family: 'Segoe UI';">
-
 
             <!-- Заголовок -->
             <Label text="Запланированная трата"
@@ -41,15 +40,26 @@
             </Label>
 
             <!-- Подзаголовок -->
-            <Label text="Укажите параметры траты и расписание списаний"
+            <Label text="Выберите счёт, категорию, сумму и укажите расписание списаний."
                    wrapText="true"
                    style="-fx-text-fill: #777777; -fx-font-size: 11;"/>
 
             <!-- Форма -->
-            <VBox spacing="8" prefWidth="380">
+            <VBox spacing="10" prefWidth="380">
+
+                <!-- Счёт -->
+                <Label text="Счёт"
+                       style="-fx-text-fill: #555555; -fx-font-size: 12;"/>
                 <ComboBox fx:id="accountComboBox"
-                          promptText="Счёт"
-                          prefWidth="260" />
+                          promptText="Выберите счёт"
+                          prefWidth="380"
+                          style="-fx-background-color: #F5F5F5;
+                                 -fx-background-radius: 8;
+                                 -fx-text-fill: #222222;
+                                 -fx-prompt-text-fill: #999999;
+                                 -fx-border-color: #DDDDDD;
+                                 -fx-border-radius: 8;
+                                 -fx-padding: 6 10 6 10;"/>
 
                 <!-- Категория -->
                 <Label text="Категория"
@@ -154,23 +164,27 @@
             <HBox spacing="10"
                   alignment="CENTER_RIGHT"
                   prefWidth="380"
-                  style="-fx-padding: 6 0 0 0;">
+                  style="-fx-padding: 8 0 0 0;">
 
                 <Button text="Отмена"
                         onAction="#onCancelClick"
                         style="-fx-background-color: #E0E0E0;
                                -fx-background-radius: 999;
                                -fx-text-fill: #333333;
+                               -fx-font-family: 'Segoe UI';
                                -fx-font-weight: bold;
-                               -fx-padding: 5 16;"/>
+                               -fx-padding: 6 18;
+                               -fx-font-size: 12;"/>
 
                 <Button text="Сохранить"
                         onAction="#onSaveClick"
                         style="-fx-background-color: #4C6FFF;
                                -fx-background-radius: 999;
                                -fx-text-fill: white;
+                               -fx-font-family: 'Segoe UI';
                                -fx-font-weight: bold;
-                               -fx-padding: 5 18;"/>
+                               -fx-padding: 6 20;
+                               -fx-font-size: 12;"/>
             </HBox>
 
             <!-- Статус -->
