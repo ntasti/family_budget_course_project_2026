@@ -187,7 +187,6 @@ public class AccountController {
 
             if (resp != null && resp.startsWith("OK JOINED")) {
 
-                // 🔄 ОБНОВИТЬ ГЛАВНОЕ ОКНО
                 MainController main = MainController.getInstance();
                 if (main != null) {
                     main.refreshAfterJoinFamily();

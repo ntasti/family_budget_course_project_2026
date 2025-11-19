@@ -37,14 +37,22 @@ public class AccountsController {
             this.currency = currency;
         }
 
-        public long getId() { return id; }
-        public String getName() { return name; }
-        public String getCurrency() { return currency; }
+        public long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getCurrency() {
+            return currency;
+        }
 
         @Override
         public String toString() {
-            // что показывать в комбобоксах:
-            return name;                     // или name + " (" + currency + ")"
+            // что показывать в комбобоксах
+            return name; // можно сделать name + " (" + currency + ")"
         }
     }
 
@@ -121,8 +129,16 @@ public class AccountsController {
                 String resp = ServerConnection.getInstance()
                         .sendCommand("ADD_ACCOUNT " + name);
                 if (resp != null && resp.startsWith("OK ACCOUNT_ADDED")) {
+
                     loadAccounts();
                     statusLabel.setText("");
+
+                    // 🔄 обновляем главное окно
+                    MainController main = MainController.getInstance();
+                    if (main != null) {
+                        main.refreshAfterJoinFamily();
+                    }
+
                 } else {
                     statusLabel.setText("Ошибка добавления: " + resp);
                 }
@@ -154,8 +170,16 @@ public class AccountsController {
                 String cmd = "UPDATE_ACCOUNT " + item.getId() + " " + newName;
                 String resp = ServerConnection.getInstance().sendCommand(cmd);
                 if (resp != null && resp.startsWith("OK ACCOUNT_UPDATED")) {
+
                     loadAccounts();
                     statusLabel.setText("");
+
+                    // 🔄 обновить главное окно
+                    MainController main = MainController.getInstance();
+                    if (main != null) {
+                        main.refreshAfterJoinFamily();
+                    }
+
                 } else {
                     statusLabel.setText("Ошибка обновления: " + resp);
                 }
@@ -177,7 +201,7 @@ public class AccountsController {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Удаление счёта");
         confirm.setHeaderText("Удалить счёт \"" + item.getName() + "\"?");
-        confirm.setContentText("Транзакции пока не трогаем (логику свяжем позже).");
+        confirm.setContentText("Транзакции пока не трогаем.");
 
         confirm.showAndWait().ifPresent(btn -> {
             if (btn != ButtonType.OK) return;
@@ -186,8 +210,16 @@ public class AccountsController {
                 String resp = ServerConnection.getInstance()
                         .sendCommand("DELETE_ACCOUNT " + item.getId());
                 if (resp != null && resp.startsWith("OK ACCOUNT_DELETED")) {
+
                     loadAccounts();
                     statusLabel.setText("");
+
+                    // 🔄 обновить главное окно
+                    MainController main = MainController.getInstance();
+                    if (main != null) {
+                        main.refreshAfterJoinFamily();
+                    }
+
                 } else {
                     statusLabel.setText("Ошибка удаления: " + resp);
                 }
@@ -204,7 +236,7 @@ public class AccountsController {
         stage.close();
     }
 
-    //transfer
+    // ===== перевод между счетами =====
     @FXML
     private void onTransferClick() {
         AccountItem selected = accountsTable.getSelectionModel().getSelectedItem();
@@ -228,13 +260,18 @@ public class AccountsController {
             stage.setResizable(false);
             stage.showAndWait();
 
-            // при желании после перевода можно обновить список счетов
+            // обновляем список счетов
             loadAccounts();
+
+            // и главное окно (балансы/операции)
+            MainController main = MainController.getInstance();
+            if (main != null) {
+                main.refreshAfterJoinFamily();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
             statusLabel.setText("Ошибка открытия окна перевода: " + e.getMessage());
         }
     }
-
 }

@@ -1123,6 +1123,11 @@ public class MainController {
             return;
         }
 
+        if (currentAccount == null) {
+            statusLabel.setText("Счёт не выбран");
+            return;
+        }
+
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Экспорт операций (dat)");
         chooser.getExtensionFilters().add(
@@ -1132,15 +1137,18 @@ public class MainController {
         File file = chooser.showSaveDialog(balanceLabel.getScene().getWindow());
         if (file == null) return;
 
+        long accId = currentAccount.getId();
+        String accName = currentAccount.getName();
+
         List<OperationExportItem> exportList = allOperations.stream()
-                .map(OperationExportItem::new)
+                .map(row -> new OperationExportItem(row, accId, accName))
                 .collect(Collectors.toList());
 
         try (ObjectOutputStream oos =
                      new ObjectOutputStream(new FileOutputStream(file))) {
 
             oos.writeObject(exportList);
-            statusLabel.setText("Экспортировано (dat) операций: " + exportList.size());
+            statusLabel.setText("Экспортировано (dat): " + exportList.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -1148,13 +1156,21 @@ public class MainController {
         }
     }
 
+
 // -------------------- ЭКСПОРТ CSV --------------------
+
+    // -------------------- ЭКСПОРТ CSV --------------------
 
     @FXML
     private void onExportOperationsCsvClick() {
         List<OperationRow> toExport = new ArrayList<>(operationsList.getItems());
         if (toExport.isEmpty()) {
             statusLabel.setText("Нет операций для экспорта в CSV");
+            return;
+        }
+
+        if (currentAccount == null) {
+            statusLabel.setText("Счёт не выбран");
             return;
         }
 
@@ -1168,27 +1184,32 @@ public class MainController {
         if (file == null) return;
 
         StringBuilder sb = new StringBuilder();
-        sb.append("type;amount;category;user;date;time\n");
+        sb.append("type;amount;category;user;date;time;account\n");
+
         for (OperationRow o : toExport) {
-            sb.append(o.type).append(";");
-            sb.append(o.amount).append(";");
-            sb.append(escapeCsv(o.category)).append(";");
-            sb.append(escapeCsv(o.user)).append(";");
-            sb.append(o.date).append(";");
-            sb.append(o.time == null ? "" : o.time).append("\n");
+            sb.append(o.type).append(";")
+                    .append(o.amount).append(";")
+                    .append(escapeCsv(o.category)).append(";")
+                    .append(escapeCsv(o.user)).append(";")
+                    .append(o.date).append(";")
+                    .append(o.time == null ? "" : o.time).append(";")
+                    .append(escapeCsv(currentAccount.getName()))
+                    .append("\n");
         }
 
         try (OutputStream os = new FileOutputStream(file);
              Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
 
-            writer.write('\uFEFF'); // BOM
+            writer.write('\uFEFF');
             writer.write(sb.toString());
-            statusLabel.setText("Экспортировано в CSV: " + toExport.size());
+            statusLabel.setText("Экспортировано CSV: " + toExport.size());
+
         } catch (IOException e) {
             e.printStackTrace();
             statusLabel.setText("Ошибка экспорта CSV: " + e.getMessage());
         }
     }
+
 
     private String escapeCsv(String s) {
         if (s == null) return "";
@@ -1199,6 +1220,9 @@ public class MainController {
     }
 
 // -------------------- ИМПОРТ (dat) --------------------
+
+
+    // -------------------- ИМПОРТ (dat) --------------------
 
     @FXML
     private void onImportOperationsClick() {
@@ -1212,15 +1236,15 @@ public class MainController {
         if (file == null) return;
 
         try (ObjectInputStream ois =
-                     new ObjectInputStream(new java.io.FileInputStream(file))) {
+                     new ObjectInputStream(new FileInputStream(file))) {
 
             Object obj = ois.readObject();
-            if (!(obj instanceof java.util.List<?> rawList)) {
+            if (!(obj instanceof List<?> rawList)) {
                 statusLabel.setText("Неверный формат файла");
                 return;
             }
 
-            java.util.List<OperationExportItem> imported = new java.util.ArrayList<>();
+            List<OperationExportItem> imported = new ArrayList<>();
             for (Object o : rawList) {
                 if (o instanceof OperationExportItem item) {
                     imported.add(item);
@@ -1233,104 +1257,54 @@ public class MainController {
             }
 
             ServerConnection conn = ServerConnection.getInstance();
-
-            Map<String, Long> categoryMap;
-            try {
-                categoryMap = loadCategoryMap();
-            } catch (IOException e) {
-                e.printStackTrace();
-                statusLabel.setText("Не удалось загрузить категории: " + e.getMessage());
-                return;
-            }
+            Map<String, Long> categoryMap = loadCategoryMap();
 
             int okCount = 0;
             int skipCount = 0;
 
-            for (OperationExportItem it : imported) {
-                String catName = it.getCategory();
-                if (catName == null || catName.isBlank()) {
-                    System.out.println("Пропущена операция без категории");
-                    skipCount++;
-                    continue;
-                }
+            // ===== определяем / создаём счёт =====
+            String accName = imported.get(0).getAccountName();
+            long accId = findOrCreateAccount(accName, conn);
 
-                Long categoryId = categoryMap.get(catName);
-                if (categoryId == null) {
-                    String respCat = conn.sendCommand("ADD_CATEGORY " + catName);
-                    if (respCat != null && respCat.startsWith("OK CATEGORY_CREATED")) {
-                        String tail = respCat.substring("OK CATEGORY_CREATED".length()).trim();
-                        String[] idName = tail.split(":", 2);
-                        if (idName.length == 2) {
-                            try {
-                                long newId = Long.parseLong(idName[0]);
-                                categoryId = newId;
-                                categoryMap.put(catName, newId);
-                            } catch (NumberFormatException ex) {
-                                System.out.println("Не удалось распарсить id категории из ответа: " + respCat);
-                                skipCount++;
-                                continue;
-                            }
-                        } else {
-                            System.out.println("Неожиданный формат ответа ADD_CATEGORY: " + respCat);
-                            skipCount++;
-                            continue;
-                        }
-                    } else {
-                        System.out.println("Нельзя создать категорию '" + catName + "': " + respCat);
-                        skipCount++;
-                        continue;
-                    }
-                }
+            // ===== импортируем операции =====
+            for (OperationExportItem it : imported) {
+
+                long categoryId = resolveCategoryId(it.getCategory(), categoryMap, conn);
 
                 String type = it.getType();
                 double amount = it.getAmount();
-                if (amount <= 0) {
-                    System.out.println("Пропущена операция с некорректной суммой: " + amount);
-                    skipCount++;
-                    continue;
-                }
 
                 String cmd;
                 if ("INCOME".equalsIgnoreCase(type)) {
-                    cmd = "ADD_INCOME " + categoryId + " " + amount + " Импорт";
+                    cmd = "ADD_INCOME_ACCOUNT " + accId + " " + categoryId + " " + amount + " Импорт";
                 } else if ("EXPENSE".equalsIgnoreCase(type)) {
-                    cmd = "ADD_EXPENSE " + categoryId + " " + amount + " Импорт";
+                    cmd = "ADD_EXPENSE_ACCOUNT " + accId + " " + categoryId + " " + amount + " Импорт";
                 } else {
-                    System.out.println("Неизвестный тип операции: " + type);
                     skipCount++;
                     continue;
                 }
 
                 String respOp = conn.sendCommand(cmd);
-                if (respOp != null && (respOp.startsWith("OK INCOME_ADDED") || respOp.startsWith("OK EXPENSE_ADDED"))) {
+                if (respOp != null && respOp.startsWith("OK")) {
                     okCount++;
                 } else {
-                    System.out.println("Ошибка при создании операции: " + respOp);
                     skipCount++;
                 }
             }
 
-            onRefreshBalance();
+            loadAccountsForSelector();
+            refreshAccountBalance();
             onRefreshOperations();
 
-            statusLabel.setText("Импортировано в семью операций: " + okCount +
-                                (skipCount > 0 ? (" (пропущено: " + skipCount + ")") : ""));
+            statusLabel.setText("Импортировано: " + okCount +
+                                (skipCount > 0 ? " (пропущено: " + skipCount + ")" : ""));
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Импорт завершён");
-            alert.setHeaderText("Успешно создано операций: " + okCount);
-            alert.setContentText(
-                    "Все операции записаны на сервер в вашу семью.\n" +
-                    "Дата и пользователь берутся как при обычном добавлении (текущий пользователь, текущая дата)." +
-                    (skipCount > 0 ? ("\nПропущено операций: " + skipCount + " (смотрите лог в консоли).") : "")
-            );
-            alert.showAndWait();
-
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Ошибка импорта: " + e.getMessage());
         }
     }
+
 
     private Map<String, Long> loadCategoryMap() throws IOException {
         Map<String, Long> result = new HashMap<>();
@@ -1341,11 +1315,7 @@ public class MainController {
         }
 
         if (!resp.startsWith("OK CATEGORIES=")) {
-            if (resp.startsWith("OK CATEGORIES=")) {
-                return result;
-            } else {
-                throw new IOException("Ошибка LIST_CATEGORIES: " + resp);
-            }
+            throw new IOException("Ошибка LIST_CATEGORIES: " + resp);
         }
 
         String payload = resp.substring("OK CATEGORIES=".length()).trim();
@@ -1372,6 +1342,78 @@ public class MainController {
 
         return result;
     }
+
+    private long findOrCreateAccount(String accName, ServerConnection conn) throws IOException {
+        if (accName == null || accName.isBlank()) {
+            throw new IOException("Имя счёта пустое в файле импорта");
+        }
+
+        String resp = conn.sendCommand("LIST_ACCOUNTS");
+        if (resp != null && resp.startsWith("OK ACCOUNTS=")) {
+            String payload = resp.substring("OK ACCOUNTS=".length()).trim();
+            if (!payload.isEmpty()) {
+                String[] rows = payload.split(",");
+                for (String row : rows) {
+                    row = row.trim();
+                    if (row.isEmpty()) continue;
+
+                    String[] p = row.split(":", 4); // id:name:currency:isArchived
+                    if (p.length >= 2) {
+                        long id   = Long.parseLong(p[0]);
+                        String nm = p[1];
+                        if (accName.equals(nm)) {
+                            return id; // нашли уже существующий счёт
+                        }
+                    }
+                }
+            }
+        }
+
+        // не нашли — создаём
+        String respAdd = conn.sendCommand("ADD_ACCOUNT " + accName);
+        if (respAdd != null && respAdd.startsWith("OK ACCOUNT_ADDED")) {
+            // формат: "OK ACCOUNT_ADDED <id>"
+            String tail = respAdd.substring("OK ACCOUNT_ADDED".length()).trim();
+            try {
+                return Long.parseLong(tail.split("\\s+")[0]);
+            } catch (NumberFormatException e) {
+                throw new IOException("Не удалось распарсить id нового счёта: " + respAdd, e);
+            }
+        }
+        throw new IOException("Ошибка создания счёта: " + respAdd);
+    }
+
+    // поиск/создание категории по имени
+    private long resolveCategoryId(String catName,
+                                   Map<String, Long> categoryMap,
+                                   ServerConnection conn) throws IOException {
+
+        if (catName == null || catName.isBlank()) {
+            throw new IOException("Имя категории пустое");
+        }
+
+        Long existingId = categoryMap.get(catName);
+        if (existingId != null) {
+            return existingId;
+        }
+
+        String respCat = conn.sendCommand("ADD_CATEGORY " + catName);
+        if (respCat != null && respCat.startsWith("OK CATEGORY_CREATED")) {
+            String tail = respCat.substring("OK CATEGORY_CREATED".length()).trim();
+            String[] idName = tail.split(":", 2);
+            if (idName.length == 2) {
+                try {
+                    long newId = Long.parseLong(idName[0]);
+                    categoryMap.put(catName, newId);
+                    return newId;
+                } catch (NumberFormatException e) {
+                    throw new IOException("Не удалось распарсить id категории: " + respCat, e);
+                }
+            }
+        }
+        throw new IOException("Ошибка создания категории '" + catName + "': " + respCat);
+    }
+
 
     // ================== ОБНОВЛЕНИЕ ГЛАВНОГО ОКНА ПОСЛЕ JOIN_FAMILY ==================
     public void refreshAfterJoinFamily() {
