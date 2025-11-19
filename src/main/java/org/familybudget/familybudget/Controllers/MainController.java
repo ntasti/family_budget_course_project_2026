@@ -31,6 +31,15 @@ import java.util.stream.Collectors;
 
 public class MainController {
 
+    private static MainController instance;
+
+    public MainController() {
+        instance = this;
+    }
+
+    public static MainController getInstance() {
+        return instance;
+    }
     @FXML
     private Label familyNameLabel;
 
@@ -1363,4 +1372,32 @@ public class MainController {
 
         return result;
     }
+
+    // ================== ОБНОВЛЕНИЕ ГЛАВНОГО ОКНА ПОСЛЕ JOIN_FAMILY ==================
+    public void refreshAfterJoinFamily() {
+        // заново загрузить инфу о семье
+        loadFamilyInfo();
+
+        // заново загрузить счета и баланс
+        initAccounts();
+        loadAccountsForSelector();
+        refreshAccountBalance();
+
+        // обновить операции
+        onRefreshOperations();
+
+        // пересчитать права (вдруг роль стала ADMIN)
+        String rawRole = SessionContext.getRole();
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(rawRole) || "1".equals(rawRole);
+
+        if (manageCategoriesButton != null) {
+            manageCategoriesButton.setVisible(isAdmin);
+            manageCategoriesButton.setManaged(isAdmin);
+        }
+
+        // обновить подпись про пользователя (на всякий случай)
+        String login = SessionContext.getLogin();
+        userInfoLabel.setText("Пользователь: " + login);
+    }
+
 }

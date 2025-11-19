@@ -2,11 +2,9 @@ package org.familybudget.familybudget.Controllers;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.familybudget.familybudget.Server.ServerConnection;
 import org.familybudget.familybudget.SessionContext;
 
@@ -178,36 +176,37 @@ public class AccountController {
     // ==== НОВОЕ: обработчик кнопки "Присоединиться по коду" ====
     @FXML
     private void onJoinFamilyClick() {
-        String code = joinCodeField.getText();
-        if (code == null || code.isBlank()) {
-            statusLabel.setText("Введите код семьи");
+        String code = joinCodeField.getText().trim();
+        if (code.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Введите код семьи").showAndWait();
             return;
         }
 
         try {
-            String resp = ServerConnection.getInstance()
-                    .sendCommand("JOIN_FAMILY " + code.trim());
+            String resp = ServerConnection.getInstance().sendCommand("JOIN_FAMILY " + code);
 
-            if (resp == null) {
-                statusLabel.setText("Нет ответа от сервера");
-                return;
-            }
+            if (resp != null && resp.startsWith("OK JOINED")) {
 
-            if (resp.startsWith("OK JOINED")) {
-                statusLabel.setText("Вы успешно присоединились к семье");
-                // прячем блок присоединения и обновляем данные
-                joinFamilyBox.setVisible(false);
-                joinFamilyBox.setManaged(false);
-                loadFamilyCode();
-                loadFamilyMembers();
+                // 🔄 ОБНОВИТЬ ГЛАВНОЕ ОКНО
+                MainController main = MainController.getInstance();
+                if (main != null) {
+                    main.refreshAfterJoinFamily();
+                }
+
+                new Alert(Alert.AlertType.INFORMATION, "Вы успешно присоединились к семье!").showAndWait();
+
+                // можно закрыть окно кабинета
+                ((Stage) joinCodeField.getScene().getWindow()).close();
+
             } else {
-                statusLabel.setText("Ошибка присоединения: " + resp);
+                new Alert(Alert.AlertType.ERROR, "Ошибка: " + resp).showAndWait();
             }
-
-        } catch (IOException e) {
-            statusLabel.setText("Ошибка соединения: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Ошибка соединения: " + e.getMessage()).showAndWait();
         }
     }
+
 
     @FXML
     private void onRemoveMemberClick() {
