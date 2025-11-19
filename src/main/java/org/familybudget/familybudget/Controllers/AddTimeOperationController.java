@@ -42,6 +42,9 @@ public class AddTimeOperationController {
 
     @FXML
     private Label statusLabel;
+    @FXML
+    private ComboBox<AccountsController.AccountItem> accountComboBox;
+
 
     // маленькая модель категории (такая же, как в AddOperationController)
     public static class CategoryItem {
@@ -90,6 +93,7 @@ public class AddTimeOperationController {
         timeField.setText(LocalTime.now().withSecond(0).withNano(0).toString()); // HH:mm
 
         loadCategories();
+        loadAccounts();
     }
 
     private void loadCategories() {
@@ -143,7 +147,13 @@ public class AddTimeOperationController {
 
     @FXML
     private void onSaveClick() {
+
         statusLabel.setText("");
+        AccountsController.AccountItem account = accountComboBox.getValue();
+        if (account == null) {
+            statusLabel.setText("Выберите счёт");
+            return;
+        }
 
         CategoryItem category = categoryComboBox.getValue();
         String amountStr = amountField.getText();
@@ -204,8 +214,9 @@ public class AddTimeOperationController {
         // --- формируем команду SCHEDULE_EXPENSE ---
         String endDateStr = (endDate == null) ? "NULL" : endDate.toString();
 
-        StringBuilder cmd = new StringBuilder("SCHEDULE_EXPENSE ");
-        cmd.append(category.getId()).append(" ")
+        StringBuilder cmd = new StringBuilder("SCHEDULE_EXPENSE_ACCOUNT ");
+        cmd.append(account.getId()).append(" ")
+                .append(category.getId()).append(" ")
                 .append(amount).append(" ")
                 .append(important ? "1" : "0").append(" ")
                 .append(startDate.toString()).append(" ")
@@ -243,4 +254,52 @@ public class AddTimeOperationController {
         Stage stage = (Stage) amountField.getScene().getWindow();
         stage.close();
     }
+
+    private void loadAccounts() {
+        try {
+            String resp = ServerConnection.getInstance().sendCommand("LIST_ACCOUNTS");
+            if (resp == null) {
+                statusLabel.setText("Нет ответа от сервера");
+                return;
+            }
+            if (!resp.startsWith("OK ACCOUNTS=")) {
+                statusLabel.setText("Ошибка загрузки счетов: " + resp);
+                return;
+            }
+
+            String payload = resp.substring("OK ACCOUNTS=".length()).trim();
+            if (payload.isEmpty()) {
+                accountComboBox.setItems(FXCollections.observableArrayList());
+                statusLabel.setText("Счетов ещё нет");
+                return;
+            }
+
+            List<AccountsController.AccountItem> list = new ArrayList<>();
+            for (String row : payload.split(",")) {
+                row = row.trim();
+                if (row.isEmpty()) continue;
+
+                String[] p = row.split(":", 4); // id:name:currency:isArchived
+                if (p.length < 3) continue;
+
+                long id = Long.parseLong(p[0]);
+                String name = p[1];
+                String curr = p[2];
+
+                list.add(new AccountsController.AccountItem(id, name, curr));
+            }
+
+            var obs = FXCollections.observableArrayList(list);
+            accountComboBox.setItems(obs);
+
+            if (!obs.isEmpty()) {
+                accountComboBox.getSelectionModel().selectFirst();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка загрузки счетов: " + e.getMessage());
+        }
+    }
+
 }

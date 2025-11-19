@@ -18,6 +18,10 @@ import org.familybudget.familybudget.SessionContext;
 import javafx.scene.chart.PieChart;
 import javafx.collections.ObservableList;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -103,6 +107,12 @@ public class MainController {
     @FXML
     private Button categoryPlanButton;
 
+    @FXML
+    private ComboBox<AccountsController.AccountItem> accountSelector;
+    @FXML
+    private Label accountBalanceLabel;
+    private AccountsController.AccountItem currentAccount;
+
 
     // агрегированные данные по категориям
     private Map<String, Double> incomeTotalsByCategory = new HashMap<>();
@@ -164,6 +174,8 @@ public class MainController {
         setupToolbarButton(categoryPlanButton);
         setupToolbarButton(accountsButton);
 
+        initAccounts();
+        loadAccountsForSelector();
         loadFamilyInfo();
         setupOperationsCellFactory();
         setupFilters();
@@ -174,7 +186,137 @@ public class MainController {
     }
 
 
-    // -------------------- ПЛАН ПО ЗАТРАТ ПО КАТЕГОРИЯМ --------------------
+    // -------------------- ВЫБОР СЧЕТА --------------------
+
+    private void loadAccountsForSelector() {
+        try {
+            String resp = ServerConnection.getInstance().sendCommand("LIST_ACCOUNTS");
+            if (resp == null || !resp.startsWith("OK ACCOUNTS=")) {
+                // можно вывести ошибку при желании
+                accountSelector.setItems(FXCollections.observableArrayList());
+                currentAccount = null;
+                accountBalanceLabel.setText("Баланс: —");
+                return;
+            }
+
+            String payload = resp.substring("OK ACCOUNTS=".length()).trim();
+            if (payload.isEmpty()) {
+                accountSelector.setItems(FXCollections.observableArrayList());
+                currentAccount = null;
+                accountBalanceLabel.setText("Баланс: —");
+                return;
+            }
+
+            List<AccountsController.AccountItem> list = new ArrayList<>();
+            for (String row : payload.split(",")) {
+                row = row.trim();
+                if (row.isEmpty()) continue;
+
+                String[] p = row.split(":", 4); // id:name:currency:isArchived
+                if (p.length < 3) continue;
+
+                long id = Long.parseLong(p[0]);
+                String name = p[1];
+                String curr = p[2];
+
+                list.add(new AccountsController.AccountItem(id, name, curr));
+            }
+
+            var observable = FXCollections.observableArrayList(list);
+            accountSelector.setItems(observable);
+
+            // если уже был выбран счёт – пробуем сохранить выбор
+            if (currentAccount != null) {
+                for (AccountsController.AccountItem it : list) {
+                    if (it.getId() == currentAccount.getId()) {
+                        accountSelector.setValue(it);
+                        currentAccount = it;
+                        return;
+                    }
+                }
+            }
+
+
+            accountSelector.setItems(observable);
+
+            // если уже был выбран счёт – пробуем сохранить выбор
+            if (currentAccount != null) {
+                for (AccountsController.AccountItem it : list) {
+                    if (it.getId() == currentAccount.getId()) {
+                        currentAccount = it;
+                        accountSelector.setValue(it);
+                        refreshAccountBalance();   // обновить баланс
+                        return;
+                    }
+                }
+            }
+
+            // иначе берём первый как дефолт
+            if (!observable.isEmpty()) {
+                currentAccount = observable.get(0);
+                accountSelector.setValue(currentAccount);
+                refreshAccountBalance();
+            }
+
+            // вешаем слушатель (один раз, но если боишься дубликатов — можно вынести в initialize())
+            accountSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                currentAccount = newVal;
+                refreshAccountBalance();
+                onRefreshOperations();
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            accountSelector.setItems(FXCollections.observableArrayList());
+            currentAccount = null;
+            accountBalanceLabel.setText("Баланс: ошибка");
+        }
+    }
+
+
+    @FXML
+    private void onAccountSelectorChanged() {
+        currentAccount = accountSelector.getValue();
+        refreshAccountBalance();
+        onRefreshOperations();
+    }
+
+    @FXML
+    private void onRefreshBalance() {
+        refreshAccountBalance();
+    }
+
+//    @FXML
+//    private void onAddOperationClick() {
+//        try {
+//            FXMLLoader loader = new FXMLLoader(
+//                    getClass().getResource("/org/familybudget/familybudget/add-operation-view.fxml")
+//            );
+//            Parent root = loader.load();
+//
+//            AddOperationController ctrl = loader.getController();
+//            if (currentAccount != null) {
+//                ctrl.setCurrentAccount(currentAccount);
+//            }
+//
+//            Stage stage = new Stage();
+//            stage.setTitle("Добавить операцию");
+//            stage.initModality(Modality.WINDOW_MODAL);
+//            stage.initOwner(balanceLabel.getScene().getWindow());
+//            stage.setScene(new Scene(root));
+//            stage.showAndWait();
+//
+//            // после закрытия можно обновить баланс/операции
+//            onRefreshBalance();
+//            onRefreshOperations();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            // statusLabel.setText("Не удалось открыть окно добавления операции: " + e.getMessage());
+//        }
+//    }
+
+// -------------------- ПЛАН ПО ЗАТРАТ ПО КАТЕГОРИЯМ --------------------
 
     @FXML
     private void onOpenCategoryPlanClick() {
@@ -195,8 +337,111 @@ public class MainController {
         }
     }
 
+    private void refreshAccountBalance() {
+        if (currentAccount == null) {
+            accountBalanceLabel.setText("Баланс: —");
+            return;
+        }
 
-    // -------------------- СТИЛИ КНОПОК --------------------
+        try {
+            String resp = ServerConnection.getInstance()
+                    .sendCommand("GET_ACCOUNT_BALANCE " + currentAccount.getId());
+
+            if (resp != null && resp.startsWith("OK ACCOUNT_BALANCE=")) {
+                String val = resp.substring("OK ACCOUNT_BALANCE=".length()).trim();
+                accountBalanceLabel.setText("Баланс: " + val);
+            } else {
+                accountBalanceLabel.setText("Баланс: ошибка");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            accountBalanceLabel.setText("Баланс: нет связи");
+        }
+    }
+
+
+    @FXML
+    private void initAccounts() {
+        try {
+            String resp = ServerConnection.getInstance().sendCommand("LIST_ACCOUNTS");
+            if (resp == null || !resp.startsWith("OK ACCOUNTS=")) {
+                accountBalanceLabel.setText("Баланс: ошибка");
+                return;
+            }
+
+            String payload = resp.substring("OK ACCOUNTS=".length()).trim();
+            if (payload.isEmpty()) {
+                accountSelector.setItems(FXCollections.observableArrayList());
+                accountBalanceLabel.setText("Баланс: —");
+                currentAccount = null;
+                return;
+            }
+
+            var list = new ArrayList<AccountsController.AccountItem>();
+            for (String row : payload.split(",")) {
+                row = row.trim();
+                if (row.isEmpty()) continue;
+
+                String[] p = row.split(":", 4); // id:name:currency:isArchived
+                if (p.length < 3) continue;
+
+                long id = Long.parseLong(p[0]);
+                String name = p[1];
+                String curr = p[2];
+
+                list.add(new AccountsController.AccountItem(id, name, curr));
+            }
+
+            var obs = FXCollections.observableArrayList(list);
+            accountSelector.setItems(obs);
+
+            if (!obs.isEmpty()) {
+                currentAccount = obs.get(0);
+                accountSelector.getSelectionModel().select(currentAccount);
+                refreshAccountBalance();
+            }
+
+            // слушатель смены счёта
+            accountSelector.getSelectionModel()
+                    .selectedItemProperty()
+                    .addListener((obsVal, oldVal, newVal) -> {
+                        currentAccount = newVal;
+                        refreshAccountBalance();
+                        // тут же можно перезагружать список операций по счёту
+                    });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            accountBalanceLabel.setText("Баланс: ошибка подключения");
+        }
+    }
+    @FXML
+    private void onAccountsButtonClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("accounts-view.fxml")
+            );
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("Счета");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(balanceLabel.getScene().getWindow());
+            stage.setScene(scene);
+            stage.setResizable(false);
+            stage.showAndWait();
+
+            // 👇 после закрытия окна счетов:
+            loadAccountsForSelector();   // вдруг добавили/удалили счёт
+            refreshAccountBalance();     // и обязательно обновим баланс текущего счёта
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия окна счетов: " + e.getMessage());
+        }
+    }
+
+
+// -------------------- СТИЛИ КНОПОК --------------------
 
     private void setupHoverDark(Button btn, String normal, String hover) {
         if (btn == null) return;
@@ -235,7 +480,7 @@ public class MainController {
     }
 
 
-    // -------------------- НАСТРОЙКА ВЫБОРА ТИПА ДИАГРАММЫ --------------------
+// -------------------- НАСТРОЙКА ВЫБОРА ТИПА ДИАГРАММЫ --------------------
 
     private void setupChartsControls() {
         if (chartTypeCombo == null) return;
@@ -256,7 +501,7 @@ public class MainController {
         refreshCategoryChart();
     }
 
-    // -------------------- ФИЛЬТРЫ --------------------
+// -------------------- ФИЛЬТРЫ --------------------
 
     private void setupFilters() {
         if (typeFilterCombo != null) {
@@ -357,35 +602,44 @@ public class MainController {
         applyFilters();
     }
 
-    // -------------------- БАЛАНС --------------------
+// -------------------- БАЛАНС --------------------
 
-    @FXML
-    protected void onRefreshBalance() {
-        try {
-            String resp = ServerConnection.getInstance().sendCommand("GET_BALANCE");
-            if (resp == null) {
-                statusLabel.setText("Нет ответа от сервера");
-                return;
-            }
-            if (resp.startsWith("OK BALANCE=")) {
-                String value = resp.substring("OK BALANCE=".length()).trim();
-                balanceLabel.setText(value + " BYN");
-                statusLabel.setText("");
-            } else {
-                statusLabel.setText("Ошибка: " + resp);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            statusLabel.setText("Ошибка соединения: " + e.getMessage());
-        }
-    }
+//@FXML
+//protected void onRefreshBalance() {
+//    try {
+//        String resp = ServerConnection.getInstance().sendCommand("GET_BALANCE");
+//        if (resp == null) {
+//            statusLabel.setText("Нет ответа от сервера");
+//            return;
+//        }
+//        if (resp.startsWith("OK BALANCE=")) {
+//            String value = resp.substring("OK BALANCE=".length()).trim();
+//            balanceLabel.setText(value + " BYN");
+//            statusLabel.setText("");
+//        } else {
+//            statusLabel.setText("Ошибка: " + resp);
+//        }
+//    } catch (IOException e) {
+//        e.printStackTrace();
+//        statusLabel.setText("Ошибка соединения: " + e.getMessage());
+//    }
+//}
 
-    // -------------------- ИСТОРИЯ ОПЕРАЦИЙ --------------------
+// -------------------- ИСТОРИЯ ОПЕРАЦИЙ --------------------
 
     @FXML
     protected void onRefreshOperations() {
+        // 1. нет выбранного счёта — нет операций
+        if (currentAccount == null) {
+            allOperations.clear();
+            operationsList.setItems(FXCollections.observableArrayList());
+            statusLabel.setText("Счёт не выбран");
+            return;
+        }
+
         try {
-            String resp = ServerConnection.getInstance().sendCommand("GET_OPERATIONS");
+            String cmd = "GET_OPERATIONS_ACCOUNT " + currentAccount.getId();
+            String resp = ServerConnection.getInstance().sendCommand(cmd);
             if (resp == null) {
                 statusLabel.setText("Нет ответа от сервера");
                 return;
@@ -448,11 +702,11 @@ public class MainController {
                 allOperations.sort(cmp.reversed());
             }
 
-            statusLabel.setText(allOperations.isEmpty() ? "Операций пока нет" : "");
+            statusLabel.setText(allOperations.isEmpty() ? "Операций по этому счёту пока нет" : "");
 
             updateCategoryFilterItems();
             updateUserFilterItems();
-            applyFilters();
+            applyFilters(); // обновит ListView и диаграммы
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -492,7 +746,7 @@ public class MainController {
         userFilterCombo.getSelectionModel().selectFirst();
     }
 
-    // -------------------- ОФОРМЛЕНИЕ СПИСКА --------------------
+// -------------------- ОФОРМЛЕНИЕ СПИСКА --------------------
 
     private void setupOperationsCellFactory() {
         operationsList.setStyle(
@@ -578,7 +832,7 @@ public class MainController {
         });
     }
 
-    // -------------------- ДАННЫЕ СЕМЬИ --------------------
+// -------------------- ДАННЫЕ СЕМЬИ --------------------
 
     private void loadFamilyInfo() {
         try {
@@ -627,7 +881,7 @@ public class MainController {
         }
     }
 
-    // -------------------- ДИАГРАММЫ ДОХОДОВ/РАСХОДОВ --------------------
+// -------------------- ДИАГРАММЫ ДОХОДОВ/РАСХОДОВ --------------------
 
     private void updateChartsFromList(List<OperationRow> rows) {
         // собираем суммы по категориям для доходов и расходов
@@ -695,7 +949,7 @@ public class MainController {
         categoryPieChart.setLegendVisible(true);
     }
 
-    // -------------------- КНОПКИ --------------------
+// -------------------- КНОПКИ --------------------
 
     @FXML
     protected void onOpenAnalyticsClick() {
@@ -716,26 +970,38 @@ public class MainController {
     }
 
     @FXML
-    protected void onAddOperationClick() {
+    private void onAddOperationClick() {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("add-operation-view.fxml")
+                    getClass().getResource("/org/familybudget/familybudget/add-operation-view.fxml")
             );
-            Scene scene = new Scene(loader.load());
+            Parent root = loader.load();
+
+            AddOperationController controller = loader.getController();
+
+            // передаём текущий активный счёт в окно добавления операции
+            if (currentAccount != null) {
+                controller.setCurrentAccount(currentAccount);
+            }
+
             Stage stage = new Stage();
             stage.setTitle("Новая операция");
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(scene);
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
             stage.showAndWait();
 
-            onRefreshBalance();
-            onRefreshOperations();
+            // 🔄 После закрытия окна – обновляем баланс
+            refreshAccountBalance();
 
+            // и при необходимости обновляем список операций/транзакций
+            // loadOperations();
         } catch (IOException e) {
             e.printStackTrace();
-            statusLabel.setText("Ошибка открытия окна: " + e.getMessage());
+            // можно вывести в статусбар, если он есть
         }
     }
+
 
     @FXML
     protected void onManageCategoriesClick() {
@@ -804,13 +1070,12 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("accounts-view.fxml"));
-            Parent root = loader.load();
-
+            Scene scene = new Scene(loader.load(), 550, 300);
             Stage stage = new Stage();
             stage.setTitle("Счета");
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(balanceLabel.getScene().getWindow());
-            stage.setScene(new Scene(root));
+            stage.setScene(scene);
             stage.setResizable(false);
             stage.showAndWait();
         } catch (IOException e) {
@@ -819,7 +1084,9 @@ public class MainController {
         }
     }
 
-    // -------------------- ЛИЧНЫЙ КАБИНЕТ --------------------
+
+
+// -------------------- ЛИЧНЫЙ КАБИНЕТ --------------------
 
     @FXML
     private void onOpenAccountClick() {
@@ -838,7 +1105,7 @@ public class MainController {
             statusLabel.setText("Ошибка открытия личного кабинета: " + e.getMessage());
         }
     }
-    // -------------------- ЭКСПОРТ (dat) --------------------
+// -------------------- ЭКСПОРТ (dat) --------------------
 
     @FXML
     private void onExportOperationsClick() {
@@ -872,7 +1139,7 @@ public class MainController {
         }
     }
 
-    // -------------------- ЭКСПОРТ CSV --------------------
+// -------------------- ЭКСПОРТ CSV --------------------
 
     @FXML
     private void onExportOperationsCsvClick() {
@@ -922,7 +1189,7 @@ public class MainController {
         return s;
     }
 
-    // -------------------- ИМПОРТ (dat) --------------------
+// -------------------- ИМПОРТ (dat) --------------------
 
     @FXML
     private void onImportOperationsClick() {

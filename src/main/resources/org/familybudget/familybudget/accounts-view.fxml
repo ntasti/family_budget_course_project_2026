@@ -60,31 +60,40 @@
     <HBox spacing="10" alignment="CENTER_RIGHT" prefWidth="380">
         <Button text="Обновить" onAction="#onRefreshClick"
                 style="-fx-background-color: #FFFFFF;
-                       -fx-background-radius: 999;
-                       -fx-text-fill: #333;
-                       -fx-font-weight: bold;
-                       -fx-padding: 5 14;"/>
+                   -fx-background-radius: 999;
+                   -fx-text-fill: #333;
+                   -fx-font-weight: bold;
+                   -fx-padding: 5 14;"/>
 
         <Button text="Переименовать" onAction="#onEditClick"
                 style="-fx-background-color: #FFFFFF;
-                       -fx-background-radius: 999;
-                       -fx-text-fill: #333;
-                       -fx-font-weight: bold;
-                       -fx-padding: 5 14;"/>
+                   -fx-background-radius: 999;
+                   -fx-text-fill: #333;
+                   -fx-font-weight: bold;
+                   -fx-padding: 5 14;"/>
 
         <Button text="Удалить" onAction="#onDeleteClick"
                 style="-fx-background-color: #FF4B55;
-                       -fx-background-radius: 999;
-                       -fx-text-fill: #FFFFFF;
-                       -fx-font-weight: bold;
-                       -fx-padding: 5 14;"/>
+                   -fx-background-radius: 999;
+                   -fx-text-fill: #FFFFFF;
+                   -fx-font-weight: bold;
+                   -fx-padding: 5 14;"/>
+
+        <!-- 🔹 НОВАЯ КНОПКА -->
+        <Button text="Перевод..."
+                onAction="#onTransferClick"
+                style="-fx-background-color: #FFFFFF;
+                   -fx-background-radius: 999;
+                   -fx-text-fill: #333;
+                   -fx-font-weight: bold;
+                   -fx-padding: 5 14;"/>
 
         <Button text="Закрыть" onAction="#onCloseClick"
                 style="-fx-background-color: #E0E0E0;
-                       -fx-background-radius: 999;
-                       -fx-text-fill: #333;
-                       -fx-font-weight: bold;
-                       -fx-padding: 5 14;"/>
+                   -fx-background-radius: 999;
+                   -fx-text-fill: #333;
+                   -fx-font-weight: bold;
+                   -fx-padding: 5 14;"/>
     </HBox>
 
     <Label fx:id="statusLabel"

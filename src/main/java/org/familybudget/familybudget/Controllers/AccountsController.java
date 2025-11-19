@@ -3,7 +3,11 @@ package org.familybudget.familybudget.Controllers;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.familybudget.familybudget.Server.ServerConnection;
 
@@ -36,6 +40,12 @@ public class AccountsController {
         public long getId() { return id; }
         public String getName() { return name; }
         public String getCurrency() { return currency; }
+
+        @Override
+        public String toString() {
+            // что показывать в комбобоксах:
+            return name;                     // или name + " (" + currency + ")"
+        }
     }
 
     @FXML
@@ -193,4 +203,38 @@ public class AccountsController {
         Stage stage = (Stage) accountsTable.getScene().getWindow();
         stage.close();
     }
+
+    //transfer
+    @FXML
+    private void onTransferClick() {
+        AccountItem selected = accountsTable.getSelectionModel().getSelectedItem();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/org/familybudget/familybudget/account-transfer-view.fxml")
+            );
+            Parent root = loader.load();
+
+            // контроллер окна перевода
+            AccountTransferController controller = loader.getController();
+            if (selected != null) {
+                controller.setInitialFromAccount(selected.getId());
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Перевод между счетами");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.showAndWait();
+
+            // при желании после перевода можно обновить список счетов
+            loadAccounts();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия окна перевода: " + e.getMessage());
+        }
+    }
+
 }

@@ -20,7 +20,16 @@
     </padding>
 
     <children>
-
+        <VBox alignment="TOP_LEFT" spacing="4">
+            <Label text="Счёт"
+                   style="-fx-text-fill: #777777; -fx-font-size: 11;"/>
+            <ComboBox fx:id="accountComboBox" prefWidth="220"
+                      style="-fx-background-radius: 8;
+                     -fx-background-color: #F5F5F5;
+                     -fx-text-fill: #222222;
+                     -fx-border-color: #DDDDDD;
+                     -fx-border-radius: 8;"/>
+        </VBox>
         <!-- Внутренняя карточка -->
         <VBox alignment="TOP_CENTER"
               spacing="12"

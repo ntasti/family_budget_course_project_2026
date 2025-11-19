@@ -27,6 +27,9 @@ public class AddOperationController {
 
     @FXML
     private Label statusLabel;
+    @FXML
+    private ComboBox<AccountsController.AccountItem> accountComboBox;
+    private AccountsController.AccountItem initialAccount;
 
     // маленькая модель категории
     public static class CategoryItem {
@@ -68,8 +71,15 @@ public class AddOperationController {
         };
         amountField.setTextFormatter(new TextFormatter<>(filter));
 
+        loadAccounts();
         loadCategories();
+
+        // если уже передали счёт до открытия окна – выбрать его
+        if (initialAccount != null) {
+            selectAccount(initialAccount);
+        }
     }
+
 
     private void loadCategories() {
         try {
@@ -159,12 +169,27 @@ public class AddOperationController {
         }
 
         try {
+            AccountsController.AccountItem acc = accountComboBox.getValue();
+            if (acc == null) {
+                statusLabel.setText("Выберите счёт");
+                return;
+            }
+
             String cmd;
             if ("INCOME".equalsIgnoreCase(type)) {
-                cmd = "ADD_INCOME " + category.getId() + " " + amount + " " + comment;
+                // начисление на счёт
+                cmd = "ADD_INCOME_ACCOUNT " + acc.getId() + " " + category.getId() + " " + amount;
+                if (!comment.isEmpty()) {
+                    cmd += " " + comment;
+                }
             } else { // EXPENSE
-                cmd = "ADD_EXPENSE " + category.getId() + " " + amount + " " + comment;
+                // расход с конкретного счёта
+                cmd = "ADD_EXPENSE_ACCOUNT " + acc.getId() + " " + category.getId() + " " + amount;
+                if (!comment.isEmpty()) {
+                    cmd += " " + comment;
+                }
             }
+
 
             String resp = ServerConnection.getInstance().sendCommand(cmd);
             if (resp == null) {
@@ -191,4 +216,59 @@ public class AddOperationController {
         Stage stage = (Stage) amountField.getScene().getWindow();
         stage.close();
     }
+
+    public void setCurrentAccount(AccountsController.AccountItem acc) {
+        if (acc == null) return;
+
+        // запоминаем, какой счёт должен быть выбран
+        this.initialAccount = acc;
+
+        // если ComboBox уже инициализирован и в нём есть элементы – сразу выберем
+        if (accountComboBox != null && accountComboBox.getItems() != null && !accountComboBox.getItems().isEmpty()) {
+            selectAccount(acc);
+        }
+    }
+
+
+    private void loadAccounts() {
+        try {
+            String resp = ServerConnection.getInstance().sendCommand("LIST_ACCOUNTS");
+            if (resp == null || !resp.startsWith("OK ACCOUNTS=")) {
+                return;
+            }
+            String payload = resp.substring("OK ACCOUNTS=".length()).trim();
+            if (payload.isEmpty()) {
+                return;
+            }
+            List<AccountsController.AccountItem> items = new ArrayList<>();
+            for (String row : payload.split(",")) {
+                row = row.trim();
+                if (row.isEmpty()) continue;
+                String[] p = row.split(":", 4);
+                if (p.length < 3) continue;
+                long id = Long.parseLong(p[0]);
+                String name = p[1];
+                String curr = p[2];
+                items.add(new AccountsController.AccountItem(id, name, curr));
+            }
+            accountComboBox.setItems(FXCollections.observableArrayList(items));
+            if (!items.isEmpty()) {
+                accountComboBox.setValue(items.get(0)); // по умолчанию первый
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void selectAccount(AccountsController.AccountItem acc) {
+        if (accountComboBox == null || acc == null) return;
+
+        for (AccountsController.AccountItem item : accountComboBox.getItems()) {
+            if (item.getId() == acc.getId()) {
+                accountComboBox.setValue(item);
+                break;
+            }
+        }
+
+    }
+
 }

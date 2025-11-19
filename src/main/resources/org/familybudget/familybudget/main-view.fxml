@@ -195,6 +195,20 @@
                 <Insets bottom="0" left="0" right="0" top="0" />
             </BorderPane.margin>
 
+            <VBox alignment="CENTER" spacing="6">
+                <Label  fx:id="balanceLabel" text="Текущий счёт"
+                       style="-fx-text-fill: #777777; -fx-font-size: 11;"/>
+                <ComboBox fx:id="accountSelector"
+                          prefWidth="220"
+                          onAction="#onAccountSelectorChanged"
+                          style="-fx-background-radius: 8;
+                     -fx-background-color: #F5F5F5;
+                     -fx-text-fill: #222222;
+                     -fx-border-color: #DDDDDD;
+                     -fx-border-radius: 8;"/>
+            </VBox>
+
+
             <!-- Блок баланса и диаграммы (главная центральная карточка) -->
             <VBox alignment="CENTER" maxWidth="900" spacing="14" style="-fx-background-color: #FFFFFF;                          -fx-background-radius: 22;                          -fx-padding: 16 24 18 24;                          -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.18), 24, 0.16, 0, 6);                          -fx-font-family: 'Segoe UI';">
 
@@ -204,7 +218,7 @@
                     </font>
                 </Label>
 
-                <Label fx:id="balanceLabel" style="-fx-text-fill: #4C6FFF;">
+                <Label fx:id="accountBalanceLabel" style="-fx-text-fill: #4C6FFF;">
                     <font>
                         <Font name="Segoe UI Semibold" size="28" />
                     </font>
