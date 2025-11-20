@@ -40,6 +40,7 @@ public class MainController {
     public static MainController getInstance() {
         return instance;
     }
+
     @FXML
     private Label familyNameLabel;
 
@@ -132,19 +133,22 @@ public class MainController {
 
     // модель строки
     public static class OperationRow {
-        public String type;      // INCOME / EXPENSE
+        public long id;        // <--- НОВОЕ
+        public String type;    // INCOME / EXPENSE
         public double amount;
         public String category;
         public String user;
-        public String date;      // "2025-11-14"
-        public String time;      // "14:35"
+        public String date;    // "2025-11-14"
+        public String time;    // "14:35"
 
-        public OperationRow(String type,
+        public OperationRow(long id,
+                            String type,
                             double amount,
                             String category,
                             String user,
                             String date,
                             String time) {
+            this.id = id;
             this.type = type;
             this.amount = amount;
             this.category = category;
@@ -153,6 +157,7 @@ public class MainController {
             this.time = time;
         }
     }
+
 
     @FXML
     private void initialize() {
@@ -394,6 +399,7 @@ public class MainController {
             accountBalanceLabel.setText("Баланс: ошибка подключения");
         }
     }
+
     @FXML
     private void onAccountsButtonClick() {
         try {
@@ -562,7 +568,6 @@ public class MainController {
 // -------------------- БАЛАНС --------------------
 
 
-
 // -------------------- ИСТОРИЯ ОПЕРАЦИЙ --------------------
 
     @FXML
@@ -606,6 +611,14 @@ public class MainController {
                         continue;
                     }
 
+                    long id;
+                    try {
+                        id = Long.parseLong(parts[0]);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Некорректный id в строке: " + line);
+                        continue;
+                    }
+
                     String type = parts[1];
                     String category = parts[2];
 
@@ -630,7 +643,15 @@ public class MainController {
                         }
                     }
 
-                    allOperations.add(new OperationRow(type, amount, category, user, date, time));
+                    allOperations.add(new OperationRow(
+                            id,
+                            type,
+                            amount,
+                            category,
+                            user,
+                            date,
+                            time
+                    ));
                 }
 
                 // сортируем по дате и времени (от новых к старым)
@@ -684,8 +705,44 @@ public class MainController {
         userFilterCombo.getSelectionModel().selectFirst();
     }
 
+    private void deleteOperation(OperationRow row) {
+        if (row == null) return;
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Удаление операции");
+        alert.setHeaderText(null);
+        alert.setContentText("Удалить операцию на сумму "
+                             + String.format("%.0f BYN", row.amount)
+                             + " из категории \"" + row.category + "\" ?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        try {
+            String cmd = "DELETE_TRANSACTION " + row.id;
+            String resp = ServerConnection.getInstance().sendCommand(cmd);
+
+            if (resp != null && resp.startsWith("OK TRANSACTION_DELETED")) {
+                // убираем из общего списка и обновляем отображение/диаграммы
+                allOperations.removeIf(op -> op.id == row.id);
+                applyFilters();
+                statusLabel.setText("Операция удалена");
+            } else if (resp != null && resp.startsWith("ERROR NOT_FOUND")) {
+                statusLabel.setText("Операция не найдена (возможно, уже удалена).");
+            } else {
+                statusLabel.setText("Ошибка удаления: " + resp);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка соединения при удалении: " + e.getMessage());
+        }
+    }
+
 // -------------------- ОФОРМЛЕНИЕ СПИСКА --------------------
 
+    // -------------------- ОФОРМЛЕНИЕ СПИСКА --------------------
     private void setupOperationsCellFactory() {
         operationsList.setStyle(
                 "-fx-focus-color: transparent; " +
@@ -757,11 +814,45 @@ public class MainController {
                         "-fx-font-size: 13;"
                 );
 
+                Button deleteBtn = new Button();
+                deleteBtn.setMinWidth(40);
+                deleteBtn.setPrefWidth(40);
+                deleteBtn.setMaxWidth(40);
+                deleteBtn.setStyle(
+                        "-fx-background-color: transparent;" +
+                        "-fx-padding: 4 6 4 6;" +
+                        "-fx-cursor: hand;"
+                );
+
+                javafx.scene.shape.SVGPath trashIcon = new javafx.scene.shape.SVGPath();
+                trashIcon.setContent(
+                        "M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"
+                );
+                trashIcon.setStyle("-fx-fill: #DC2626;"); // красный цвет иконки
+
+                deleteBtn.setGraphic(trashIcon);
+
+                // hover-эффект для кнопки
+                deleteBtn.setOnMouseEntered(e ->
+                        deleteBtn.setStyle("-fx-background-color: #FEE2E2; -fx-padding: 4 6 4 6; -fx-cursor: hand;"));
+                deleteBtn.setOnMouseExited(e ->
+                        deleteBtn.setStyle("-fx-background-color: transparent; -fx-padding: 4 6 4 6; -fx-cursor: hand;"));
+
+                // действие удаления
+                deleteBtn.setOnAction(e -> deleteOperation(item));
+
                 HBox row = new HBox(0);
                 row.setAlignment(Pos.CENTER_LEFT);
                 String bg = (getIndex() % 2 == 0) ? "#FFFFFF" : "#F9F9F9";
                 row.setStyle("-fx-background-color: " + bg + ";");
-                row.getChildren().addAll(amountLabel, categoryLabel, userLabel, dateLabel, timeLabel);
+                row.getChildren().addAll(
+                        amountLabel,
+                        categoryLabel,
+                        userLabel,
+                        dateLabel,
+                        timeLabel,
+                        deleteBtn
+                );
 
                 setText(null);
                 setGraphic(row);
@@ -769,6 +860,7 @@ public class MainController {
             }
         });
     }
+
 
 // -------------------- ДАННЫЕ СЕМЬИ --------------------
 
@@ -918,7 +1010,7 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("analytics-view.fxml")
             );
-            Scene scene = new Scene(loader.load(),900,600);
+            Scene scene = new Scene(loader.load(), 900, 600);
             Stage stage = new Stage();
             stage.setTitle("Аналитика ");
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -1046,7 +1138,6 @@ public class MainController {
     }
 
 
-
 // -------------------- ЛИЧНЫЙ КАБИНЕТ --------------------
 
     @FXML
@@ -1107,7 +1198,6 @@ public class MainController {
             statusLabel.setText("Ошибка экспорта: " + e.getMessage());
         }
     }
-
 
 
     // -------------------- ЭКСПОРТ CSV --------------------
@@ -1308,7 +1398,7 @@ public class MainController {
 
                     String[] p = row.split(":", 4); // id:name:currency:isArchived
                     if (p.length >= 2) {
-                        long id   = Long.parseLong(p[0]);
+                        long id = Long.parseLong(p[0]);
                         String nm = p[1];
                         if (accName.equals(nm)) {
                             return id; // нашли уже существующий счёт
