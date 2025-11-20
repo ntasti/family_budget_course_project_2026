@@ -295,36 +295,6 @@ public class MainController {
         refreshAccountBalance();
     }
 
-//    @FXML
-//    private void onAddOperationClick() {
-//        try {
-//            FXMLLoader loader = new FXMLLoader(
-//                    getClass().getResource("/org/familybudget/familybudget/add-operation-view.fxml")
-//            );
-//            Parent root = loader.load();
-//
-//            AddOperationController ctrl = loader.getController();
-//            if (currentAccount != null) {
-//                ctrl.setCurrentAccount(currentAccount);
-//            }
-//
-//            Stage stage = new Stage();
-//            stage.setTitle("Добавить операцию");
-//            stage.initModality(Modality.WINDOW_MODAL);
-//            stage.initOwner(balanceLabel.getScene().getWindow());
-//            stage.setScene(new Scene(root));
-//            stage.showAndWait();
-//
-//            // после закрытия можно обновить баланс/операции
-//            onRefreshBalance();
-//            onRefreshOperations();
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            // statusLabel.setText("Не удалось открыть окно добавления операции: " + e.getMessage());
-//        }
-//    }
-
 // -------------------- ПЛАН ПО ЗАТРАТ ПО КАТЕГОРИЯМ --------------------
 
     @FXML
@@ -488,28 +458,6 @@ public class MainController {
                 btn.setStyle("-fx-background-color: " + normal + ";" + base));
     }
 
-
-// -------------------- НАСТРОЙКА ВЫБОРА ТИПА ДИАГРАММЫ --------------------
-
-    private void setupChartsControls() {
-        if (chartTypeCombo == null) return;
-
-        chartTypeCombo.setItems(FXCollections.observableArrayList(
-                "Структура расходов",
-                "Структура доходов"
-        ));
-
-        // по умолчанию — структура расходов
-        chartTypeCombo.getSelectionModel().select("Структура расходов");
-
-        chartTypeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            refreshCategoryChart();
-        });
-
-        // если данные уже будут, после загрузки сразу перерисуем
-        refreshCategoryChart();
-    }
-
 // -------------------- ФИЛЬТРЫ --------------------
 
     private void setupFilters() {
@@ -613,26 +561,7 @@ public class MainController {
 
 // -------------------- БАЛАНС --------------------
 
-//@FXML
-//protected void onRefreshBalance() {
-//    try {
-//        String resp = ServerConnection.getInstance().sendCommand("GET_BALANCE");
-//        if (resp == null) {
-//            statusLabel.setText("Нет ответа от сервера");
-//            return;
-//        }
-//        if (resp.startsWith("OK BALANCE=")) {
-//            String value = resp.substring("OK BALANCE=".length()).trim();
-//            balanceLabel.setText(value + " BYN");
-//            statusLabel.setText("");
-//        } else {
-//            statusLabel.setText("Ошибка: " + resp);
-//        }
-//    } catch (IOException e) {
-//        e.printStackTrace();
-//        statusLabel.setText("Ошибка соединения: " + e.getMessage());
-//    }
-//}
+
 
 // -------------------- ИСТОРИЯ ОПЕРАЦИЙ --------------------
 
@@ -957,6 +886,29 @@ public class MainController {
         categoryPieChart.setLabelsVisible(true);
         categoryPieChart.setLegendVisible(true);
     }
+
+
+    // -------------------- НАСТРОЙКА ВЫБОРА ТИПА ДИАГРАММЫ --------------------
+
+    private void setupChartsControls() {
+        if (chartTypeCombo == null) return;
+
+        chartTypeCombo.setItems(FXCollections.observableArrayList(
+                "Структура расходов",
+                "Структура доходов"
+        ));
+
+        // по умолчанию — структура расходов
+        chartTypeCombo.getSelectionModel().select("Структура расходов");
+
+        chartTypeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            refreshCategoryChart();
+        });
+
+        // если данные уже будут, после загрузки сразу перерисуем
+        refreshCategoryChart();
+    }
+
 
 // -------------------- КНОПКИ --------------------
 

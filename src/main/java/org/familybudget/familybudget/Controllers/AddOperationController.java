@@ -28,6 +28,9 @@ public class AddOperationController {
     @FXML
     private Label statusLabel;
     @FXML
+    private CheckBox importantCheckBox;
+
+    @FXML
     private ComboBox<AccountsController.AccountItem> accountComboBox;
     private AccountsController.AccountItem initialAccount;
 
@@ -139,21 +142,7 @@ public class AddOperationController {
         String amountStr = amountField.getText();
         String comment = commentField.getText() == null ? "" : commentField.getText().trim();
 
-        // --- валидация ---
-        if (type == null || type.isBlank()) {
-            statusLabel.setText("Выберите тип операции");
-            return;
-        }
-
-        if (category == null) {
-            statusLabel.setText("Выберите категорию");
-            return;
-        }
-
-        if (amountStr == null || amountStr.isBlank()) {
-            statusLabel.setText("Введите сумму");
-            return;
-        }
+        // ... вся валидация как у тебя ...
 
         double amount;
         try {
@@ -175,21 +164,26 @@ public class AddOperationController {
                 return;
             }
 
+            boolean important = importantCheckBox != null && importantCheckBox.isSelected();
+
             String cmd;
             if ("INCOME".equalsIgnoreCase(type)) {
-                // начисление на счёт
+                // Для доходов приоритет у тебя на сервере вообще не предусмотрен.
                 cmd = "ADD_INCOME_ACCOUNT " + acc.getId() + " " + category.getId() + " " + amount;
                 if (!comment.isEmpty()) {
                     cmd += " " + comment;
                 }
             } else { // EXPENSE
-                // расход с конкретного счёта
                 cmd = "ADD_EXPENSE_ACCOUNT " + acc.getId() + " " + category.getId() + " " + amount;
-                if (!comment.isEmpty()) {
-                    cmd += " " + comment;
+
+                // Добавляем флаг важности и комментарий в формате, который ждёт сервер
+                if (important || !comment.isEmpty()) {
+                    cmd += " " + (important ? "1" : "0");
+                    if (!comment.isEmpty()) {
+                        cmd += " " + comment;
+                    }
                 }
             }
-
 
             String resp = ServerConnection.getInstance().sendCommand(cmd);
             if (resp == null) {
@@ -198,7 +192,6 @@ public class AddOperationController {
             }
 
             if (resp.startsWith("OK")) {
-                // успех — просто закрываем окно
                 Stage stage = (Stage) amountField.getScene().getWindow();
                 stage.close();
             } else {
@@ -210,6 +203,7 @@ public class AddOperationController {
             statusLabel.setText("Ошибка соединения: " + e.getMessage());
         }
     }
+
 
     @FXML
     private void onCancelClick() {

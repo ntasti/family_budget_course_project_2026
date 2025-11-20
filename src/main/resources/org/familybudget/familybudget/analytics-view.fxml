@@ -2,6 +2,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
 
@@ -16,15 +19,27 @@
 
     <top>
         <VBox spacing="10">
-            <Label text="Аналитика расходов по категориям"
+            <Label text="Аналитика"
                    style="-fx-text-fill: #333333;">
                 <font>
                     <Font name="Segoe UI Semibold" size="18"/>
                 </font>
             </Label>
 
-            <HBox spacing="10">
-                <Label text="Период:" style="-fx-text-fill: #555555;"/>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Режим:"
+                       style="-fx-text-fill: #555555;"/>
+
+                <!-- выбор типа диаграммы -->
+                <ComboBox fx:id="viewTypeCombo"
+                          prefWidth="260"
+                          style="-fx-background-radius: 999;
+                             -fx-background-color: #FFFFFF;
+                             -fx-border-color: #E5E7EB;
+                             -fx-border-radius: 999;"/>
+
+                <Label text="Период:"
+                       style="-fx-text-fill: #555555;"/>
 
                 <DatePicker fx:id="fromDatePicker" promptText="с"/>
                 <Label text="—" style="-fx-text-fill: #777777;"/>
@@ -33,10 +48,22 @@
                 <Button text="Показать"
                         onAction="#onCalculateClick"
                         style="-fx-background-color: #4C6FFF;
-                               -fx-background-radius: 999;
-                               -fx-text-fill: white;
-                               -fx-font-weight: bold;
-                               -fx-padding: 4 14;"/>
+                           -fx-background-radius: 999;
+                           -fx-text-fill: white;
+                           -fx-font-weight: bold;
+                           -fx-padding: 4 14;"/>
+            </HBox>
+
+            <!-- 🔹 фильтр по счёту для режима "Приоритеты" -->
+            <HBox fx:id="importanceFilterBox"
+                  spacing="8"
+                  alignment="CENTER_LEFT"
+                  visible="false"
+                  managed="false">
+                <Label text="Счёт:"
+                       style="-fx-text-fill: #555555;"/>
+                <ComboBox fx:id="importanceAccountCombo"
+                          prefWidth="220"/>
             </HBox>
 
             <Label fx:id="statusLabel"
@@ -45,9 +72,29 @@
     </top>
 
     <center>
-        <PieChart fx:id="categoryPieChart"
-                  legendVisible="true"
-                  labelsVisible="true"/>
+        <!-- оба графика в одном месте, будем переключать видимость -->
+        <StackPane>
+            <PieChart fx:id="categoryPieChart"
+                      legendVisible="true"
+                      labelsVisible="true"/>
+
+            <BarChart fx:id="planFactChart"
+                      legendVisible="true"
+                      animated="false">
+                <xAxis>
+                    <CategoryAxis label="Категория"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Сумма"/>
+                </yAxis>
+            </BarChart>
+
+            <PieChart fx:id="importancePieChart"
+                      legendVisible="true"
+                      labelsVisible="true"
+                      visible="false"
+                      managed="false"/>
+        </StackPane>
     </center>
 
     <bottom>
