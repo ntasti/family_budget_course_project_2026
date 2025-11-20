@@ -7,6 +7,9 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -54,20 +57,21 @@
                            -fx-padding: 4 14;"/>
             </HBox>
 
-
-
             <Label fx:id="statusLabel"
                    style="-fx-text-fill: #D32F2F; -fx-font-size: 12;"/>
         </VBox>
     </top>
 
     <center>
-        <!-- оба графика в одном месте, будем переключать видимость -->
+        <!-- все варианты аналитики, видимостью управляет контроллер -->
         <StackPane>
+
+            <!-- Расходы по категориям -->
             <PieChart fx:id="categoryPieChart"
                       legendVisible="true"
                       labelsVisible="true"/>
 
+            <!-- План / факт по категориям -->
             <BarChart fx:id="planFactChart"
                       legendVisible="true"
                       animated="false">
@@ -79,11 +83,32 @@
                 </yAxis>
             </BarChart>
 
+            <!-- Важные / неважные -->
             <PieChart fx:id="importancePieChart"
                       legendVisible="true"
                       labelsVisible="true"
                       visible="false"
                       managed="false"/>
+
+            <!-- Обзор по месяцам (карточки как на картинке) -->
+            <VBox fx:id="monthlyOverviewBox"
+                  spacing="8"
+                  visible="false"
+                  managed="false">
+                <Label text="Обзор по месяцам"
+                       style="-fx-text-fill: #555555; -fx-font-weight: bold;"/>
+                <ScrollPane fitToWidth="true"
+                            hbarPolicy="NEVER"
+                            vbarPolicy="AS_NEEDED"
+                            style="-fx-background-color: transparent;">
+                    <content>
+                        <VBox fx:id="monthlyCardsContainer"
+                              spacing="8"
+                              fillWidth="true"/>
+                    </content>
+                </ScrollPane>
+            </VBox>
+
         </StackPane>
     </center>
 
