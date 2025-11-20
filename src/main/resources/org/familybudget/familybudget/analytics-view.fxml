@@ -54,17 +54,7 @@
                            -fx-padding: 4 14;"/>
             </HBox>
 
-            <!-- 🔹 фильтр по счёту для режима "Приоритеты" -->
-            <HBox fx:id="importanceFilterBox"
-                  spacing="8"
-                  alignment="CENTER_LEFT"
-                  visible="false"
-                  managed="false">
-                <Label text="Счёт:"
-                       style="-fx-text-fill: #555555;"/>
-                <ComboBox fx:id="importanceAccountCombo"
-                          prefWidth="220"/>
-            </HBox>
+
 
             <Label fx:id="statusLabel"
                    style="-fx-text-fill: #D32F2F; -fx-font-size: 12;"/>

@@ -918,9 +918,9 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("analytics-view.fxml")
             );
-            Scene scene = new Scene(loader.load());
+            Scene scene = new Scene(loader.load(),900,600);
             Stage stage = new Stage();
-            stage.setTitle("Аналитика расходов");
+            stage.setTitle("Аналитика ");
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(scene);
             stage.showAndWait();

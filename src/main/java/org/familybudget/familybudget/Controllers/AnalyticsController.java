@@ -18,8 +18,7 @@ import java.util.*;
 public class AnalyticsController {
 
     @FXML private PieChart importancePieChart;
-    @FXML private ComboBox<AccountsController.AccountItem> importanceAccountCombo;
-    @FXML private HBox importanceFilterBox;
+
     @FXML
     private DatePicker fromDatePicker;
 
@@ -87,26 +86,16 @@ public class AnalyticsController {
         boolean isPlanFact = "План / факт по категориям".equals(mode);
         boolean isImportance = "Приоритеты (важно/неважно)".equals(mode);
 
-        if (categoryPieChart != null) {
-            categoryPieChart.setVisible(isCategories);
-            categoryPieChart.setManaged(isCategories);
-        }
+        categoryPieChart.setVisible(isCategories);
+        categoryPieChart.setManaged(isCategories);
 
-        if (planFactChart != null) {
-            planFactChart.setVisible(isPlanFact);
-            planFactChart.setManaged(isPlanFact);
-        }
+        planFactChart.setVisible(isPlanFact);
+        planFactChart.setManaged(isPlanFact);
 
-        if (importancePieChart != null) {
-            importancePieChart.setVisible(isImportance);
-            importancePieChart.setManaged(isImportance);
-        }
-
-        if (importanceFilterBox != null) {
-            importanceFilterBox.setVisible(isImportance);
-            importanceFilterBox.setManaged(isImportance);
-        }
+        importancePieChart.setVisible(isImportance);
+        importancePieChart.setManaged(isImportance);
     }
+
 
 
     @FXML
@@ -314,6 +303,7 @@ public class AnalyticsController {
     }
 
     // важные неывжные ранзакции
+    // важные / неважные транзакции
     private void loadImportanceAnalytics() {
         LocalDate from = fromDatePicker.getValue();
         LocalDate to = toDatePicker.getValue();
@@ -327,16 +317,8 @@ public class AnalyticsController {
             return;
         }
 
-        AccountsController.AccountItem acc = importanceAccountCombo.getValue();
-
-        String mode;
-        if (acc == null || acc.getId() < 0) {
-            mode = "ALL";
-        } else {
-            mode = "ACCOUNT " + acc.getId();
-        }
-
-        String cmd = "ANALYTICS_IMPORTANCE " + from + " " + to + " " + mode;
+        // считаем по всем счетам
+        String cmd = "ANALYTICS_IMPORTANCE " + from + " " + to + " ALL";
 
         try {
             String resp = ServerConnection.getInstance().sendCommand(cmd);
@@ -355,31 +337,54 @@ public class AnalyticsController {
                 String[] kv = part.split(":");
                 if (kv.length != 2) continue;
 
-                if (kv[0].equals("IMPORTANT")) important = Double.parseDouble(kv[1]);
-                if (kv[0].equals("NOT_IMPORTANT")) notImportant = Double.parseDouble(kv[1]);
+                if ("IMPORTANT".equals(kv[0])) {
+                    important = Double.parseDouble(kv[1]);
+                } else if ("NOT_IMPORTANT".equals(kv[0])) {
+                    notImportant = Double.parseDouble(kv[1]);
+                }
             }
-
-            List<PieChart.Data> list = new ArrayList<>();
-
-            if (important > 0)
-                list.add(new PieChart.Data("Важные", important));
-
-            if (notImportant > 0)
-                list.add(new PieChart.Data("Неважные", notImportant));
-
-            importancePieChart.setData(FXCollections.observableArrayList(list));
 
             double total = important + notImportant;
 
+            // если вообще нет расходов
+            if (total <= 0) {
+                importancePieChart.setData(FXCollections.observableArrayList());
+                statusLabel.setText("За выбранный период расходов нет.");
+                summaryLabel.setText("");
+                return;
+            }
+
+            // подписи с суммой
+            List<PieChart.Data> list = new ArrayList<>();
+
+            if (important > 0) {
+                list.add(new PieChart.Data(
+                        String.format("Важные (%.0f BYN)", important),
+                        important
+                ));
+            }
+
+            if (notImportant > 0) {
+                list.add(new PieChart.Data(
+                        String.format("Неважные (%.0f BYN)", notImportant),
+                        notImportant
+                ));
+            }
+
+            importancePieChart.setData(FXCollections.observableArrayList(list));
+
             summaryLabel.setText(String.format(
                     "Важные: %.0f BYN (%.1f%%), неважные: %.0f BYN (%.1f%%)",
-                    important, important / total * 100,
-                    notImportant, notImportant / total * 100
+                    important, important / total * 100.0,
+                    notImportant, notImportant / total * 100.0
             ));
+            statusLabel.setText("");
 
         } catch (Exception e) {
+            e.printStackTrace();
             statusLabel.setText("Ошибка соединения: " + e.getMessage());
         }
     }
+
 
 }
