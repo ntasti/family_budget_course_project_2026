@@ -177,7 +177,21 @@ public class MainController {
             manageCategoriesButton.setVisible(isAdmin);
             manageCategoriesButton.setManaged(isAdmin);
         }
-
+        // показать / скрыть кнопку импорт json
+        if (importButton != null) {
+            importButton.setVisible(isAdmin);
+            importButton.setManaged(isAdmin);
+        }
+        // показать / скрыть кнопку план по категориям
+        if (categoryPlanButton != null) {
+            categoryPlanButton.setVisible(isAdmin);
+            categoryPlanButton.setManaged(isAdmin);
+        }
+        // показать / скрыть кнопку счетов
+        if (accountsButton != null) {
+            accountsButton.setVisible(isAdmin);
+            accountsButton.setManaged(isAdmin);
+        }
         // крупные тулбар-кнопки
         setupToolbarButton(addOperationButton);
         setupToolbarButton(manageCategoriesButton);
