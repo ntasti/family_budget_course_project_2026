@@ -54,10 +54,9 @@
                      -fx-effect: dropshadow(gaussian, rgba(15,26,54,0.18), 22, 0.1, 0, 8);
                      -fx-font-family: 'Segoe UI';">
 
-            <!-- Шапка карточки: аватар + имя + почта -->
+            <!-- Шапка карточки-->
             <HBox spacing="16" alignment="CENTER_LEFT">
 
-                <!-- Простая "заглушка"-аватар -->
                 <VBox alignment="CENTER" spacing="2"
                       prefHeight="52" prefWidth="52"
                       style="-fx-background-color: linear-gradient(to bottom right, #5C6BC0, #3949AB);

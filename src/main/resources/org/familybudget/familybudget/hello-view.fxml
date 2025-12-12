@@ -11,64 +11,78 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="420" prefWidth="800" spacing="10" style="-fx-background-color: #F0F2F5;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.familybudget.familybudget.Controllers.LoginController">
+<VBox alignment="CENTER" prefHeight="420" prefWidth="800" spacing="10" style="-fx-background-color: #F0F2F5;"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.familybudget.familybudget.Controllers.LoginController">
 
     <padding>
-        <Insets bottom="40" left="40" right="40" top="40" />
+        <Insets bottom="40" left="40" right="40" top="40"/>
     </padding>
 
     <children>
 
-        <!-- Карточка логина (внутри делим на левую/правую половину) -->
-        <VBox alignment="CENTER" prefWidth="700" spacing="0" style="-fx-background-color: #FFFFFF;                      -fx-background-radius: 16;                      -fx-padding: 0;                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 18, 0, 0, 4);                      -fx-font-family: 'Segoe UI';">
+        <!-- Карточка логина -->
+        <VBox alignment="CENTER" prefWidth="700" spacing="0"
+              style="-fx-background-color: #FFFFFF;                      -fx-background-radius: 16;                      -fx-padding: 0;                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 18, 0, 0, 4);                      -fx-font-family: 'Segoe UI';">
 
             <!-- Две половины внутри карточки -->
             <HBox fillHeight="true" spacing="0">
 
-                <!-- Левая половина: логотип + большая надпись, фон #FCFCFC -->
-                <VBox alignment="CENTER" prefWidth="320" spacing="20" style="-fx-background-color: #FCFCFC;                              -fx-background-radius: 16 0 0 16;                              -fx-padding: 24 20 24 24;">
+                <!-- Левая половина-->
+                <VBox alignment="CENTER" prefWidth="320" spacing="20"
+                      style="-fx-background-color: #FCFCFC;                              -fx-background-radius: 16 0 0 16;                              -fx-padding: 24 20 24 24;">
 
                     <ImageView fitWidth="140" preserveRatio="true">
                         <image>
-                            <!-- путь к картинке из resources/image/logo.png -->
-                            <Image url="@image/logo.png" />
+                            <Image url="@image/logo.png"/>
                         </image>
                     </ImageView>
 
-                    <Label style="-fx-text-fill: #222222; -fx-text-alignment: center;" text="Планирование и учёт семейного бюджета" wrapText="true">
+                    <Label style="-fx-text-fill: #222222; -fx-text-alignment: center;"
+                           text="Планирование и учёт семейного бюджета" wrapText="true">
                         <font>
-                            <Font name="Century Gothic" size="24.0" />
+                            <Font name="Century Gothic" size="24.0"/>
                         </font>
                     </Label>
                 </VBox>
 
                 <!-- Правая половина: авторизация -->
-                <VBox alignment="CENTER" prefWidth="320" spacing="14" style="-fx-background-color: #FFFFFF;                              -fx-background-radius: 0 16 16 0;                              -fx-padding: 28 28 24 28;">
+                <VBox alignment="CENTER" prefWidth="320" spacing="14"
+                      style="-fx-background-color: #FFFFFF;                              -fx-background-radius: 0 16 16 0;                              -fx-padding: 28 28 24 28;">
 
                     <!-- Заголовок -->
                     <Label style="-fx-text-fill: #222222;" text="Авторизация">
                         <font>
-                            <Font name="Segoe UI Semibold" size="22" />
+                            <Font name="Segoe UI Semibold" size="22"/>
                         </font>
                     </Label>
 
                     <!-- Логин -->
-                    <TextField fx:id="loginField" maxWidth="260" promptText="Логин" style="-fx-background-color: #F5F5F5;                                       -fx-background-radius: 8;                                       -fx-border-color: #DDDDDD;                                       -fx-border-radius: 8;                                       -fx-text-fill: #222222;                                       -fx-prompt-text-fill: #999999;                                       -fx-padding: 8 12;                                       -fx-font-size: 13;" />
+                    <TextField fx:id="loginField" maxWidth="260" promptText="Логин"
+                               style="-fx-background-color: #F5F5F5;                                       -fx-background-radius: 8;                                       -fx-border-color: #DDDDDD;                                       -fx-border-radius: 8;                                       -fx-text-fill: #222222;                                       -fx-prompt-text-fill: #999999;                                       -fx-padding: 8 12;                                       -fx-font-size: 13;"/>
 
                     <!-- Пароль -->
-                    <PasswordField fx:id="passwordField" maxWidth="260" promptText="Пароль" style="-fx-background-color: #F5F5F5;                                           -fx-background-radius: 8;                                           -fx-border-color: #DDDDDD;                                           -fx-border-radius: 8;                                           -fx-text-fill: #222222;                                           -fx-prompt-text-fill: #999999;                                           -fx-padding: 8 12;                                           -fx-font-size: 13;" />
+                    <PasswordField fx:id="passwordField" maxWidth="260" promptText="Пароль"
+                                   style="-fx-background-color: #F5F5F5;                                           -fx-background-radius: 8;                                           -fx-border-color: #DDDDDD;                                           -fx-border-radius: 8;                                           -fx-text-fill: #222222;                                           -fx-prompt-text-fill: #999999;                                           -fx-padding: 8 12;                                           -fx-font-size: 13;"/>
 
                     <!-- Войти -->
-                    <Button fx:id="loginButton" defaultButton="true" maxWidth="260" onAction="#onLoginClick" style="-fx-background-color: #4C6FFF;                                    -fx-background-radius: 999;                                    -fx-text-fill: #FFFFFF;                                    -fx-font-size: 14;                                    -fx-font-weight: bold;                                    -fx-padding: 8 0;" text="Войти">
-                  <font>
-                     <Font name="System Italic" size="12.0" />
-                  </font></Button>
+                    <Button fx:id="loginButton" defaultButton="true" maxWidth="260" onAction="#onLoginClick"
+                            style="-fx-background-color: #4C6FFF;                                    -fx-background-radius: 999;                                    -fx-text-fill: #FFFFFF;                                    -fx-font-size: 14;                                    -fx-font-weight: bold;                                    -fx-padding: 8 0;"
+                            text="Войти">
+                        <font>
+                            <Font name="System Italic" size="12.0"/>
+                        </font>
+                    </Button>
 
                     <!-- Регистрация -->
-                    <Button maxWidth="260" onAction="#onRegisterClick" style="-fx-background-color: #E0E0E0;                                    -fx-background-radius: 999;                                    -fx-text-fill: #333333;                                    -fx-font-weight: bold;                                    -fx-font-size: 14;                                    -fx-padding: 8 0;" text="Регистрация" />
+                    <Button maxWidth="260" onAction="#onRegisterClick"
+                            style="-fx-background-color: #E0E0E0;                                    -fx-background-radius: 999;                                    -fx-text-fill: #333333;                                    -fx-font-weight: bold;                                    -fx-font-size: 14;                                    -fx-padding: 8 0;"
+                            text="Регистрация"/>
 
                     <!-- Статус -->
-                    <Label fx:id="statusLabel" style="-fx-text-fill: #D32F2F;                                   -fx-font-size: 11;" text="" />
+                    <Label fx:id="statusLabel"
+                           style="-fx-text-fill: #D32F2F;                                   -fx-font-size: 11;"
+                           text=""/>
                 </VBox>
 
             </HBox>

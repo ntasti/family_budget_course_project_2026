@@ -4,10 +4,8 @@ import org.familybudget.familybudget.Controllers.MainController;
 
 import java.io.Serializable;
 
-/**
- * DTO для сериализации операций в файл.
- * Теперь содержит также данные счёта (id + name).
- */
+
+//класс для сериализации операций в файл.
 public class OperationExportItem implements Serializable {
 
     private static final long serialVersionUID = 2L;
@@ -22,20 +20,18 @@ public class OperationExportItem implements Serializable {
     private long accountId;
     private String accountName;
 
-    public OperationExportItem(MainController.OperationRow row,
-                               long accountId,
-                               String accountName) {
-        this.type        = row.type;
-        this.amount      = row.amount;
-        this.category    = row.category;
-        this.user        = row.user;
-        this.date        = row.date;
-        this.time        = row.time;
-        this.accountId   = accountId;
+    public OperationExportItem(MainController.OperationRow row, long accountId, String accountName) {
+        this.type = row.type;
+        this.amount = row.amount;
+        this.category = row.category;
+        this.user = row.user;
+        this.date = row.date;
+        this.time = row.time;
+        this.accountId = accountId;
         this.accountName = accountName;
     }
 
-    // пустой конструктор на всякий случай (для сериализации/десериализации)
+    // пустой конструктор для сериализации/десериализации
     public OperationExportItem() {
     }
 

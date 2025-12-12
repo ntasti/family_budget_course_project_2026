@@ -12,11 +12,9 @@ import javafx.stage.Stage;
 import org.familybudget.familybudget.Server.ServerConnection;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
+//плановая операция
+//planned-operation-view.fxml
 public class PlannedOperationsController {
 
     @FXML
@@ -142,6 +140,7 @@ public class PlannedOperationsController {
         loadPlanned();
     }
 
+    //удаление
     @FXML
     private void onDeleteClick() {
         PlannedItem selected = plannedTable.getSelectionModel().getSelectedItem();
@@ -174,6 +173,7 @@ public class PlannedOperationsController {
         }
     }
 
+    //закрыть окно
     @FXML
     private void onCloseClick() {
         Stage stage = (Stage) plannedTable.getScene().getWindow();
@@ -206,7 +206,7 @@ public class PlannedOperationsController {
         }
     }
 
-    // --- Модель строки для таблицы ---
+    //модель строки для таблицы
     public static class PlannedItem {
         private final long id;
         private final String type;

@@ -11,10 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
+//добавление транзакции
+//add-operation-view
 public class AddOperationController {
 
     @FXML
-    private ComboBox<String> typeComboBox;      // "INCOME" / "EXPENSE"
+    private ComboBox<String> typeComboBox;
 
     @FXML
     private ComboBox<CategoryItem> categoryComboBox;
@@ -33,30 +35,6 @@ public class AddOperationController {
     @FXML
     private ComboBox<AccountsController.AccountItem> accountComboBox;
     private AccountsController.AccountItem initialAccount;
-
-    // маленькая модель категории
-    public static class CategoryItem {
-        private final long id;
-        protected final String name;
-
-        public CategoryItem(long id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String toString() {
-            return name; // так будет отображаться в ComboBox
-        }
-    }
 
     @FXML
     private void initialize() {
@@ -83,7 +61,7 @@ public class AddOperationController {
         }
     }
 
-
+    //выгрузка категорий
     private void loadCategories() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("LIST_CATEGORIES");
@@ -133,6 +111,7 @@ public class AddOperationController {
         }
     }
 
+    //сохранение транзакции
     @FXML
     private void onSaveClick() {
         statusLabel.setText("");
@@ -142,7 +121,6 @@ public class AddOperationController {
         String amountStr = amountField.getText();
         String comment = commentField.getText() == null ? "" : commentField.getText().trim();
 
-        // ... вся валидация как у тебя ...
 
         double amount;
         try {
@@ -168,7 +146,6 @@ public class AddOperationController {
 
             String cmd;
             if ("INCOME".equalsIgnoreCase(type)) {
-                // Для доходов приоритет у тебя на сервере вообще не предусмотрен.
                 cmd = "ADD_INCOME_ACCOUNT " + acc.getId() + " " + category.getId() + " " + amount;
                 if (!comment.isEmpty()) {
                     cmd += " " + comment;
@@ -176,7 +153,6 @@ public class AddOperationController {
             } else { // EXPENSE
                 cmd = "ADD_EXPENSE_ACCOUNT " + acc.getId() + " " + category.getId() + " " + amount;
 
-                // Добавляем флаг важности и комментарий в формате, который ждёт сервер
                 if (important || !comment.isEmpty()) {
                     cmd += " " + (important ? "1" : "0");
                     if (!comment.isEmpty()) {
@@ -204,26 +180,25 @@ public class AddOperationController {
         }
     }
 
-
+    //закрытие окна
     @FXML
     private void onCancelClick() {
         Stage stage = (Stage) amountField.getScene().getWindow();
         stage.close();
     }
 
+    //выбор счета для перевода
     public void setCurrentAccount(AccountsController.AccountItem acc) {
         if (acc == null) return;
 
-        // запоминаем, какой счёт должен быть выбран
         this.initialAccount = acc;
 
-        // если ComboBox уже инициализирован и в нём есть элементы – сразу выберем
         if (accountComboBox != null && accountComboBox.getItems() != null && !accountComboBox.getItems().isEmpty()) {
             selectAccount(acc);
         }
     }
 
-
+    //загрузка счетов
     private void loadAccounts() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("LIST_ACCOUNTS");
@@ -253,6 +228,7 @@ public class AddOperationController {
         }
     }
 
+    //выбор счетов
     private void selectAccount(AccountsController.AccountItem acc) {
         if (accountComboBox == null || acc == null) return;
 
@@ -263,6 +239,30 @@ public class AddOperationController {
             }
         }
 
+    }
+
+    // модель для выбора категории
+    public static class CategoryItem {
+        private final long id;
+        protected final String name;
+
+        public CategoryItem(long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return name; // так будет отображаться в ComboBox
+        }
     }
 
 }

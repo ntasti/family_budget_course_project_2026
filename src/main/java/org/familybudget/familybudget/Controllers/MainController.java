@@ -29,6 +29,8 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+//главная страница
+//main-view.fxml
 public class MainController {
 
     private static MainController instance;
@@ -71,19 +73,15 @@ public class MainController {
     @FXML
     private Button logoutButton;
 
-    // сериализация (dat)
     @FXML
     private Button exportButton;
 
-    // экспорт CSV
     @FXML
     private Button exportCsvButton;
 
-    // импорт .dat
     @FXML
     private Button importButton;
 
-    // Фильтры
     @FXML
     private ComboBox<String> typeFilterCombo;
 
@@ -99,7 +97,6 @@ public class MainController {
     @FXML
     private DatePicker toDatePicker;
 
-    // analytics
     @FXML
     private Button analyticsButton;
     @FXML
@@ -108,7 +105,7 @@ public class MainController {
     private Button openPlannedListButton;
     @FXML
     private Button accountsButton;
-    // ОДНА круговая диаграмма + выбор типа
+
     @FXML
     private PieChart categoryPieChart;
 
@@ -123,40 +120,12 @@ public class MainController {
     private Label accountBalanceLabel;
     private AccountsController.AccountItem currentAccount;
 
-
-    // агрегированные данные по категориям
+    // данные по категориям
     private Map<String, Double> incomeTotalsByCategory = new HashMap<>();
     private Map<String, Double> expenseTotalsByCategory = new HashMap<>();
 
     // полный список операций (до фильтрации)
     private final List<OperationRow> allOperations = new ArrayList<>();
-
-    // модель строки
-    public static class OperationRow {
-        public long id;        // <--- НОВОЕ
-        public String type;    // INCOME / EXPENSE
-        public double amount;
-        public String category;
-        public String user;
-        public String date;    // "2025-11-14"
-        public String time;    // "14:35"
-
-        public OperationRow(long id,
-                            String type,
-                            double amount,
-                            String category,
-                            String user,
-                            String date,
-                            String time) {
-            this.id = id;
-            this.type = type;
-            this.amount = amount;
-            this.category = category;
-            this.user = user;
-            this.date = date;
-            this.time = time;
-        }
-    }
 
 
     @FXML
@@ -164,10 +133,9 @@ public class MainController {
         String login = SessionContext.getLogin();
         String rawRole = SessionContext.getRole();
 
-        // определяем, админ ли пользователь
+        // определение роли пользователя
         boolean isAdmin = "ADMIN".equalsIgnoreCase(rawRole) || "1".equals(rawRole);
 
-        // красивый текст роли для отображения
         String roleLabel = isAdmin ? "ADMIN" : rawRole;
 
         userInfoLabel.setText("Пользователь: " + login);
@@ -192,7 +160,7 @@ public class MainController {
             accountsButton.setVisible(isAdmin);
             accountsButton.setManaged(isAdmin);
         }
-        // крупные тулбар-кнопки
+        // тулбар кнопки
         setupToolbarButton(addOperationButton);
         setupToolbarButton(manageCategoriesButton);
         setupToolbarButton(analyticsButton);
@@ -207,15 +175,14 @@ public class MainController {
         loadFamilyInfo();
         setupOperationsCellFactory();
         setupFilters();
-        setupChartsControls(); // <-- твой код для диаграмм
-
+        setupChartsControls();
         onRefreshBalance();
         onRefreshOperations();
     }
 
+    //ВЫБОР СЧЕТА
 
-    // -------------------- ВЫБОР СЧЕТА --------------------
-
+    //список счетов LIST_ACCOUNTS
     private void loadAccountsForSelector() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("LIST_ACCOUNTS");
@@ -301,7 +268,7 @@ public class MainController {
         }
     }
 
-
+    //выбор счета
     @FXML
     private void onAccountSelectorChanged() {
         currentAccount = accountSelector.getValue();
@@ -309,25 +276,26 @@ public class MainController {
         onRefreshOperations();
     }
 
+    //обновление баланса
     @FXML
     private void onRefreshBalance() {
         refreshAccountBalance();
     }
 
-// -------------------- ПЛАН ПО ЗАТРАТ ПО КАТЕГОРИЯМ --------------------
+    //ПЛАН ЗАТРАТ ПО КАТЕГОРИЯМ
 
+    //открытие окна управления планом по категориям
     @FXML
     private void onOpenCategoryPlanClick() {
 
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("category-plan-list-view.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("category-plan-list-view.fxml"));
             Scene scene = new Scene(loader.load(), 650, 400);
             Stage stage = new Stage();
             stage.setTitle("План по категориям");
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(scene);
+            stage.getIcons().add(new javafx.scene.image.Image(HelloApplication.class.getResourceAsStream("logo.png")));
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -335,6 +303,7 @@ public class MainController {
         }
     }
 
+    //обновление баланса GET_ACCOUNT_BALANCE
     private void refreshAccountBalance() {
         if (currentAccount == null) {
             accountBalanceLabel.setText("Баланс: —");
@@ -342,8 +311,7 @@ public class MainController {
         }
 
         try {
-            String resp = ServerConnection.getInstance()
-                    .sendCommand("GET_ACCOUNT_BALANCE " + currentAccount.getId());
+            String resp = ServerConnection.getInstance().sendCommand("GET_ACCOUNT_BALANCE " + currentAccount.getId());
 
             if (resp != null && resp.startsWith("OK ACCOUNT_BALANCE=")) {
                 String val = resp.substring("OK ACCOUNT_BALANCE=".length()).trim();
@@ -357,7 +325,9 @@ public class MainController {
         }
     }
 
+    //СЧЕТА
 
+    //счета LIST_ACCOUNTS
     @FXML
     private void initAccounts() {
         try {
@@ -400,13 +370,11 @@ public class MainController {
             }
 
             // слушатель смены счёта
-            accountSelector.getSelectionModel()
-                    .selectedItemProperty()
-                    .addListener((obsVal, oldVal, newVal) -> {
-                        currentAccount = newVal;
-                        refreshAccountBalance();
-                        // тут же можно перезагружать список операций по счёту
-                    });
+            accountSelector.getSelectionModel().selectedItemProperty().addListener((obsVal, oldVal, newVal) -> {
+                currentAccount = newVal;
+                refreshAccountBalance();
+                // тут же можно перезагружать список операций по счёту
+            });
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -414,12 +382,11 @@ public class MainController {
         }
     }
 
+    //открытие окна счетов
     @FXML
     private void onAccountsButtonClick() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("accounts-view.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("accounts-view.fxml"));
             Scene scene = new Scene(loader.load());
             Stage stage = new Stage();
             stage.setTitle("Счета");
@@ -429,9 +396,9 @@ public class MainController {
             stage.setResizable(false);
             stage.showAndWait();
 
-            // 👇 после закрытия окна счетов:
-            loadAccountsForSelector();   // вдруг добавили/удалили счёт
-            refreshAccountBalance();     // и обязательно обновим баланс текущего счёта
+            //после закрытия окна счетов
+            loadAccountsForSelector();   // обновление списка счетов
+            refreshAccountBalance();     // обновление балансса
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -439,54 +406,38 @@ public class MainController {
         }
     }
 
-
-// -------------------- СТИЛИ КНОПОК --------------------
+    //СТИЛИ КНОПОК
 
     private void setupHoverDark(Button btn, String normal, String hover) {
         if (btn == null) return;
-        String base = "-fx-background-radius: 999; " +
-                      "-fx-text-fill: white; " +
-                      "-fx-font-weight: bold; " +
-                      "-fx-padding: 6 14;";
+        String base = "-fx-background-radius: 999; " + "-fx-text-fill: white; " + "-fx-font-weight: bold; " + "-fx-padding: 6 14;";
 
         btn.setStyle("-fx-background-color: " + normal + ";" + base);
 
-        btn.setOnMouseEntered(e ->
-                btn.setStyle("-fx-background-color: " + hover + ";" + base));
+        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: " + hover + ";" + base));
 
-        btn.setOnMouseExited(e ->
-                btn.setStyle("-fx-background-color: " + normal + ";" + base));
+        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + normal + ";" + base));
     }
 
     private void setupToolbarButton(Button btn) {
         if (btn == null) return;
-        String base = "-fx-background-radius: 999; " +
-                      "-fx-text-fill: #333333; " +
-                      "-fx-font-weight: bold; " +
-                      "-fx-padding: 7 14; " +
-                      "-fx-font-size: 13;";
+        String base = "-fx-background-radius: 999; " + "-fx-text-fill: #333333; " + "-fx-font-weight: bold; " + "-fx-padding: 7 14; " + "-fx-font-size: 13;";
 
         String normal = "#FFFFFF";
         String hover = "#E0E0E0";
 
         btn.setStyle("-fx-background-color: " + normal + ";" + base);
 
-        btn.setOnMouseEntered(e ->
-                btn.setStyle("-fx-background-color: " + hover + ";" + base));
+        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: " + hover + ";" + base));
 
-        btn.setOnMouseExited(e ->
-                btn.setStyle("-fx-background-color: " + normal + ";" + base));
+        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + normal + ";" + base));
     }
 
-// -------------------- ФИЛЬТРЫ --------------------
+    // ФИЛЬТРЫ
 
     private void setupFilters() {
         if (typeFilterCombo != null) {
-            typeFilterCombo.setItems(FXCollections.observableArrayList(
-                    "Все операции",
-                    "Только доходы",
-                    "Только расходы"
-            ));
+            typeFilterCombo.setItems(FXCollections.observableArrayList("Все операции", "Только доходы", "Только расходы"));
             typeFilterCombo.getSelectionModel().selectFirst();
             typeFilterCombo.valueProperty().addListener((obs, o, n) -> applyFilters());
         }
@@ -517,31 +468,23 @@ public class MainController {
         if (typeFilterCombo != null) {
             String typeFilter = typeFilterCombo.getValue();
             if ("Только доходы".equals(typeFilter)) {
-                filtered = filtered.stream()
-                        .filter(o -> "INCOME".equalsIgnoreCase(o.type))
-                        .collect(Collectors.toList());
+                filtered = filtered.stream().filter(o -> "INCOME".equalsIgnoreCase(o.type)).collect(Collectors.toList());
             } else if ("Только расходы".equals(typeFilter)) {
-                filtered = filtered.stream()
-                        .filter(o -> "EXPENSE".equalsIgnoreCase(o.type))
-                        .collect(Collectors.toList());
+                filtered = filtered.stream().filter(o -> "EXPENSE".equalsIgnoreCase(o.type)).collect(Collectors.toList());
             }
         }
 
         if (categoryFilterCombo != null) {
             String catFilter = categoryFilterCombo.getValue();
             if (catFilter != null && !"Все категории".equals(catFilter)) {
-                filtered = filtered.stream()
-                        .filter(o -> catFilter.equals(o.category))
-                        .collect(Collectors.toList());
+                filtered = filtered.stream().filter(o -> catFilter.equals(o.category)).collect(Collectors.toList());
             }
         }
 
         if (userFilterCombo != null) {
             String userFilter = userFilterCombo.getValue();
             if (userFilter != null && !"Все пользователи".equals(userFilter)) {
-                filtered = filtered.stream()
-                        .filter(o -> userFilter.equals(o.user))
-                        .collect(Collectors.toList());
+                filtered = filtered.stream().filter(o -> userFilter.equals(o.user)).collect(Collectors.toList());
             }
         }
 
@@ -549,18 +492,16 @@ public class MainController {
         LocalDate to = (toDatePicker != null) ? toDatePicker.getValue() : null;
 
         if (from != null || to != null) {
-            filtered = filtered.stream()
-                    .filter(o -> {
-                        try {
-                            LocalDate d = LocalDate.parse(o.date); // только дата, без времени
-                            if (from != null && d.isBefore(from)) return false;
-                            if (to != null && d.isAfter(to)) return false;
-                            return true;
-                        } catch (DateTimeParseException e) {
-                            return false;
-                        }
-                    })
-                    .collect(Collectors.toList());
+            filtered = filtered.stream().filter(o -> {
+                try {
+                    LocalDate d = LocalDate.parse(o.date); // только дата, без времени
+                    if (from != null && d.isBefore(from)) return false;
+                    if (to != null && d.isAfter(to)) return false;
+                    return true;
+                } catch (DateTimeParseException e) {
+                    return false;
+                }
+            }).collect(Collectors.toList());
         }
 
         operationsList.setItems(FXCollections.observableArrayList(filtered));
@@ -579,11 +520,9 @@ public class MainController {
         applyFilters();
     }
 
-// -------------------- БАЛАНС --------------------
+    //ИСТОРИЯ ОПЕРАЦИЙ
 
-
-// -------------------- ИСТОРИЯ ОПЕРАЦИЙ --------------------
-
+    //список операций GET_OPERATIONS_ACCOUNT
     @FXML
     protected void onRefreshOperations() {
         // 1. нет выбранного счёта — нет операций
@@ -617,8 +556,6 @@ public class MainController {
                     String line = item.trim();
                     if (line.isEmpty()) continue;
 
-                    // формат строки с сервера:
-                    // id:type:categoryName:amount:userLogin:2024-12-08 14:35
                     String[] parts = line.split(":", 6);
                     if (parts.length < 6) {
                         System.out.println("Некорректная строка: " + line);
@@ -657,21 +594,11 @@ public class MainController {
                         }
                     }
 
-                    allOperations.add(new OperationRow(
-                            id,
-                            type,
-                            amount,
-                            category,
-                            user,
-                            date,
-                            time
-                    ));
+                    allOperations.add(new OperationRow(id, type, amount, category, user, date, time));
                 }
 
-                // сортируем по дате и времени (от новых к старым)
-                Comparator<OperationRow> cmp =
-                        Comparator.<OperationRow, String>comparing(o -> o.date)
-                                .thenComparing(o -> o.time);
+                // сортируем по дате и времени от новых к старым
+                Comparator<OperationRow> cmp = Comparator.<OperationRow, String>comparing(o -> o.date).thenComparing(o -> o.time);
                 allOperations.sort(cmp.reversed());
             }
 
@@ -679,7 +606,7 @@ public class MainController {
 
             updateCategoryFilterItems();
             updateUserFilterItems();
-            applyFilters(); // обновит ListView и диаграммы
+            applyFilters(); // обновить ListView и диаграммы
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -687,13 +614,11 @@ public class MainController {
         }
     }
 
+    //обновление списка по категориям
     private void updateCategoryFilterItems() {
         if (categoryFilterCombo == null) return;
 
-        Set<String> cats = allOperations.stream()
-                .map(o -> o.category)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(TreeSet::new));
+        Set<String> cats = allOperations.stream().map(o -> o.category).filter(Objects::nonNull).collect(Collectors.toCollection(TreeSet::new));
 
         List<String> values = new ArrayList<>();
         values.add("Все категории");
@@ -703,13 +628,11 @@ public class MainController {
         categoryFilterCombo.getSelectionModel().selectFirst();
     }
 
+    //обновление списка по пользователям
     private void updateUserFilterItems() {
         if (userFilterCombo == null) return;
 
-        Set<String> users = allOperations.stream()
-                .map(o -> o.user)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(TreeSet::new));
+        Set<String> users = allOperations.stream().map(o -> o.user).filter(Objects::nonNull).collect(Collectors.toCollection(TreeSet::new));
 
         List<String> values = new ArrayList<>();
         values.add("Все пользователи");
@@ -719,15 +642,14 @@ public class MainController {
         userFilterCombo.getSelectionModel().selectFirst();
     }
 
+    //удаление операции
     private void deleteOperation(OperationRow row) {
         if (row == null) return;
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Удаление операции");
         alert.setHeaderText(null);
-        alert.setContentText("Удалить операцию на сумму "
-                             + String.format("%.0f BYN", row.amount)
-                             + " из категории \"" + row.category + "\" ?");
+        alert.setContentText("Удалить операцию на сумму " + String.format("%.0f BYN", row.amount) + " из категории \"" + row.category + "\" ?");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isEmpty() || result.get() != ButtonType.OK) {
@@ -739,7 +661,7 @@ public class MainController {
             String resp = ServerConnection.getInstance().sendCommand(cmd);
 
             if (resp != null && resp.startsWith("OK TRANSACTION_DELETED")) {
-                // убираем из общего списка и обновляем отображение/диаграммы
+                // убираем из общего списка и обновляем отображение диаграммы
                 allOperations.removeIf(op -> op.id == row.id);
                 applyFilters();
                 statusLabel.setText("Операция удалена");
@@ -754,14 +676,10 @@ public class MainController {
         }
     }
 
-// -------------------- ОФОРМЛЕНИЕ СПИСКА --------------------
 
-    // -------------------- ОФОРМЛЕНИЕ СПИСКА --------------------
+    //офрмление списка
     private void setupOperationsCellFactory() {
-        operationsList.setStyle(
-                "-fx-focus-color: transparent; " +
-                "-fx-faint-focus-color: transparent;"
-        );
+        operationsList.setStyle("-fx-focus-color: transparent; " + "-fx-faint-focus-color: transparent;");
 
         operationsList.setCellFactory(list -> new ListCell<>() {
             @Override
@@ -782,91 +700,52 @@ public class MainController {
                 Label amountLabel = new Label(amountText);
                 amountLabel.setPrefWidth(150);
                 amountLabel.setAlignment(Pos.CENTER_LEFT);
-                amountLabel.setStyle(
-                        (income ? "-fx-text-fill: #2E7D32;" : "-fx-text-fill: #C62828;") +
-                        "-fx-padding: 6 8 6 8;" +
-                        "-fx-font-size: 14;" +
-                        "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
-                );
+                amountLabel.setStyle((income ? "-fx-text-fill: #2E7D32;" : "-fx-text-fill: #C62828;") + "-fx-padding: 6 8 6 8;" + "-fx-font-size: 14;" + "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;");
 
                 Label categoryLabel = new Label(item.category);
                 categoryLabel.setPrefWidth(250);
                 categoryLabel.setAlignment(Pos.CENTER_LEFT);
-                categoryLabel.setStyle(
-                        "-fx-text-fill: #424242;" +
-                        "-fx-padding: 6 8 6 8;" +
-                        "-fx-font-size: 13;" +
-                        "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
-                );
+                categoryLabel.setStyle("-fx-text-fill: #424242;" + "-fx-padding: 6 8 6 8;" + "-fx-font-size: 13;" + "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;");
 
                 Label userLabel = new Label(item.user);
                 userLabel.setPrefWidth(180);
                 userLabel.setAlignment(Pos.CENTER_LEFT);
-                userLabel.setStyle(
-                        "-fx-text-fill: #757575;" +
-                        "-fx-padding: 6 8 6 8;" +
-                        "-fx-font-size: 13;" +
-                        "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
-                );
+                userLabel.setStyle("-fx-text-fill: #757575;" + "-fx-padding: 6 8 6 8;" + "-fx-font-size: 13;" + "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;");
 
                 Label dateLabel = new Label(item.date);
                 dateLabel.setPrefWidth(130);
                 dateLabel.setAlignment(Pos.CENTER_LEFT);
-                dateLabel.setStyle(
-                        "-fx-text-fill: #757575;" +
-                        "-fx-padding: 6 8 6 8;" +
-                        "-fx-font-size: 13;" +
-                        "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;"
-                );
+                dateLabel.setStyle("-fx-text-fill: #757575;" + "-fx-padding: 6 8 6 8;" + "-fx-font-size: 13;" + "-fx-border-color: #E0E0E0; -fx-border-width: 0 1 0 0;");
 
                 Label timeLabel = new Label(item.time);
                 timeLabel.setPrefWidth(80);
                 timeLabel.setAlignment(Pos.CENTER_LEFT);
-                timeLabel.setStyle(
-                        "-fx-text-fill: #757575;" +
-                        "-fx-padding: 6 8 6 8;" +
-                        "-fx-font-size: 13;"
-                );
+                timeLabel.setStyle("-fx-text-fill: #757575;" + "-fx-padding: 6 8 6 8;" + "-fx-font-size: 13;");
 
                 Button deleteBtn = new Button();
                 deleteBtn.setMinWidth(40);
                 deleteBtn.setPrefWidth(40);
                 deleteBtn.setMaxWidth(40);
-                deleteBtn.setStyle(
-                        "-fx-background-color: transparent;" +
-                        "-fx-padding: 4 6 4 6;" +
-                        "-fx-cursor: hand;"
-                );
+                deleteBtn.setStyle("-fx-background-color: transparent;" + "-fx-padding: 4 6 4 6;" + "-fx-cursor: hand;");
 
                 javafx.scene.shape.SVGPath trashIcon = new javafx.scene.shape.SVGPath();
-                trashIcon.setContent(
-                        "M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"
-                );
-                trashIcon.setStyle("-fx-fill: #DC2626;"); // красный цвет иконки
+                trashIcon.setContent("M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5");
+                trashIcon.setStyle("-fx-fill: #DC2626;");
 
                 deleteBtn.setGraphic(trashIcon);
 
-                // hover-эффект для кнопки
-                deleteBtn.setOnMouseEntered(e ->
-                        deleteBtn.setStyle("-fx-background-color: #FEE2E2; -fx-padding: 4 6 4 6; -fx-cursor: hand;"));
-                deleteBtn.setOnMouseExited(e ->
-                        deleteBtn.setStyle("-fx-background-color: transparent; -fx-padding: 4 6 4 6; -fx-cursor: hand;"));
+                //эффект для кнопки
+                deleteBtn.setOnMouseEntered(e -> deleteBtn.setStyle("-fx-background-color: #FEE2E2; -fx-padding: 4 6 4 6; -fx-cursor: hand;"));
+                deleteBtn.setOnMouseExited(e -> deleteBtn.setStyle("-fx-background-color: transparent; -fx-padding: 4 6 4 6; -fx-cursor: hand;"));
 
-                // действие удаления
+                //удаление
                 deleteBtn.setOnAction(e -> deleteOperation(item));
 
                 HBox row = new HBox(0);
                 row.setAlignment(Pos.CENTER_LEFT);
                 String bg = (getIndex() % 2 == 0) ? "#FFFFFF" : "#F9F9F9";
                 row.setStyle("-fx-background-color: " + bg + ";");
-                row.getChildren().addAll(
-                        amountLabel,
-                        categoryLabel,
-                        userLabel,
-                        dateLabel,
-                        timeLabel,
-                        deleteBtn
-                );
+                row.getChildren().addAll(amountLabel, categoryLabel, userLabel, dateLabel, timeLabel, deleteBtn);
 
                 setText(null);
                 setGraphic(row);
@@ -875,9 +754,7 @@ public class MainController {
         });
     }
 
-
-// -------------------- ДАННЫЕ СЕМЬИ --------------------
-
+    //данные семьи
     private void loadFamilyInfo() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("GET_FAMILY_NAME");
@@ -901,9 +778,7 @@ public class MainController {
                 if (nameIdx >= 0) {
                     int start = nameIdx + "name=".length();
                     int codeIdx = resp.indexOf(" code=", start);
-                    String name = (codeIdx > 0)
-                            ? resp.substring(start, codeIdx)
-                            : resp.substring(start);
+                    String name = (codeIdx > 0) ? resp.substring(start, codeIdx) : resp.substring(start);
                     name = name.trim();
                     if (name.isEmpty()) {
                         familyNameLabel.setText("Семья: (без имени)");
@@ -925,10 +800,9 @@ public class MainController {
         }
     }
 
-// -------------------- ДИАГРАММЫ ДОХОДОВ/РАСХОДОВ --------------------
-
+    // обновление диаграммы
     private void updateChartsFromList(List<OperationRow> rows) {
-        // собираем суммы по категориям для доходов и расходов
+        //суммы по категориям для доходов и расходов
         Map<String, Double> incomeMap = new HashMap<>();
         Map<String, Double> expenseMap = new HashMap<>();
 
@@ -947,18 +821,12 @@ public class MainController {
         incomeTotalsByCategory = incomeMap;
         expenseTotalsByCategory = expenseMap;
 
-        // перерисовываем диаграмму в соответствии с выбранным типом
+        //диаграмма в соответствии с выбранным типом
         refreshCategoryChart();
     }
 
-    /**
-     * Перезаполняет единственную круговую диаграмму categoryPieChart
-     * на основании выбранного в chartTypeCombo типа:
-     * - "Структура расходов"  -> расходы
-     * - "Структура доходов"   -> доходы
-     * <p>
-     * Подпись каждого сектора: "<Категория> (XX.X%)"
-     */
+
+    // Перезаполнение круговой диаграммы categoryPieChart
     private void refreshCategoryChart() {
         if (categoryPieChart == null) return;
 
@@ -968,15 +836,13 @@ public class MainController {
         if ("Структура доходов".equals(chartType)) {
             sourceMap = incomeTotalsByCategory;
         } else {
-            // по умолчанию — структура расходов
+            // по умолчанию структура расходов
             sourceMap = expenseTotalsByCategory;
         }
 
         ObservableList<PieChart.Data> data = FXCollections.observableArrayList();
 
-        double total = sourceMap.values().stream()
-                .mapToDouble(Double::doubleValue)
-                .sum();
+        double total = sourceMap.values().stream().mapToDouble(Double::doubleValue).sum();
 
         for (Map.Entry<String, Double> e : sourceMap.entrySet()) {
             String name = e.getKey();
@@ -993,16 +859,11 @@ public class MainController {
         categoryPieChart.setLegendVisible(true);
     }
 
-
-    // -------------------- НАСТРОЙКА ВЫБОРА ТИПА ДИАГРАММЫ --------------------
-
+    //выбор диаграммы
     private void setupChartsControls() {
         if (chartTypeCombo == null) return;
 
-        chartTypeCombo.setItems(FXCollections.observableArrayList(
-                "Структура расходов",
-                "Структура доходов"
-        ));
+        chartTypeCombo.setItems(FXCollections.observableArrayList("Структура расходов", "Структура доходов"));
 
         // по умолчанию — структура расходов
         chartTypeCombo.getSelectionModel().select("Структура расходов");
@@ -1011,24 +872,23 @@ public class MainController {
             refreshCategoryChart();
         });
 
-        // если данные уже будут, после загрузки сразу перерисуем
         refreshCategoryChart();
     }
 
 
-// -------------------- КНОПКИ --------------------
+    // КНОПКИ
 
+    //аналитика
     @FXML
     protected void onOpenAnalyticsClick() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("analytics-view.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("analytics-view.fxml"));
             Scene scene = new Scene(loader.load(), 900, 600);
             Stage stage = new Stage();
             stage.setTitle("Аналитика ");
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(scene);
+            stage.getIcons().add(new javafx.scene.image.Image(HelloApplication.class.getResourceAsStream("logo.png")));
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -1036,12 +896,11 @@ public class MainController {
         }
     }
 
+    // добавление транзакции
     @FXML
     private void onAddOperationClick() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/org/familybudget/familybudget/add-operation-view.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/familybudget/familybudget/add-operation-view.fxml"));
             Parent root = loader.load();
 
             AddOperationController controller = loader.getController();
@@ -1056,6 +915,7 @@ public class MainController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.setResizable(false);
+            stage.getIcons().add(new javafx.scene.image.Image(HelloApplication.class.getResourceAsStream("logo.png")));
             stage.showAndWait();
 
             // 🔄 После закрытия окна – обновляем баланс
@@ -1069,20 +929,18 @@ public class MainController {
         }
     }
 
-
+    //категории
     @FXML
     protected void onManageCategoriesClick() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("categories-view.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("categories-view.fxml"));
             Scene scene = new Scene(loader.load());
             Stage stage = new Stage();
             stage.setTitle("Категории семьи");
             stage.initModality(Modality.APPLICATION_MODAL);
+            stage.getIcons().add(new javafx.scene.image.Image(HelloApplication.class.getResourceAsStream("logo.png")));
             stage.setScene(scene);
             stage.showAndWait();
-
             onRefreshOperations();
 
         } catch (Exception e) {
@@ -1091,6 +949,7 @@ public class MainController {
         }
     }
 
+    //выйти
     @FXML
     protected void onLogoutClick() {
         SessionContext.clear();
@@ -1098,32 +957,31 @@ public class MainController {
         current.close();
 
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("hello-view.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
             Scene scene = new Scene(loader.load(), 800, 600);
             Stage stage = new Stage();
             stage.setTitle("Семейный бюджет — вход");
             stage.setScene(scene);
+            stage.getIcons().add(new javafx.scene.image.Image(HelloApplication.class.getResourceAsStream("logo.png")));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    //плановые операции
     @FXML
     private void onOpenPlannedListClick() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/org/familybudget/familybudget/planned-operations-view.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/familybudget/familybudget/planned-operations-view.fxml"));
             Parent root = loader.load();
 
             Stage stage = new Stage();
             stage.setTitle("Запланированные списания");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(addOperationButton.getScene().getWindow()); // или любое окно-родитель
+            stage.initOwner(addOperationButton.getScene().getWindow());
+            stage.getIcons().add(new javafx.scene.image.Image(HelloApplication.class.getResourceAsStream("logo.png")));// или любое окно-родитель
             stage.show();
 
         } catch (IOException e) {
@@ -1132,11 +990,11 @@ public class MainController {
         }
     }
 
+    //счета
     @FXML
     private void onOpenAccountsClick() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("accounts-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("accounts-view.fxml"));
             Scene scene = new Scene(loader.load(), 650, 300);
             Stage stage = new Stage();
             stage.setTitle("Счета");
@@ -1144,6 +1002,7 @@ public class MainController {
             stage.initOwner(balanceLabel.getScene().getWindow());
             stage.setScene(scene);
             stage.setResizable(false);
+            stage.getIcons().add(new javafx.scene.image.Image(HelloApplication.class.getResourceAsStream("logo.png")));
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -1151,28 +1010,27 @@ public class MainController {
         }
     }
 
-
-// -------------------- ЛИЧНЫЙ КАБИНЕТ --------------------
-
+    //личный кабинет
     @FXML
     private void onOpenAccountClick() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("account-view.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("account-view.fxml"));
             Scene scene = new Scene(loader.load());
             Stage stage = new Stage();
             stage.setTitle("Личный кабинет");
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(scene);
+            stage.getIcons().add(new javafx.scene.image.Image(HelloApplication.class.getResourceAsStream("logo.png")));
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
             statusLabel.setText("Ошибка открытия личного кабинета: " + e.getMessage());
         }
     }
-// -------------------- ЭКСПОРТ (dat) --------------------
 
+    //ЭКСПОРТ
+
+    //экспорт dat
     @FXML
     private void onExportOperationsClick() {
         if (allOperations.isEmpty()) {
@@ -1187,9 +1045,7 @@ public class MainController {
 
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Экспорт операций (dat)");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Файл операций (*.dat)", "*.dat")
-        );
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Файл операций (*.dat)", "*.dat"));
 
         File file = chooser.showSaveDialog(balanceLabel.getScene().getWindow());
         if (file == null) return;
@@ -1197,12 +1053,9 @@ public class MainController {
         long accId = currentAccount.getId();
         String accName = currentAccount.getName();
 
-        List<OperationExportItem> exportList = allOperations.stream()
-                .map(row -> new OperationExportItem(row, accId, accName))
-                .collect(Collectors.toList());
+        List<OperationExportItem> exportList = allOperations.stream().map(row -> new OperationExportItem(row, accId, accName)).collect(Collectors.toList());
 
-        try (ObjectOutputStream oos =
-                     new ObjectOutputStream(new FileOutputStream(file))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
 
             oos.writeObject(exportList);
             statusLabel.setText("Экспортировано (dat): " + exportList.size());
@@ -1213,9 +1066,7 @@ public class MainController {
         }
     }
 
-
-    // -------------------- ЭКСПОРТ CSV --------------------
-
+    //экспорт csv
     @FXML
     private void onExportOperationsCsvClick() {
         List<OperationRow> toExport = new ArrayList<>(operationsList.getItems());
@@ -1231,9 +1082,7 @@ public class MainController {
 
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Экспорт операций в CSV");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV файлы (*.csv)", "*.csv")
-        );
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV файлы (*.csv)", "*.csv"));
 
         File file = chooser.showSaveDialog(balanceLabel.getScene().getWindow());
         if (file == null) return;
@@ -1242,18 +1091,10 @@ public class MainController {
         sb.append("type;amount;category;user;date;time;account\n");
 
         for (OperationRow o : toExport) {
-            sb.append(o.type).append(";")
-                    .append(o.amount).append(";")
-                    .append(escapeCsv(o.category)).append(";")
-                    .append(escapeCsv(o.user)).append(";")
-                    .append(o.date).append(";")
-                    .append(o.time == null ? "" : o.time).append(";")
-                    .append(escapeCsv(currentAccount.getName()))
-                    .append("\n");
+            sb.append(o.type).append(";").append(o.amount).append(";").append(escapeCsv(o.category)).append(";").append(escapeCsv(o.user)).append(";").append(o.date).append(";").append(o.time == null ? "" : o.time).append(";").append(escapeCsv(currentAccount.getName())).append("\n");
         }
 
-        try (OutputStream os = new FileOutputStream(file);
-             Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+        try (OutputStream os = new FileOutputStream(file); Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
 
             writer.write('\uFEFF');
             writer.write(sb.toString());
@@ -1265,7 +1106,6 @@ public class MainController {
         }
     }
 
-
     private String escapeCsv(String s) {
         if (s == null) return "";
         if (s.contains(";") || s.contains("\"")) {
@@ -1274,22 +1114,17 @@ public class MainController {
         return s;
     }
 
-
-    // -------------------- ИМПОРТ (dat) --------------------
-
+    //импорт dat
     @FXML
     private void onImportOperationsClick() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Импорт операций (dat)");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Файл операций (*.dat)", "*.dat")
-        );
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Файл операций (*.dat)", "*.dat"));
 
         File file = chooser.showOpenDialog(balanceLabel.getScene().getWindow());
         if (file == null) return;
 
-        try (ObjectInputStream ois =
-                     new ObjectInputStream(new FileInputStream(file))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
 
             Object obj = ois.readObject();
             if (!(obj instanceof List<?> rawList)) {
@@ -1349,8 +1184,7 @@ public class MainController {
             refreshAccountBalance();
             onRefreshOperations();
 
-            statusLabel.setText("Импортировано: " + okCount +
-                                (skipCount > 0 ? " (пропущено: " + skipCount + ")" : ""));
+            statusLabel.setText("Импортировано: " + okCount + (skipCount > 0 ? " (пропущено: " + skipCount + ")" : ""));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -1358,7 +1192,7 @@ public class MainController {
         }
     }
 
-
+    //вывод категорий LIST_CATEGORIES
     private Map<String, Long> loadCategoryMap() throws IOException {
         Map<String, Long> result = new HashMap<>();
 
@@ -1410,12 +1244,12 @@ public class MainController {
                     row = row.trim();
                     if (row.isEmpty()) continue;
 
-                    String[] p = row.split(":", 4); // id:name:currency:isArchived
+                    String[] p = row.split(":", 4);
                     if (p.length >= 2) {
                         long id = Long.parseLong(p[0]);
                         String nm = p[1];
                         if (accName.equals(nm)) {
-                            return id; // нашли уже существующий счёт
+                            return id;
                         }
                     }
                 }
@@ -1437,9 +1271,7 @@ public class MainController {
     }
 
     // поиск/создание категории по имени
-    private long resolveCategoryId(String catName,
-                                   Map<String, Long> categoryMap,
-                                   ServerConnection conn) throws IOException {
+    private long resolveCategoryId(String catName, Map<String, Long> categoryMap, ServerConnection conn) throws IOException {
 
         if (catName == null || catName.isBlank()) {
             throw new IOException("Имя категории пустое");
@@ -1468,12 +1300,12 @@ public class MainController {
     }
 
 
-    // ================== ОБНОВЛЕНИЕ ГЛАВНОГО ОКНА ПОСЛЕ JOIN_FAMILY ==================
+    //обновление главного окна после присоединения к семье по коду
     public void refreshAfterJoinFamily() {
-        // заново загрузить инфу о семье
+        //  загрузить инфу о семье
         loadFamilyInfo();
 
-        // заново загрузить счета и баланс
+        //  загрузить счета и баланс
         initAccounts();
         loadAccountsForSelector();
         refreshAccountBalance();
@@ -1481,7 +1313,7 @@ public class MainController {
         // обновить операции
         onRefreshOperations();
 
-        // пересчитать права (вдруг роль стала ADMIN)
+        // пересчитать права
         String rawRole = SessionContext.getRole();
         boolean isAdmin = "ADMIN".equalsIgnoreCase(rawRole) || "1".equals(rawRole);
 
@@ -1490,9 +1322,31 @@ public class MainController {
             manageCategoriesButton.setManaged(isAdmin);
         }
 
-        // обновить подпись про пользователя (на всякий случай)
+        // обновить подпись про пользователя
         String login = SessionContext.getLogin();
         userInfoLabel.setText("Пользователь: " + login);
+    }
+
+
+    // модель строки для транзакций
+    public static class OperationRow {
+        public long id;        // <--- НОВОЕ
+        public String type;    // INCOME / EXPENSE
+        public double amount;
+        public String category;
+        public String user;
+        public String date;    // "2025-11-14"
+        public String time;    // "14:35"
+
+        public OperationRow(long id, String type, double amount, String category, String user, String date, String time) {
+            this.id = id;
+            this.type = type;
+            this.amount = amount;
+            this.category = category;
+            this.user = user;
+            this.date = date;
+            this.time = time;
+        }
     }
 
 }

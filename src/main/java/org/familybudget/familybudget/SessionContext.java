@@ -1,23 +1,26 @@
 package org.familybudget.familybudget;
 
+//хранит данные о текущей сессии
 public class SessionContext {
 
     private static final SessionContext INSTANCE = new SessionContext();
 
     private String login;
     private String role;
-    private  String userName;
+    private String userName;
 
-    private SessionContext() {}
+    // Приватный конструктор запрещает создание объектов извне
+    private SessionContext() {
+    }
 
     public static SessionContext getInstance() {
         return INSTANCE;
     }
 
-    public static void setUser(String login, String role,String userName) {
+    public static void setUser(String login, String role, String userName) {
         INSTANCE.login = login;
         INSTANCE.role = role;
-        INSTANCE.userName=userName;
+        INSTANCE.userName = userName;
 
     }
 
@@ -34,17 +37,14 @@ public class SessionContext {
         return INSTANCE.role;
     }
 
-
     public static String getUserName() {
         return INSTANCE.userName;
     }
 
-
-
     // очистка сессии при logout
     public static void clear() {
         INSTANCE.login = null;
-        INSTANCE.role  = null;
+        INSTANCE.role = null;
 
     }
 }

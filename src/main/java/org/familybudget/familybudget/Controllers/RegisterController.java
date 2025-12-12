@@ -1,6 +1,6 @@
 package org.familybudget.familybudget.Controllers;
 
-import javafx.collections.FXCollections;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -51,10 +51,6 @@ public class RegisterController {
 
         createFamilyRadio.setSelected(true);
         updateFamilyFields();
-
-
-
-
         group.selectedToggleProperty().addListener((obs, oldV, newV) -> updateFamilyFields());
     }
 
@@ -64,6 +60,7 @@ public class RegisterController {
         familyCodeField.setDisable(create);
     }
 
+    //кнопка регистрации
     @FXML
     private void onRegisterClick() {
         String userName = nameField.getText();
@@ -149,13 +146,12 @@ public class RegisterController {
             statusLabel.setText("Ошибка: " + e.getMessage());
         }
     }
-
+    //переход в главное меню
     private void openMainWindow() throws Exception {
         FXMLLoader loader = new FXMLLoader(
                 HelloApplication.class.getResource("main-view.fxml")
         );
 
-        // --- УВЕЛИЧЕН РАЗМЕР ГЛАВНОГО ОКНА ---
         Scene scene = new Scene(loader.load(), 1190, 1000);
 
         Stage stage = new Stage();
@@ -165,7 +161,7 @@ public class RegisterController {
 
         stage.show();
     }
-
+    //закрытие окна
     @FXML
     private void onCancelClick() {
         Stage stage = (Stage) loginField.getScene().getWindow();

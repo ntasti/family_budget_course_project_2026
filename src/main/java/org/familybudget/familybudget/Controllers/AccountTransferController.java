@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+//перевод между счетами
+//account-transfer.fxml
 public class AccountTransferController {
 
     @FXML
@@ -18,7 +20,6 @@ public class AccountTransferController {
 
     @FXML
     private ComboBox<AccountsController.AccountItem> toAccountCombo;
-
 
     @FXML
     private TextField amountField;
@@ -29,7 +30,7 @@ public class AccountTransferController {
     @FXML
     private Label statusLabel;
 
-    // чтобы можно было заранее подставить "С какого счёта"
+    // чтобы можно было заранее подставить какой счет нужен
     private Long initialFromAccountId = null;
 
     @FXML
@@ -42,7 +43,6 @@ public class AccountTransferController {
     public void setInitialFromAccount(long accountId) {
         this.initialFromAccountId = accountId;
 
-        // если комбобоксы уже заполнены – сразу выберем
         if (fromAccountCombo != null && fromAccountCombo.getItems() != null) {
             for (AccountsController.AccountItem ai : fromAccountCombo.getItems()) {
                 if (ai.getId() == accountId) {
@@ -53,7 +53,7 @@ public class AccountTransferController {
         }
     }
 
-    // ===== Загрузка счетов =====
+    //загрузка счетов
     private void loadAccounts() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("LIST_ACCOUNTS");
@@ -80,7 +80,6 @@ public class AccountTransferController {
                 row = row.trim();
                 if (row.isEmpty()) continue;
 
-                // формат: id:name:currency:...
                 String[] p = row.split(":", 4);
                 if (p.length < 3) continue;
 
@@ -95,7 +94,6 @@ public class AccountTransferController {
             fromAccountCombo.setItems(obs);
             toAccountCombo.setItems(obs);
 
-            // если заранее передали счёт "с какого" — выберем его
             if (initialFromAccountId != null) {
                 for (AccountsController.AccountItem ai : obs) {
                     if (ai.getId() == initialFromAccountId) {
@@ -113,9 +111,7 @@ public class AccountTransferController {
         }
     }
 
-
-
-    // ===== выполнить перевод =====
+    //кнопка перевода
     @FXML
     private void onDoTransferClick() {
         statusLabel.setText("");
@@ -155,7 +151,6 @@ public class AccountTransferController {
         comment = comment.trim().replaceAll("\\s+", " ");
 
         try {
-            // новый формат команды: без категории
             String cmd = String.format(
                     Locale.US,
                     "TRANSFER_BETWEEN_ACCOUNTS %d %d %.2f",
@@ -183,7 +178,7 @@ public class AccountTransferController {
         }
     }
 
-
+    //закрытие окна
     @FXML
     private void onCancelClick() {
         Stage stage = (Stage) amountField.getScene().getWindow();

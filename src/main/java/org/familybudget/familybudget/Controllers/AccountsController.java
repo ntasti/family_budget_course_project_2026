@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+//счета
+//accounts-view.fxml
 public class AccountsController {
 
     @FXML
@@ -26,35 +28,6 @@ public class AccountsController {
     @FXML
     private Label statusLabel;
 
-    public static class AccountItem {
-        final long id;
-        final String name;
-        final String currency;
-
-        public AccountItem(long id, String name, String currency) {
-            this.id = id;
-            this.name = name;
-            this.currency = currency;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getCurrency() {
-            return currency;
-        }
-
-        @Override
-        public String toString() {
-            // что показывать в комбобоксах
-            return name; // можно сделать name + " (" + currency + ")"
-        }
-    }
 
     @FXML
     private void initialize() {
@@ -63,7 +36,7 @@ public class AccountsController {
         loadAccounts();
     }
 
-    // ===== загрузка счетов =====
+    //загрузка счетов
     private void loadAccounts() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("LIST_ACCOUNTS");
@@ -90,7 +63,7 @@ public class AccountsController {
                 row = row.trim();
                 if (row.isEmpty()) continue;
 
-                String[] p = row.split(":", 4); // id:name:currency:isArchived
+                String[] p = row.split(":", 4);
                 if (p.length < 3) continue;
 
                 long id = Long.parseLong(p[0]);
@@ -109,11 +82,13 @@ public class AccountsController {
         }
     }
 
+    //обновление счетов
     @FXML
     private void onRefreshClick() {
         loadAccounts();
     }
 
+    //добавление нового счета
     @FXML
     private void onAddClick() {
         TextInputDialog dlg = new TextInputDialog();
@@ -133,7 +108,7 @@ public class AccountsController {
                     loadAccounts();
                     statusLabel.setText("");
 
-                    // 🔄 обновляем главное окно
+                    // обновление главного окна
                     MainController main = MainController.getInstance();
                     if (main != null) {
                         main.refreshAfterJoinFamily();
@@ -149,6 +124,7 @@ public class AccountsController {
         });
     }
 
+    //редактирование информации о счете
     @FXML
     private void onEditClick() {
         AccountItem item = accountsTable.getSelectionModel().getSelectedItem();
@@ -174,7 +150,7 @@ public class AccountsController {
                     loadAccounts();
                     statusLabel.setText("");
 
-                    // 🔄 обновить главное окно
+                    //обновление главного окна
                     MainController main = MainController.getInstance();
                     if (main != null) {
                         main.refreshAfterJoinFamily();
@@ -190,6 +166,7 @@ public class AccountsController {
         });
     }
 
+    //удаление
     @FXML
     private void onDeleteClick() {
         AccountItem item = accountsTable.getSelectionModel().getSelectedItem();
@@ -214,7 +191,7 @@ public class AccountsController {
                     loadAccounts();
                     statusLabel.setText("");
 
-                    // 🔄 обновить главное окно
+                    // обновление главного окна
                     MainController main = MainController.getInstance();
                     if (main != null) {
                         main.refreshAfterJoinFamily();
@@ -230,13 +207,14 @@ public class AccountsController {
         });
     }
 
+    //закрытие
     @FXML
     private void onCloseClick() {
         Stage stage = (Stage) accountsTable.getScene().getWindow();
         stage.close();
     }
 
-    // ===== перевод между счетами =====
+    //откртие окна перевод между счетами
     @FXML
     private void onTransferClick() {
         AccountItem selected = accountsTable.getSelectionModel().getSelectedItem();
@@ -274,4 +252,35 @@ public class AccountsController {
             statusLabel.setText("Ошибка открытия окна перевода: " + e.getMessage());
         }
     }
+
+    //для вывода информации о счетах
+    public static class AccountItem {
+        final long id;
+        final String name;
+        final String currency;
+
+        public AccountItem(long id, String name, String currency) {
+            this.id = id;
+            this.name = name;
+            this.currency = currency;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getCurrency() {
+            return currency;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
 }

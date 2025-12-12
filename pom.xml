@@ -39,11 +39,11 @@
         </dependency>
 
         <!-- Swing-встраивание: нужно редко -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId>
-            <version>21.0.4</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.openjfx</groupId>-->
+<!--            <artifactId>javafx-swing</artifactId>-->
+<!--            <version>21.0.4</version>-->
+<!--        </dependency>-->
 
         <!-- UI улучшения -->
         <dependency>
@@ -114,6 +114,33 @@
 
     <build>
         <plugins>
+
+
+
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-shade-plugin</artifactId>-->
+<!--                <version>3.5.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>shade</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            &lt;!&ndash; чтобы не портить pom &ndash;&gt;-->
+<!--                            <createDependencyReducedPom>false</createDependencyReducedPom>-->
+<!--                            <transformers>-->
+<!--                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+<!--                                    <mainClass>org.familybudget.familybudget.HelloApplication</mainClass>-->
+<!--                                </transformer>-->
+<!--                            </transformers>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
+
             <!-- компиляция под JDK 21 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -144,6 +171,9 @@
                     <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
+
+
         </plugins>
+
     </build>
 </project>

@@ -108,7 +108,7 @@
                                -fx-font-size: 12;"/>
             </HBox>
 
-            <!-- Статус + закрытие -->
+            <!-- Статус и закрытие -->
             <HBox spacing="10"
                   alignment="CENTER_RIGHT"
                   maxWidth="440">

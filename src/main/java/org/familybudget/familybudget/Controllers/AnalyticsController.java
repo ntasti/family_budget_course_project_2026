@@ -20,9 +20,12 @@ import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.*;
 
+//раздел аналитики
+//analytics-view.fxml
 public class AnalyticsController {
 
-    @FXML private PieChart importancePieChart;
+    @FXML
+    private PieChart importancePieChart;
 
     @FXML
     private DatePicker fromDatePicker;
@@ -37,7 +40,7 @@ public class AnalyticsController {
     @FXML
     private BarChart<String, Number> planFactChart;
 
-    // выбор режима: "Расходы по категориям" / "План / факт по категориям"
+    // выбор режима аналитики
     @FXML
     private ComboBox<String> viewTypeCombo;
 
@@ -47,7 +50,7 @@ public class AnalyticsController {
     @FXML
     private Label summaryLabel;
 
-    // контейнер для "карточек" по месяцам
+    // контейнер для аналитики по месяцам
     @FXML
     private VBox monthlyOverviewBox;        // весь блок
     @FXML
@@ -58,7 +61,7 @@ public class AnalyticsController {
         statusLabel.setText("");
         summaryLabel.setText("Выберите период и нажмите «Показать».");
 
-        // период по умолчанию: последний месяц
+        // период по умолчанию последний месяц
         LocalDate today = LocalDate.now();
         LocalDate monthAgo = today.minusMonths(1);
 
@@ -80,7 +83,6 @@ public class AnalyticsController {
             summaryLabel.setText("Выберите период и нажмите «Показать».");
         });
 
-        // сначала настроить, какой блок виден
         updateVisibleChart();
         loadPlanFactChart();
         loadImportanceAnalytics();
@@ -88,16 +90,14 @@ public class AnalyticsController {
         loadMonthlyOverview();
     }
 
-    /**
-     * Показывает только нужный блок и прячет остальные
-     */
+    //Показывает только нужный блок аналитики и прячет остальные
     private void updateVisibleChart() {
         String mode = viewTypeCombo.getValue();
 
         boolean isCategories = "Расходы по категориям".equals(mode);
-        boolean isPlanFact   = "План / факт по категориям".equals(mode);
+        boolean isPlanFact = "План / факт по категориям".equals(mode);
         boolean isImportance = "Приоритеты (важно/неважно)".equals(mode);
-        boolean isMonthly    = "Обзор по месяцам".equals(mode);
+        boolean isMonthly = "Обзор по месяцам".equals(mode);
 
         categoryPieChart.setVisible(isCategories);
         categoryPieChart.setManaged(isCategories);
@@ -112,6 +112,7 @@ public class AnalyticsController {
         monthlyOverviewBox.setManaged(isMonthly);
     }
 
+    //расчет по выбранной дате при нажатии
     @FXML
     private void onCalculateClick() {
         statusLabel.setText("");
@@ -128,8 +129,7 @@ public class AnalyticsController {
         }
     }
 
-    // ---------- 1. Режим "Расходы по категориям" (pie + ANALYTICS_CATEGORIES) ----------
-
+    //режим расходы по категориям  ANALYTICS_CATEGORIES
     private void loadCategoryAnalytics() {
         LocalDate from = fromDatePicker.getValue();
         LocalDate to = toDatePicker.getValue();
@@ -222,8 +222,7 @@ public class AnalyticsController {
         }
     }
 
-    // ---------- 2. Режим "План / факт по категориям" (bar + GET_CATEGORY_PLANS) ----------
-
+    //режим план / факт по категориям GET_CATEGORY_PLANS
     private void loadPlanFactChart() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("GET_CATEGORY_PLANS");
@@ -244,12 +243,10 @@ public class AnalyticsController {
                 return;
             }
 
-            // агрегируем по названию категории
+            // выводим по названию категории
             Map<String, Double> plannedByCat = new LinkedHashMap<>();
-            Map<String, Double> actualByCat  = new LinkedHashMap<>();
+            Map<String, Double> actualByCat = new LinkedHashMap<>();
 
-            // формат элемента:
-            // id:categoryId:categoryName:from:to:planned:actual
             String[] items = payload.split(",");
             for (String item : items) {
                 String line = item.trim();
@@ -263,7 +260,7 @@ public class AnalyticsController {
                 double actual;
                 try {
                     planned = Double.parseDouble(p[5]);
-                    actual  = Double.parseDouble(p[6]);
+                    actual = Double.parseDouble(p[6]);
                 } catch (NumberFormatException e) {
                     continue;
                 }
@@ -285,14 +282,14 @@ public class AnalyticsController {
             XYChart.Series<String, Number> actualSeries = new XYChart.Series<>();
             actualSeries.setName("Факт");
 
-            // единый набор категорий (ключи из обоих map)
+            // единый набор категорий
             Set<String> allCats = new LinkedHashSet<>();
             allCats.addAll(plannedByCat.keySet());
             allCats.addAll(actualByCat.keySet());
 
             for (String cat : allCats) {
                 double planned = plannedByCat.getOrDefault(cat, 0.0);
-                double actual  = actualByCat.getOrDefault(cat, 0.0);
+                double actual = actualByCat.getOrDefault(cat, 0.0);
 
                 plannedSeries.getData().add(new XYChart.Data<>(cat, planned));
                 actualSeries.getData().add(new XYChart.Data<>(cat, actual));
@@ -301,10 +298,10 @@ public class AnalyticsController {
             planFactChart.getData().setAll(plannedSeries, actualSeries);
             statusLabel.setText("");
 
-            // краткое резюме: сколько категорий и какая всего план/факт
+            // краткие данные внизу окна
             double totalPlanned = plannedByCat.values().stream()
                     .mapToDouble(Double::doubleValue).sum();
-            double totalActual  = actualByCat.values().stream()
+            double totalActual = actualByCat.values().stream()
                     .mapToDouble(Double::doubleValue).sum();
 
             summaryLabel.setText(String.format(
@@ -318,8 +315,7 @@ public class AnalyticsController {
         }
     }
 
-    // ---------- 3. Режим "Приоритеты" (pie + ANALYTICS_IMPORTANCE) ----------
-
+    //режим приоритеты ANALYTICS_IMPORTANCE
     private void loadImportanceAnalytics() {
         LocalDate from = fromDatePicker.getValue();
         LocalDate to = toDatePicker.getValue();
@@ -333,7 +329,7 @@ public class AnalyticsController {
             return;
         }
 
-        // считаем по всем счетам
+        //высчет по всем счетам
         String cmd = "ANALYTICS_IMPORTANCE " + from + " " + to + " ALL";
 
         try {
@@ -362,7 +358,7 @@ public class AnalyticsController {
 
             double total = important + notImportant;
 
-            // если вообще нет расходов
+            //если нет расходов
             if (total <= 0) {
                 importancePieChart.setData(FXCollections.observableArrayList());
                 statusLabel.setText("За выбранный период расходов нет.");
@@ -402,17 +398,10 @@ public class AnalyticsController {
         }
     }
 
-    // ---------- 4. Режим "Обзор по месяцам" (карточки + ANALYTICS_MONTHLY) ----------
-
-    /**
-     * Используем ANALYTICS_MONTHLY, где сервер возвращает:
-     * OK ANALYTICS_MONTHLY=YYYY-MM:expense:income,...
-     *
-     * Слева показываем доходы, справа расходы, полоска — доля расходов от доходов.
-     */
+    //Режим обзор по месяцам ANALYTICS_MONTHLY
     private void loadMonthlyOverview() {
         LocalDate from = fromDatePicker.getValue();
-        LocalDate to   = toDatePicker.getValue();
+        LocalDate to = toDatePicker.getValue();
 
         if (from == null || to == null) {
             statusLabel.setText("Укажите обе даты: «с» и «по».");
@@ -445,7 +434,7 @@ public class AnalyticsController {
             }
 
             double totalExpense = 0.0;
-            double totalIncome  = 0.0;
+            double totalIncome = 0.0;
 
             String[] items = payload.split(",");
             for (String item : items) {
@@ -460,7 +449,7 @@ public class AnalyticsController {
                 double income;
                 try {
                     expense = Double.parseDouble(p[1]);
-                    income  = Double.parseDouble(p[2]);
+                    income = Double.parseDouble(p[2]);
                 } catch (NumberFormatException e) {
                     continue;
                 }
@@ -470,7 +459,7 @@ public class AnalyticsController {
                 monthlyCardsContainer.getChildren().add(card);
 
                 totalExpense += expense;
-                totalIncome  += income;
+                totalIncome += income;
             }
 
             if (monthlyCardsContainer.getChildren().isEmpty()) {
@@ -490,14 +479,12 @@ public class AnalyticsController {
         }
     }
 
-    /**
-     * Одна «карточка» месяца в стиле как на скрине.
-     */
+   //карточка для каждого месяца
     private HBox buildMonthCard(YearMonth ym, double expense, double income) {
         HBox card = new HBox(16);
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // Новая карточка с мягким серо-лавандовым градиентом
+        //стили
         card.setStyle(
                 "-fx-background-color: linear-gradient(to bottom, #EEF2FF, #E5E7EB);" +
                 "-fx-background-radius: 18;" +
@@ -508,7 +495,6 @@ public class AnalyticsController {
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 16, 0.2, 0, 3);"
         );
 
-        // ------ остальной код без изменений ------
 
         VBox leftBox = new VBox(2);
         Label incomeValue = new Label(String.format("%.0f BYN", income));
@@ -560,7 +546,6 @@ public class AnalyticsController {
         card.getChildren().addAll(leftBox, centerBox, rightBox);
         return card;
     }
-
 
 
 }

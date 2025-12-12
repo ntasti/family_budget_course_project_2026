@@ -9,14 +9,22 @@ import org.kordamp.bootstrapfx.BootstrapFX;
 import java.io.IOException;
 
 public class HelloApplication extends Application {
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 800, 600);
 
-//        // Подключение BootstrapFX :
+        stage.getIcons().add(
+                new javafx.scene.image.Image(
+                        HelloApplication.class.getResourceAsStream("logo.png")
+                )
+        );
+
+
+        // Подключение BootstrapFX
         scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
-        stage.setTitle("Hello WORLD!");
+        stage.setTitle("Family Budget");
         stage.setScene(scene);
         stage.show();
     }

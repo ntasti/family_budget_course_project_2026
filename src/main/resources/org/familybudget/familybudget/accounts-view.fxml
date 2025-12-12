@@ -18,7 +18,7 @@
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <!-- Заголовок + добавление счёта -->
+    <!-- Заголовок и добавление счёта -->
     <HBox alignment="CENTER_LEFT" spacing="10" prefWidth="380">
         <Label text="Счета"
                style="-fx-text-fill: #222222;">
@@ -29,7 +29,7 @@
 
         <Region HBox.hgrow="ALWAYS"/>
 
-        <!-- Кнопка добавления счёта (зелёный круг с плюсом) -->
+        <!-- Кнопка добавления счёта  -->
         <Button onAction="#onAddClick"
                 style="-fx-background-color: #4CAF50;
                        -fx-background-radius: 50;
@@ -74,7 +74,6 @@
                        -fx-padding: 6 18;
                        -fx-font-size: 12;"/>
 
-        <!-- Растягиваем пространство, чтобы остальные ушли вправо -->
         <Region HBox.hgrow="ALWAYS"/>
 
         <!-- СИНЯЯ кнопка ПЕРЕИМЕНОВАТЬ -->

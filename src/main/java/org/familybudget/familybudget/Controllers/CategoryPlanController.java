@@ -15,30 +15,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+
+//план по категориям
+//category-plan-view.fxml
 public class CategoryPlanController {
 
     @FXML
     private ComboBox<AddOperationController.CategoryItem> categoryComboBox;
-
     @FXML
     private DatePicker fromDatePicker;
-
     @FXML
     private DatePicker toDatePicker;
-
     @FXML
     private TextField amountField;
-
     @FXML
     private Label statusLabel;
-
-    // данные для редактирования
     private String  initialCategoryName;
     private LocalDate initialFrom;
     private LocalDate initialTo;
     private Double initialAmount;
-
-    // null = создаём новый план
     private Long planId;
     private Long categoryId;
 
@@ -50,7 +45,7 @@ public class CategoryPlanController {
         fromDatePicker.setValue(today.withDayOfMonth(1));
         toDatePicker.setValue(today.withDayOfMonth(today.lengthOfMonth()));
 
-        // если данные для редактирования уже проставлены — отображаем
+        // если данные для редактирования уже проставлены то отображаем
         if (initialCategoryName != null) {
             selectCategoryByName(initialCategoryName);
             fromDatePicker.setValue(initialFrom);
@@ -59,6 +54,7 @@ public class CategoryPlanController {
         }
     }
 
+    //загрузка списка категорий LIST_CATEGORIES
     private void loadCategories() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("LIST_CATEGORIES");
@@ -96,7 +92,6 @@ public class CategoryPlanController {
             categoryComboBox.setItems(FXCollections.observableArrayList(items));
             statusLabel.setText("");
 
-            // если редактируем и уже знаем категорию — выделим её
             if (initialCategoryName != null) {
                 selectCategoryByName(initialCategoryName);
             }
@@ -107,6 +102,7 @@ public class CategoryPlanController {
         }
     }
 
+    //Выбор категории по имени
     private void selectCategoryByName(String name) {
         if (categoryComboBox == null) return;
         for (AddOperationController.CategoryItem item : categoryComboBox.getItems()) {
@@ -117,6 +113,7 @@ public class CategoryPlanController {
         }
     }
 
+    //сохранить
     @FXML
     private void onSaveClick() {
         statusLabel.setText("");
@@ -150,26 +147,12 @@ public class CategoryPlanController {
 
             String cmd;
 
-            // ---- ВАЖНО: выбор SET или UPDATE ----
             if (planId == null) {
                 // создаём новый план
-                cmd = String.format(
-                        "SET_CATEGORY_PLAN %d %s %s %s",
-                        selectedCategoryId,
-                        from,
-                        to,
-                        amountStr
-                );
+                cmd = String.format("SET_CATEGORY_PLAN %d %s %s %s", selectedCategoryId, from, to, amountStr);
             } else {
-                // редактируем существующий план
-                cmd = String.format(
-                        "UPDATE_CATEGORY_PLAN %d %d %s %s %s",
-                        planId,
-                        selectedCategoryId,
-                        from,
-                        to,
-                        amountStr
-                );
+
+                cmd = String.format("UPDATE_CATEGORY_PLAN %d %d %s %s %s", planId, selectedCategoryId, from, to, amountStr);
             }
 
             String resp = ServerConnection.getInstance().sendCommand(cmd);
@@ -181,8 +164,7 @@ public class CategoryPlanController {
             if (resp.startsWith("OK PLAN_SET") || resp.startsWith("OK PLAN_UPDATED")) {
                 statusLabel.setStyle("-fx-text-fill: #388E3C; -fx-font-size: 11;");
                 statusLabel.setText("План успешно сохранён");
-                // если нужно, сразу закрываем:
-                // onCancelClick();
+
             } else {
                 statusLabel.setStyle("-fx-text-fill: #D32F2F; -fx-font-size: 11;");
                 statusLabel.setText("Ошибка: " + resp);
@@ -194,39 +176,21 @@ public class CategoryPlanController {
         }
     }
 
-    // ===== Кнопка "Очистить" внутри диалога =====
-    @FXML
-    private void onAddClick() {
-        // это не создание нового плана в БД, а просто очистка полей формы
-        planId = null;                // чтобы после очистки сохранить как новый, если надо
-        if (categoryComboBox != null) categoryComboBox.setValue(null);
-        if (fromDatePicker != null) fromDatePicker.setValue(LocalDate.now());
-        if (toDatePicker != null) toDatePicker.setValue(LocalDate.now());
-        if (amountField != null) amountField.clear();
-        statusLabel.setText("");
-    }
-
+    //закрытие окна
     @FXML
     private void onCancelClick() {
         Stage stage = (Stage) amountField.getScene().getWindow();
         stage.close();
     }
 
-    // вызывается ТОЛЬКО при редактировании из таблицы
-    public void setInitialData(long planId,
-                               long categoryId,
-                               String categoryName,
-                               LocalDate from,
-                               LocalDate to,
-                               double amount) {
+    //для редактирования
+    public void setInitialData(long planId, long categoryId, String categoryName, LocalDate from, LocalDate to, double amount) {
         this.planId = planId;
         this.categoryId = categoryId;
         this.initialCategoryName = categoryName;
         this.initialFrom = from;
         this.initialTo = to;
         this.initialAmount = amount;
-
-        // если контролы уже инициализированы – сразу проставим
         if (fromDatePicker != null) fromDatePicker.setValue(from);
         if (toDatePicker != null) toDatePicker.setValue(to);
         if (amountField != null)

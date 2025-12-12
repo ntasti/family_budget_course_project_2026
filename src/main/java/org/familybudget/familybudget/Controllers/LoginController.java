@@ -69,10 +69,18 @@ public class LoginController {
         FXMLLoader loader = new FXMLLoader(
                 HelloApplication.class.getResource("main-view.fxml")
         );
+
+
         Scene scene = new Scene(loader.load(), 1450, 800);
         Stage stage = new Stage();
         stage.setTitle("Семейный бюджет");
         stage.setScene(scene);
+
+        stage.getIcons().add(
+                new javafx.scene.image.Image(
+                        HelloApplication.class.getResourceAsStream("logo.png")
+                )
+        );
         stage.show();
     }
 

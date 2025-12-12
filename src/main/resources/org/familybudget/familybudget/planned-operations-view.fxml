@@ -2,7 +2,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 
 <?import javafx.scene.shape.SVGPath?>
 <VBox xmlns="http://javafx.com/javafx/21"
@@ -42,7 +41,7 @@
 
         </HBox>
 
-        <Label text="Здесь видно, какие операции будут списываться автоматически."
+        <Label text=" операции будут списываться автоматически."
                wrapText="true"
                style="-fx-text-fill: #777; -fx-font-size: 11;"/>
 
@@ -55,13 +54,13 @@
                           -fx-background-radius: 10;">
 
             <columns>
-                <TableColumn fx:id="colType"        text="Тип"        prefWidth="70"/>
-                <TableColumn fx:id="colCategoryId"  text="Категория"  prefWidth="80"/>
-                <TableColumn fx:id="colAmount"      text="Сумма"      prefWidth="80"/>
-                <TableColumn fx:id="colDateStart"   text="Дата"       prefWidth="90"/>
-                <TableColumn fx:id="colTime"        text="Время"      prefWidth="70"/>
-                <TableColumn fx:id="colPeriod"      text="Период"     prefWidth="90"/>
-                <TableColumn fx:id="colImportant"   text="Важно"      prefWidth="60"/>
+                <TableColumn fx:id="colType" text="Тип" prefWidth="70"/>
+                <TableColumn fx:id="colCategoryId" text="Категория" prefWidth="80"/>
+                <TableColumn fx:id="colAmount" text="Сумма" prefWidth="80"/>
+                <TableColumn fx:id="colDateStart" text="Дата" prefWidth="90"/>
+                <TableColumn fx:id="colTime" text="Время" prefWidth="70"/>
+                <TableColumn fx:id="colPeriod" text="Период" prefWidth="90"/>
+                <TableColumn fx:id="colImportant" text="Важно" prefWidth="60"/>
             </columns>
         </TableView>
 

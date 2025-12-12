@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
+//операция по таймеру
+//add-time-operation-view.fxml
 public class AddTimeOperationController {
 
     @FXML
@@ -46,33 +48,9 @@ public class AddTimeOperationController {
     private ComboBox<AccountsController.AccountItem> accountComboBox;
 
 
-    // маленькая модель категории (такая же, как в AddOperationController)
-    public static class CategoryItem {
-        private final long id;
-        private final String name;
-
-        public CategoryItem(long id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
     @FXML
     private void initialize() {
-        // только числа в поле суммы (до двух знаков)
+        // только числа в поле суммы
         UnaryOperator<TextFormatter.Change> filter = change -> {
             String newText = change.getControlNewText();
             if (newText.matches("\\d*(\\.\\d{0,2})?")) {
@@ -82,13 +60,10 @@ public class AddTimeOperationController {
         };
         amountField.setTextFormatter(new TextFormatter<>(filter));
 
-        // периодичность — значения совпадают с протоколом сервера
-        periodComboBox.setItems(
-                FXCollections.observableArrayList("ONCE", "DAILY", "WEEKLY", "MONTHLY")
-        );
+        // периодичность
+        periodComboBox.setItems(FXCollections.observableArrayList("ONCE", "DAILY", "WEEKLY", "MONTHLY"));
         periodComboBox.getSelectionModel().select("MONTHLY");
 
-        // дефолтная дата/время
         startDatePicker.setValue(LocalDate.now());
         timeField.setText(LocalTime.now().withSecond(0).withNano(0).toString()); // HH:mm
 
@@ -96,6 +71,7 @@ public class AddTimeOperationController {
         loadAccounts();
     }
 
+    //список категорий
     private void loadCategories() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("LIST_CATEGORIES");
@@ -122,7 +98,6 @@ public class AddTimeOperationController {
                 String line = item.trim();
                 if (line.isEmpty()) continue;
 
-                // формат: id:name
                 String[] parts = line.split(":", 2);
                 if (parts.length < 2) continue;
 
@@ -145,6 +120,7 @@ public class AddTimeOperationController {
         }
     }
 
+    //добавление операции
     @FXML
     private void onSaveClick() {
 
@@ -164,7 +140,7 @@ public class AddTimeOperationController {
         LocalDate endDate = endDatePicker.getValue();
         String comment = commentField.getText() == null ? "" : commentField.getText().trim();
 
-        // --- валидация ---
+        //валидация
         if (category == null) {
             statusLabel.setText("Выберите категорию");
             return;
@@ -211,7 +187,7 @@ public class AddTimeOperationController {
             return;
         }
 
-        // --- формируем команду SCHEDULE_EXPENSE ---
+        // SCHEDULE_EXPENSE_ACCOUNT
         String endDateStr = (endDate == null) ? "NULL" : endDate.toString();
 
         StringBuilder cmd = new StringBuilder("SCHEDULE_EXPENSE_ACCOUNT ");
@@ -236,7 +212,7 @@ public class AddTimeOperationController {
             }
 
             if (resp.startsWith("OK EXPENSE_SCHEDULED")) {
-                // успех — закрываем окно
+                // если успешно то закрываем окно
                 Stage stage = (Stage) amountField.getScene().getWindow();
                 stage.close();
             } else {
@@ -249,12 +225,14 @@ public class AddTimeOperationController {
         }
     }
 
+    //закрытие окна
     @FXML
     private void onCancelClick() {
         Stage stage = (Stage) amountField.getScene().getWindow();
         stage.close();
     }
 
+    //загрузка счетов
     private void loadAccounts() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("LIST_ACCOUNTS");
@@ -279,7 +257,7 @@ public class AddTimeOperationController {
                 row = row.trim();
                 if (row.isEmpty()) continue;
 
-                String[] p = row.split(":", 4); // id:name:currency:isArchived
+                String[] p = row.split(":", 4);
                 if (p.length < 3) continue;
 
                 long id = Long.parseLong(p[0]);
@@ -302,4 +280,27 @@ public class AddTimeOperationController {
         }
     }
 
+    // модель для выбора категории
+    public static class CategoryItem {
+        private final long id;
+        private final String name;
+
+        public CategoryItem(long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
 }

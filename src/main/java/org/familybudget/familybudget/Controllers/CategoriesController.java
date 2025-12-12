@@ -10,24 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+//контроллер окна категорий
+//categories-view.fxml
 public class CategoriesController {
-
-    // Модель одной строки списка категорий
-    public static class CategoryRow {
-        public long id;
-        public String name;
-
-        public CategoryRow(long id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            // по умолчанию ListView покажет name
-            return name;
-        }
-    }
 
     @FXML
     private ListView<CategoryRow> categoriesList;
@@ -43,7 +28,7 @@ public class CategoriesController {
 
     @FXML
     private void initialize() {
-        // при выборе категории — подставляем её название в поле переименования
+        // при выборе категории подставляем её название в поле переименования
         categoriesList.getSelectionModel()
                 .selectedItemProperty()
                 .addListener((obs, oldV, newV) -> {
@@ -57,7 +42,7 @@ public class CategoriesController {
         loadCategories();
     }
 
-    // ================== ЗАГРУЗКА КАТЕГОРИЙ ==================
+    //загрузка категорий LIST_CATEGORIES
     private void loadCategories() {
         statusLabel.setText("");
         try {
@@ -78,7 +63,6 @@ public class CategoriesController {
             List<CategoryRow> items = new ArrayList<>();
 
             if (!payload.isEmpty()) {
-                // формат: id:name,id:name,...
                 String[] parts = payload.split(",");
                 for (String p : parts) {
                     String line = p.trim();
@@ -110,7 +94,7 @@ public class CategoriesController {
         }
     }
 
-    // ================== ДОБАВЛЕНИЕ КАТЕГОРИИ ==================
+    //добавление категории ADD_CATEGORY
     @FXML
     private void onAddCategoryClick() {
         statusLabel.setText("");
@@ -156,7 +140,7 @@ public class CategoriesController {
         }
     }
 
-    // ================== ПЕРЕИМЕНОВАНИЕ КАТЕГОРИИ ==================
+    //изменение категории RENAME_CATEGORY
     @FXML
     private void onRenameCategoryClick() {
         statusLabel.setText("");
@@ -207,7 +191,7 @@ public class CategoriesController {
         }
     }
 
-    // ================== УДАЛЕНИЕ КАТЕГОРИИ ==================
+    //удаление категории
     @FXML
     private void onDeleteCategoryClick() {
         statusLabel.setText("");
@@ -217,8 +201,6 @@ public class CategoriesController {
             statusLabel.setText("Выберите категорию для удаления");
             return;
         }
-
-        // при желании можно добавить Alert-подтверждение
 
         try {
             String cmd = "DELETE_CATEGORY " + selected.id;
@@ -248,10 +230,26 @@ public class CategoriesController {
         }
     }
 
-    // ================== ЗАКРЫТЬ ОКНО ==================
+    // закрыть окно
     @FXML
     private void onCloseClick() {
         Stage stage = (Stage) categoriesList.getScene().getWindow();
         stage.close();
+    }
+
+    // модель для одной строки списка категорий
+    public static class CategoryRow {
+        public long id;
+        public String name;
+
+        public CategoryRow(long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 }

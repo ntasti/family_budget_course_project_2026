@@ -19,17 +19,25 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Locale;
 
+//список план по категориям
+//category-plan-list-view.fxml
 public class CategoryPlanListController {
 
     @FXML
     private TableView<CategoryPlanItem> plansTable;
 
-    @FXML private TableColumn<CategoryPlanItem, String> colCategory;
-    @FXML private TableColumn<CategoryPlanItem, String> colFrom;
-    @FXML private TableColumn<CategoryPlanItem, String> colTo;
-    @FXML private TableColumn<CategoryPlanItem, String> colPlanned;
-    @FXML private TableColumn<CategoryPlanItem, String> colActual;
-    @FXML private TableColumn<CategoryPlanItem, String> colPercent;
+    @FXML
+    private TableColumn<CategoryPlanItem, String> colCategory;
+    @FXML
+    private TableColumn<CategoryPlanItem, String> colFrom;
+    @FXML
+    private TableColumn<CategoryPlanItem, String> colTo;
+    @FXML
+    private TableColumn<CategoryPlanItem, String> colPlanned;
+    @FXML
+    private TableColumn<CategoryPlanItem, String> colActual;
+    @FXML
+    private TableColumn<CategoryPlanItem, String> colPercent;
 
     @FXML
     private Label statusLabel;
@@ -55,7 +63,7 @@ public class CategoryPlanListController {
         loadPlans();
     }
 
-    // ===== загрузка планов с сервера =====
+    //загрузка планов с сервера
     private void loadPlans() {
         try {
             String resp = ServerConnection.getInstance()
@@ -79,7 +87,6 @@ public class CategoryPlanListController {
 
             var items = FXCollections.<CategoryPlanItem>observableArrayList();
 
-            // новый формат: id:categoryId:categoryName:from:to:planned:actual
             String[] rows = payload.split(",");
             for (String row : rows) {
                 row = row.trim();
@@ -88,23 +95,15 @@ public class CategoryPlanListController {
                 String[] p = row.split(":", 7);
                 if (p.length < 7) continue;
 
-                long id         = Long.parseLong(p[0]);
+                long id = Long.parseLong(p[0]);
                 long categoryId = Long.parseLong(p[1]);
                 String categoryName = p[2];
-                LocalDate from  = LocalDate.parse(p[3]);
-                LocalDate to    = LocalDate.parse(p[4]);
-                double planned  = Double.parseDouble(p[5]);
-                double actual   = Double.parseDouble(p[6]);
+                LocalDate from = LocalDate.parse(p[3]);
+                LocalDate to = LocalDate.parse(p[4]);
+                double planned = Double.parseDouble(p[5]);
+                double actual = Double.parseDouble(p[6]);
 
-                items.add(new CategoryPlanItem(
-                        id,
-                        categoryId,
-                        categoryName,
-                        from,
-                        to,
-                        planned,
-                        actual
-                ));
+                items.add(new CategoryPlanItem(id, categoryId, categoryName, from, to, planned, actual));
             }
 
             plansTable.setItems(items);
@@ -116,18 +115,19 @@ public class CategoryPlanListController {
         }
     }
 
+    //обновить
     @FXML
     private void onRefreshClick() {
         loadPlans();
     }
 
-    // ===== Добавить =====
+    //добавить
     @FXML
     private void onAddClick() {
-        openEditDialog(null);   // planId == null => диалог сохранит новый план
+        openEditDialog(null);
     }
 
-    // ===== Редактировать =====
+    //редактировать
     @FXML
     private void onEditClick() {
         CategoryPlanItem item = plansTable.getSelectionModel().getSelectedItem();
@@ -138,7 +138,7 @@ public class CategoryPlanListController {
         openEditDialog(item);
     }
 
-    // ===== Удалить =====
+    //удалить
     @FXML
     private void onDeleteClick() {
         CategoryPlanItem item = plansTable.getSelectionModel().getSelectedItem();
@@ -168,13 +168,14 @@ public class CategoryPlanListController {
         }
     }
 
+    //закрыть окно
     @FXML
     private void onCloseClick() {
         Stage stage = (Stage) plansTable.getScene().getWindow();
         stage.close();
     }
 
-    // ===== Окно добавления/редактирования =====
+    //редактирование
     private void openEditDialog(CategoryPlanItem item) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -183,21 +184,14 @@ public class CategoryPlanListController {
 
             CategoryPlanController editController = loader.getController();
             if (item != null) {
-                editController.setInitialData(
-                        item.getId(),           // planId
-                        item.getCategoryId(),
-                        item.getCategoryName(),
-                        item.getFrom(),
-                        item.getTo(),
-                        item.getPlannedAmount()
-                );
+                editController.setInitialData(item.getId(), item.getCategoryId(), item.getCategoryName(), item.getFrom(), item.getTo(), item.getPlannedAmount());
             }
 
             Stage stage = new Stage();
             stage.setTitle(item == null ? "Новый план по категории" : "Редактирование плана");
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
-            stage.showAndWait();   // ОДИН раз
+            stage.showAndWait();
 
             // после закрытия диалога обновляем таблицу
             loadPlans();
@@ -208,7 +202,26 @@ public class CategoryPlanListController {
         }
     }
 
-    // ===== Модель строки таблицы =====
+    @FXML
+    protected void onOpenCategoryPlanAddClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("category-plan-view.fxml")
+            );
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("добавление записи");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.showAndWait();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка открытия окна категорий: " + e.getMessage());
+        }
+    }
+
+    //модель для списка
     public static class CategoryPlanItem {
         private final long id;
         private final long categoryId;
@@ -234,37 +247,38 @@ public class CategoryPlanListController {
             this.actualAmount = actualAmount;
         }
 
-        public long getId() { return id; }
-        public long getCategoryId() { return categoryId; }
-        public String getCategoryName() { return categoryName; }
-        public LocalDate getFrom() { return from; }
-        public LocalDate getTo() { return to; }
-        public double getPlannedAmount() { return plannedAmount; }
-        public double getActualAmount() { return actualAmount; }
+        public long getId() {
+            return id;
+        }
+
+        public long getCategoryId() {
+            return categoryId;
+        }
+
+        public String getCategoryName() {
+            return categoryName;
+        }
+
+        public LocalDate getFrom() {
+            return from;
+        }
+
+        public LocalDate getTo() {
+            return to;
+        }
+
+        public double getPlannedAmount() {
+            return plannedAmount;
+        }
+
+        public double getActualAmount() {
+            return actualAmount;
+        }
 
         public String getPercentText() {
             if (plannedAmount <= 0.0) return "";
             double percent = (actualAmount / plannedAmount) * 100.0;
             return String.format(Locale.US, "%.0f%%", percent);
-        }
-    }
-
-    @FXML
-    protected void onOpenCategoryPlanAddClick() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("category-plan-view.fxml")
-            );
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("добавление записи");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(scene);
-            stage.showAndWait();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            statusLabel.setText("Ошибка открытия окна категорий: " + e.getMessage());
         }
     }
 }

@@ -10,15 +10,16 @@ import org.familybudget.familybudget.SessionContext;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
+//личный кабинет
+//account-view.fxml
 public class AccountController {
 
     @FXML
-    private Label userNameLabel;      // Имя (отображаемое)
+    private Label userNameLabel;
 
     @FXML
-    private Label userEmailLabel;     // Логин / email
+    private Label userEmailLabel;
 
     @FXML
     private Label familyCodeLabel;
@@ -35,21 +36,20 @@ public class AccountController {
     @FXML
     private Button removeMemberButton;
 
-    //  блок присоединения по коду
     @FXML
-    private VBox joinFamilyBox;       // контейнер с полем и кнопкой
+    private VBox joinFamilyBox;
 
     @FXML
-    private TextField joinCodeField;  // поле ввода кода семьи
+    private TextField joinCodeField;
 
     @FXML
-    private Button joinFamilyButton;  // кнопка "Присоединиться"
+    private Button joinFamilyButton;
 
     @FXML
     private void initialize() {
         String login = SessionContext.getLogin();
-        String role  = SessionContext.getRole();
-        String name  = SessionContext.getUserName();
+        String role = SessionContext.getRole();
+        String name = SessionContext.getUserName();
 
         boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
 
@@ -71,8 +71,7 @@ public class AccountController {
         loadFamilyMembers();
     }
 
-
-    // показываем блок "Присоединиться к семье по коду"
+    // блок присоединиться к семье по коду
     private void showJoinFamilyBox() {
         if (joinFamilyBox != null) {
             joinFamilyBox.setVisible(true);
@@ -84,6 +83,8 @@ public class AccountController {
             familyCodeBox.setManaged(false);
         }
     }
+
+    //код для присоединения к семье
     private void loadFamilyCode() {
         try {
             String resp = ServerConnection.getInstance().sendCommand("GET_FAMILY_CODE");
@@ -115,6 +116,7 @@ public class AccountController {
         }
     }
 
+    //список членов семьи
     private void loadFamilyMembers() {
         try {
             String resp = ServerConnection.getInstance()
@@ -128,7 +130,7 @@ public class AccountController {
             if (resp.startsWith("ERROR NO_FAMILY")) {
                 familyMembersList.getItems().clear();
                 statusLabel.setText("Вы не состоите ни в одной семье");
-                showJoinFamilyBox();   // ← тоже показываем присоединение
+                showJoinFamilyBox();
                 return;
             }
             if (!resp.startsWith("OK FAMILY_MEMBERS=")) {
@@ -140,7 +142,7 @@ public class AccountController {
             familyMembersList.getItems().clear();
 
             if (payload.isEmpty()) {
-                return; // список пустой
+                return;
             }
 
             List<FamilyMemberItem> items = new ArrayList<>();
@@ -150,16 +152,14 @@ public class AccountController {
                 String line = p.trim();
                 if (line.isEmpty()) continue;
 
-                // ПРОТОКОЛ: login|name
                 String[] loginName = line.split("\\|", 2);
                 String login = loginName[0];
-                String name  = loginName.length > 1 ? loginName[1] : "";
+                String name = loginName.length > 1 ? loginName[1] : "";
 
                 if (name == null || name.isBlank()) {
                     name = "(без имени)";
                 }
 
-                // В ListView хотим видеть "login — name"
                 items.add(new FamilyMemberItem(login, name));
             }
 
@@ -172,8 +172,7 @@ public class AccountController {
         }
     }
 
-
-    // ==== НОВОЕ: обработчик кнопки "Присоединиться по коду" ====
+    // обработчик кнопки присоединиться по коду
     @FXML
     private void onJoinFamilyClick() {
         String code = joinCodeField.getText().trim();
@@ -192,7 +191,7 @@ public class AccountController {
                     main.refreshAfterJoinFamily();
                 }
 
-                new Alert(Alert.AlertType.INFORMATION, "Вы успешно присоединились к семье!").showAndWait();
+                new Alert(Alert.AlertType.INFORMATION, "Вы успешно присоединились к семье").showAndWait();
 
                 // можно закрыть окно кабинета
                 ((Stage) joinCodeField.getScene().getWindow()).close();
@@ -206,7 +205,7 @@ public class AccountController {
         }
     }
 
-
+    //обработчик кнопки удаления членов семьи
     @FXML
     private void onRemoveMemberClick() {
         FamilyMemberItem selected = familyMembersList.getSelectionModel().getSelectedItem();
@@ -243,7 +242,7 @@ public class AccountController {
         }
     }
 
-    // элемент списка: логин + имя
+    // элемент списка логин - имя
     public static class FamilyMemberItem {
         private final String login;
         private final String name;
@@ -263,7 +262,6 @@ public class AccountController {
 
         @Override
         public String toString() {
-            // как будет отображаться в ListView
             return login + " — " + name;
         }
     }
