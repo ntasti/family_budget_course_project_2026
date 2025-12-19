@@ -7,6 +7,10 @@ module org.familybudget.familybudget {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
+    //для пдф
+    requires kernel;
+    requires layout;
+    requires io;
 
     opens org.familybudget.familybudget to javafx.fxml;
     exports org.familybudget.familybudget;

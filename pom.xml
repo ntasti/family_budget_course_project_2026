@@ -29,7 +29,6 @@
             <version>${javafx.version}</version>
         </dependency>
 
-        <!-- Эти два подключай только если реально используешь:-->
 
         <!-- WebView: только если используешь -->
         <dependency>
@@ -38,12 +37,6 @@
             <version>21.0.4</version>
         </dependency>
 
-        <!-- Swing-встраивание: нужно редко -->
-<!--        <dependency>-->
-<!--            <groupId>org.openjfx</groupId>-->
-<!--            <artifactId>javafx-swing</artifactId>-->
-<!--            <version>21.0.4</version>-->
-<!--        </dependency>-->
 
         <!-- UI улучшения -->
         <dependency>
@@ -65,6 +58,28 @@
             </exclusions>
         </dependency>
 
+
+        <!-- для экспорта в PDF -->
+        <!-- iText 8 -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+            <version>8.0.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+            <version>8.0.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>io</artifactId>
+            <version>8.0.5</version>
+        </dependency>
+
+        <!--бутстрап-->
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-javafx</artifactId>
@@ -110,35 +125,17 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.25</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
 
-
-
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-shade-plugin</artifactId>-->
-<!--                <version>3.5.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>shade</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            &lt;!&ndash; чтобы не портить pom &ndash;&gt;-->
-<!--                            <createDependencyReducedPom>false</createDependencyReducedPom>-->
-<!--                            <transformers>-->
-<!--                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
-<!--                                    <mainClass>org.familybudget.familybudget.HelloApplication</mainClass>-->
-<!--                                </transformer>-->
-<!--                            </transformers>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
 
 
             <!-- компиляция под JDK 21 -->
@@ -174,6 +171,7 @@
 
 
         </plugins>
+
 
     </build>
 </project>

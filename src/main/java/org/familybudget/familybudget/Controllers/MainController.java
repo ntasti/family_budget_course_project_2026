@@ -1,5 +1,6 @@
 package org.familybudget.familybudget.Controllers;
 
+import com.itextpdf.io.font.PdfEncodings;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,6 +21,17 @@ import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 
 
 import java.io.*;
@@ -42,6 +54,10 @@ public class MainController {
     public static MainController getInstance() {
         return instance;
     }
+
+
+    @FXML
+    private Button exportPdfButton;//ждя пдф экспорта
 
     @FXML
     private Label familyNameLabel;
@@ -1112,6 +1128,106 @@ public class MainController {
             return "\"" + s.replace("\"", "\"\"") + "\"";
         }
         return s;
+    }
+
+    //экспорт pdf
+
+    @FXML
+    private void onExportOperationsPdfClick() {
+        var rows = operationsList.getItems();
+
+        // Если таблица пустая
+        if (rows == null || rows.isEmpty()) {
+            statusLabel.setText("Нет данных для PDF");
+            return;
+        }
+       // Диалог выбора файла для сохранения
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Экспорт в PDF");
+        // Разрешаем сохранять только .pdf
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
+        );
+        //  окно выбора файла
+        File file = chooser.showSaveDialog(balanceLabel.getScene().getWindow());
+        if (file == null) return;
+
+        try {
+            // Создаём PDF-документ
+            PdfWriter writer = new PdfWriter(file);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document doc = new Document(pdf);
+
+            // подключение кирилицы и выбор шрифта
+            PdfFont font = PdfFontFactory.createFont(
+                    "C:/Windows/Fonts/arial.ttf",
+                    PdfEncodings.IDENTITY_H,// юникод кодировка
+                    PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED   //  шрифт в PDF
+            );
+            doc.setFont(font);// применяем шрифт ко всему документу
+
+
+            // Заголовок
+            doc.add(new Paragraph("История операций")
+                    .setBold()
+                    .setFontSize(18)
+                    .setTextAlignment(TextAlignment.CENTER));
+            // имя счета
+            String accName = currentAccount != null ? currentAccount.getName() : "";
+
+            doc.add(new Paragraph("Счёт: " + accName));
+            doc.add(new Paragraph("Дата отчёта: " + java.time.LocalDate.now()));
+            doc.add(new Paragraph("\n"));
+
+            // Таблица (6 колонок)
+            Table table = new Table(UnitValue.createPercentArray(new float[]{
+                    2, 2, 3, 3, 2, 2
+            }));
+            table.setWidth(UnitValue.createPercentValue(100));//сто проц ширины страницы
+
+            addHeader(table, "Тип");
+            addHeader(table, "Сумма");
+            addHeader(table, "Категория");
+            addHeader(table, "Пользователь");
+            addHeader(table, "Дата");
+            addHeader(table, "Время");
+
+            //данные табл
+            for (OperationRow r : rows) {
+                table.addCell(typeName(r.type));
+                table.addCell(String.format("%.2f", r.amount));
+                table.addCell(text(r.category));
+                table.addCell(text(r.user));
+                table.addCell(text(r.date));
+                table.addCell(text(r.time));
+            }
+
+            doc.add(table);//добаляем табл в файл
+            doc.close();//закрываем документ
+
+            statusLabel.setText("PDF успешно создан");
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Ошибка PDF: " + e.getMessage());
+        }
+    }
+
+    //заголовк для табл
+    private void addHeader(Table t, String text) {
+        t.addHeaderCell(new Cell()
+                .add(new Paragraph(text))
+                .setBold());
+    }
+
+    //обработка нулевых ячеек
+    private String text(String s) {
+        return s == null ? "" : s;
+    }
+
+    private String typeName(String t) {
+        if ("INCOME".equalsIgnoreCase(t)) return "Доход";
+        if ("EXPENSE".equalsIgnoreCase(t)) return "Расход";
+        return t;
     }
 
     //импорт dat
