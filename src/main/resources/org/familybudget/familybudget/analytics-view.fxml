@@ -31,13 +31,12 @@
                 <Label text="Режим:"
                        style="-fx-text-fill: #555555;"/>
 
-                <!-- выбор типа диаграммы -->
                 <ComboBox fx:id="viewTypeCombo"
                           prefWidth="260"
                           style="-fx-background-radius: 999;
-                             -fx-background-color: #FFFFFF;
-                             -fx-border-color: #E5E7EB;
-                             -fx-border-radius: 999;"/>
+                                 -fx-background-color: #FFFFFF;
+                                 -fx-border-color: #E5E7EB;
+                                 -fx-border-radius: 999;"/>
 
                 <Label text="Период:"
                        style="-fx-text-fill: #555555;"/>
@@ -49,10 +48,10 @@
                 <Button text="Показать"
                         onAction="#onCalculateClick"
                         style="-fx-background-color: #4C6FFF;
-                           -fx-background-radius: 999;
-                           -fx-text-fill: white;
-                           -fx-font-weight: bold;
-                           -fx-padding: 4 14;"/>
+                               -fx-background-radius: 999;
+                               -fx-text-fill: white;
+                               -fx-font-weight: bold;
+                               -fx-padding: 4 14;"/>
             </HBox>
 
             <Label fx:id="statusLabel"
@@ -63,12 +62,10 @@
     <center>
         <StackPane>
 
-            <!-- Расходы по категориям -->
             <PieChart fx:id="categoryPieChart"
                       legendVisible="true"
                       labelsVisible="true"/>
 
-            <!-- План / факт по категориям -->
             <BarChart fx:id="planFactChart"
                       legendVisible="true"
                       animated="false">
@@ -80,40 +77,61 @@
                 </yAxis>
             </BarChart>
 
-            <!-- Важные / неважные -->
             <PieChart fx:id="importancePieChart"
                       legendVisible="true"
                       labelsVisible="true"
                       visible="false"
                       managed="false"/>
 
-            <!-- Обзор по месяцам (карточки как на картинке) -->
             <VBox fx:id="monthlyOverviewBox"
-                  spacing="8"
+                  spacing="14"
                   visible="false"
                   managed="false">
+
+                <padding>
+                    <!-- Отступы вокруг всего блока аналитики по месяцам -->
+                    <Insets top="6" right="6" bottom="18" left="6"/>
+                </padding>
+
                 <Label text="Обзор по месяцам"
                        style="-fx-text-fill: #555555; -fx-font-weight: bold;"/>
+
                 <ScrollPane fitToWidth="true"
                             hbarPolicy="NEVER"
                             vbarPolicy="AS_NEEDED"
+                            prefHeight="420"
                             style="-fx-background-color: transparent;">
                     <content>
                         <VBox fx:id="monthlyCardsContainer"
-                              spacing="8"
-                              fillWidth="true"/>
+                              spacing="12"
+                              fillWidth="true">
+                            <padding>
+                                <!-- Внутренние отступы рамки списка месяцев -->
+                                <Insets top="10" right="8" bottom="14" left="8"/>
+                            </padding>
+                        </VBox>
                     </content>
                 </ScrollPane>
+
             </VBox>
+
 
         </StackPane>
     </center>
 
     <bottom>
         <VBox spacing="4">
+            <padding>
+                <!-- увеличь top если нужно больше -->
+                <Insets top="24" right="12" bottom="15" left="12"/>
+            </padding>
+
             <Label fx:id="summaryLabel"
+                   wrapText="true"
+                   maxWidth="Infinity"
                    style="-fx-text-fill: #444444; -fx-font-size: 13;"/>
         </VBox>
     </bottom>
+
 
 </BorderPane>
