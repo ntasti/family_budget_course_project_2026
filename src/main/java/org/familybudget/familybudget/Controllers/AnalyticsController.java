@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
+import java.util.Locale;
 import java.util.*;
 
 //раздел аналитики
@@ -468,7 +469,7 @@ public class AnalyticsController {
             statusLabel.setText("Ошибка соединения: " + e.getMessage());
         }
     }
-    
+
     //карточка для каждого месяца
     private HBox buildMonthCard(YearMonth ym, double expense, double income) {
         HBox card = new HBox(16);
@@ -488,7 +489,7 @@ public class AnalyticsController {
         // центральная часть месяц, даты, прогресс-бар + кнопка рекомендаций
         VBox centerBox = new VBox(6);
 
-        String monthName = ym.getMonth().getDisplayName(TextStyle.FULL_STANDALONE, new java.util.Locale("ru"));
+        String monthName = ym.getMonth().getDisplayName(TextStyle.FULL_STANDALONE, Locale.forLanguageTag("ru-RU"));
         Label monthLabel = new Label(monthName + " " + ym.getYear());
         monthLabel.setStyle("-fx-text-fill: #333333; -fx-font-weight: bold; -fx-font-size: 14;");
 
@@ -765,7 +766,7 @@ public class AnalyticsController {
             summaryLabel.setText((base == null || base.isBlank()) ? advice : base + "\n\n" + advice);
 
         } catch (IOException ex) {
-
+//            ex.getMessage();
         }
     }
 

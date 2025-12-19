@@ -83,14 +83,14 @@
                       visible="false"
                       managed="false"/>
 
+            <!-- Блок "Обзор по месяцам" -->
             <VBox fx:id="monthlyOverviewBox"
-                  spacing="14"
+                  spacing="12"
                   visible="false"
                   managed="false">
-
                 <padding>
-                    <!-- Отступы вокруг всего блока аналитики по месяцам -->
-                    <Insets top="6" right="6" bottom="18" left="6"/>
+                    <!-- Отступ вокруг блока обзора по месяцам -->
+                    <Insets top="6" right="6" bottom="20" left="6"/>
                 </padding>
 
                 <Label text="Обзор по месяцам"
@@ -103,27 +103,25 @@
                             style="-fx-background-color: transparent;">
                     <content>
                         <VBox fx:id="monthlyCardsContainer"
-                              spacing="12"
+                              spacing="10"
                               fillWidth="true">
                             <padding>
-                                <!-- Внутренние отступы рамки списка месяцев -->
+                                <!-- Внутренние отступы "рамки", где перечислены месяцы -->
                                 <Insets top="10" right="8" bottom="14" left="8"/>
                             </padding>
                         </VBox>
                     </content>
                 </ScrollPane>
-
             </VBox>
-
 
         </StackPane>
     </center>
 
     <bottom>
         <VBox spacing="4">
+            <!-- Дополнительный отступ сверху, чтобы отодвинуть текст от центра -->
             <padding>
-                <!-- увеличь top если нужно больше -->
-                <Insets top="24" right="12" bottom="15" left="12"/>
+                <Insets top="18" right="0" bottom="0" left="0"/>
             </padding>
 
             <Label fx:id="summaryLabel"
@@ -132,6 +130,5 @@
                    style="-fx-text-fill: #444444; -fx-font-size: 13;"/>
         </VBox>
     </bottom>
-
 
 </BorderPane>
