@@ -86,8 +86,15 @@ public class AnalyticsController {
 
         viewTypeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
             updateVisibleChart();
-            summaryLabel.setText("Выберите период и нажмите «Показать».");
+
+            if ("Обзор по месяцам".equals(newVal)) {
+                // сразу грузим аналитику по месяцам, не глядя на datePicker'ы
+                loadMonthlyOverview();
+            } else {
+                summaryLabel.setText("Выберите период и нажмите «Показать».");
+            }
         });
+
 
         // Рамка где перечислены месяцы / категории в обзоре по месяцам:
         if (monthlyOverviewBox != null) {
@@ -387,18 +394,12 @@ public class AnalyticsController {
     }
 
     //Режим обзор по месяцам ANALYTICS_MONTHLY
+    // Режим обзор по месяцам ANALYTICS_MONTHLY
+// НЕ зависит от значений сверху (fromDatePicker / toDatePicker)
     private void loadMonthlyOverview() {
-        LocalDate from = fromDatePicker.getValue();
-        LocalDate to = toDatePicker.getValue();
-
-        if (from == null || to == null) {
-            statusLabel.setText("Укажите обе даты: «с» и «по».");
-            return;
-        }
-        if (to.isBefore(from)) {
-            statusLabel.setText("Дата «по» не может быть раньше даты «с».");
-            return;
-        }
+        // Берём большой диапазон "за всё время" – условно последние 10 лет
+        LocalDate to = LocalDate.now().plusMonths(1);
+        LocalDate from = to.minusYears(10);
 
         String cmd = "ANALYTICS_MONTHLY " + from + " " + to;
 
@@ -457,7 +458,10 @@ public class AnalyticsController {
             if (monthlyCardsContainer.getChildren().isEmpty()) {
                 summaryLabel.setText("За выбранный период операций нет.");
             } else {
-                summaryLabel.setText(String.format("Итого за период — доходы: %.2f BYN, расходы: %.2f BYN.", totalIncome, totalExpense));
+                summaryLabel.setText(String.format(
+                        "Итого за период — доходы: %.2f BYN, расходы: %.2f BYN.",
+                        totalIncome, totalExpense
+                ));
                 // добавляем тренд между последними двумя месяцами
                 appendMonthlyTrendAdvice(stats);
             }
@@ -469,6 +473,7 @@ public class AnalyticsController {
             statusLabel.setText("Ошибка соединения: " + e.getMessage());
         }
     }
+
 
     //карточка для каждого месяца
     private HBox buildMonthCard(YearMonth ym, double expense, double income) {

@@ -119,7 +119,7 @@
 
     <bottom>
         <VBox spacing="4">
-            <!-- Дополнительный отступ сверху, чтобы отодвинуть текст от центра -->
+
             <padding>
                 <Insets top="18" right="0" bottom="0" left="0"/>
             </padding>
